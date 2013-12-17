@@ -1,11 +1,26 @@
 ﻿using System;
 using System.Windows.Forms;
 using GorgonLibrary.InputDevices;
+using Xasteroids.Screens;
+using MainMenu = Xasteroids.Screens.MainMenu;
+using MouseButtons = System.Windows.Forms.MouseButtons;
 
 namespace Xasteroids
 {
+	public enum Screen
+	{
+		MainMenu
+	};
+
 	public class GameMain
 	{
+		#region Screens
+		private ScreenInterface _screenInterface;
+		private MainMenu _mainMenu;
+
+		private Screen _currentScreen;
+		#endregion
+
 		private Form _parentForm;
 
 		public Random Random { get; private set; }
@@ -33,6 +48,15 @@ namespace Xasteroids
 				return false;
 			}
 
+			_mainMenu = new MainMenu();
+			if (!_mainMenu.Initialize(this, out reason))
+			{
+				return false;
+			}
+
+			_screenInterface = _mainMenu;
+			_currentScreen = Screen.MainMenu;
+
 			Cursor = SpriteManager.GetSprite("Cursor", Random);
 			if (Cursor == null)
 			{
@@ -52,58 +76,37 @@ namespace Xasteroids
 		//Handle events
 		public void ProcessGame(float frameDeltaTime)
 		{
+			_screenInterface.Update(MousePos.X, MousePos.Y, frameDeltaTime);
+			_screenInterface.DrawScreen();
+
 			Cursor.Draw(MousePos.X, MousePos.Y);
 			Cursor.Update(frameDeltaTime, Random);
 		}
 
 		public void MouseDown(MouseEventArgs e)
 		{
-			int whichButton = 0;
-			switch (e.Button)
+			if (e.Button == MouseButtons.Left)
 			{
-				case System.Windows.Forms.MouseButtons.Left:
-					{
-						whichButton = 1;
-					} break;
-				case System.Windows.Forms.MouseButtons.Right:
-					{
-						whichButton = 2;
-					} break;
-				case System.Windows.Forms.MouseButtons.Middle:
-					{
-						whichButton = 3;
-					} break;
+				_screenInterface.MouseDown(e.X, e.Y);
 			}
 		}
 
 		public void MouseUp(MouseEventArgs e)
 		{
-			int whichButton = 0;
-			switch (e.Button)
+			if (e.Button == MouseButtons.Left)
 			{
-				case System.Windows.Forms.MouseButtons.Left:
-					{
-						whichButton = 1;
-					} break;
-				case System.Windows.Forms.MouseButtons.Right:
-					{
-						whichButton = 2;
-					} break;
-				case System.Windows.Forms.MouseButtons.Middle:
-					{
-						whichButton = 3;
-					} break;
+				_screenInterface.MouseUp(e.X, e.Y);
 			}
 		}
 
 		public void MouseScroll(int delta)
 		{
-			
+			_screenInterface.MouseScroll(delta, MousePos.X, MousePos.Y);
 		}
 
 		public void KeyDown(KeyboardInputEventArgs e)
 		{
-			
+			_screenInterface.KeyDown(e);
 		}
 	}
 }

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Globalization;
 
-namespace Asteroids_of_Beyaan
+namespace Xasteroids
 {
-	static class Utility
+	static public class Utility
 	{
 		public static int GetIntValue(string value, Random r)
 		{
@@ -77,5 +77,36 @@ namespace Asteroids_of_Beyaan
 			return RationalApproximation(Math.Sqrt(-2.0 * Math.Log(1.0 - p)));
 		}
 
+	}
+
+	public struct Point
+	{
+		public int X;
+		public int Y;
+
+		public Point(int x, int y)
+		{
+			X = x;
+			Y = y;
+		}
+
+		public static bool operator ==(Point p1, Point p2)
+		{
+			return p1.X == p2.X && p1.Y == p2.Y;
+		}
+
+		public static bool operator !=(Point p1, Point p2)
+		{
+			return p1.X != p2.X || p1.Y != p2.Y;
+		}
+
+		public override bool Equals(object obj)
+		{
+			return base.Equals(obj);
+		}
+		public override int GetHashCode()
+		{
+			return base.GetHashCode();
+		}
 	}
 }

@@ -4,7 +4,7 @@ using System.Drawing;
 using GorgonLibrary.Graphics;
 using GorgonLibrary.InputDevices;
 
-namespace Asteroids_of_Beyaan
+namespace Xasteroids
 {
 	public enum ButtonTextAlignment { LEFT, CENTER, RIGHT }
 

@@ -4,7 +4,7 @@ using System.IO;
 using System.Xml.Linq;
 using GorgonLibrary.Graphics;
 
-namespace Asteroids_of_Beyaan
+namespace Xasteroids
 {
 	public static class FontManager
 	{
@@ -12,7 +12,7 @@ namespace Asteroids_of_Beyaan
 		private static Dictionary<string, Font> _fonts;
 		private static string _defaultFont;
 
-		public static bool Initialize(DirectoryInfo dataSet, out string reason)
+		public static bool Initialize(out string reason)
 		{
 			// TODO: Add font attributes at load such as bold, etc in font.xml file
 			if (_initalized)
@@ -24,10 +24,10 @@ namespace Asteroids_of_Beyaan
 
 			try
 			{
-				XDocument file = XDocument.Load(Path.Combine(dataSet.FullName, "fonts.xml"));
+				XDocument file = XDocument.Load(Path.Combine(Environment.CurrentDirectory, "fonts.xml"));
 				XElement root = file.Element("Fonts");
 
-				DirectoryInfo fontDirectory = new DirectoryInfo(Path.Combine(dataSet.FullName, "Fonts"));
+				DirectoryInfo fontDirectory = new DirectoryInfo(Path.Combine(Environment.CurrentDirectory, "Fonts"));
 
 				foreach (var element in root.Elements())
 				{

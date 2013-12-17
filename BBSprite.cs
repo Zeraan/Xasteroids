@@ -6,7 +6,7 @@ using System.Xml.Linq;
 using GorgonLibrary.Graphics;
 using Image = GorgonLibrary.Graphics.Image;
 
-namespace Asteroids_of_Beyaan
+namespace Xasteroids
 {
 	internal enum StretchMode { STRETCH, REPEAT }
 	public class BaseSprite

@@ -28,9 +28,24 @@
 		/// </summary>
 		private void InitializeComponent()
 		{
-			this.components = new System.ComponentModel.Container();
+			this.SuspendLayout();
+			// 
+			// Xasteroids
+			// 
+			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-			this.Text = "Form1";
+			this.ClientSize = new System.Drawing.Size(784, 562);
+			this.MinimumSize = new System.Drawing.Size(800, 600);
+			this.Name = "Xasteroids";
+			this.Text = "Xasteroids";
+			this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.BeyondBeyaan_MouseDown);
+			this.MouseEnter += new System.EventHandler(this.BeyondBeyaan_MouseEnter);
+			this.MouseLeave += new System.EventHandler(this.BeyondBeyaan_MouseLeave);
+			this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.BeyondBeyaan_MouseMove);
+			this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.BeyondBeyaan_MouseUp);
+			this.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.BeyondBeyaan_MouseWheel);
+			this.ResumeLayout(false);
+
 		}
 
 		#endregion

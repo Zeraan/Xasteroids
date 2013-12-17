@@ -159,7 +159,8 @@ namespace Xasteroids.Screens
 				_ipAddressTextBox.MouseUp(x, y);
 				if (_hostOrConnectButton.MouseUp(x, y))
 				{
-					//Connect or host game
+					//If client, initialize connection at this point, then change screen.  Otherwise, set up listen on port
+					_gameMain.ChangeToScreen(_ipAddressTextBox.Text.Length == 0 ? Screen.MultiplayerPreGameServer : Screen.MultiplayerPreGameClient);
 				}
 				if (_cancelButton.MouseUp(x, y))
 				{

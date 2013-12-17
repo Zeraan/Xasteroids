@@ -9,7 +9,9 @@ namespace Xasteroids
 {
 	public enum Screen
 	{
-		MainMenu
+		MainMenu,
+		MultiplayerPreGameClient,
+		MultiplayerPreGameServer,
 	};
 
 	public class GameMain
@@ -17,6 +19,7 @@ namespace Xasteroids
 		#region Screens
 		private ScreenInterface _screenInterface;
 		private MainMenu _mainMenu;
+		private MultiplayerGameSetup _multiplayerGameSetup;
 
 		private Screen _currentScreen;
 		#endregion
@@ -81,6 +84,51 @@ namespace Xasteroids
 
 			Cursor.Draw(MousePos.X, MousePos.Y);
 			Cursor.Update(frameDeltaTime, Random);
+		}
+
+		public void ChangeToScreen(Screen whichScreen)
+		{
+			switch (whichScreen)
+			{
+				case Screen.MainMenu:
+				{
+					//Main Menu is always initialized before this point
+					_screenInterface = _mainMenu;
+					break;
+				}
+				case Screen.MultiplayerPreGameClient:
+				{
+					if (_multiplayerGameSetup == null)
+					{
+						string reason;
+						_multiplayerGameSetup = new MultiplayerGameSetup();
+						if (!_multiplayerGameSetup.Initialize(this, out reason))
+						{
+							MessageBox.Show("Error in loading Multiplayer PreGame Screen.  Reason: " + reason);
+							ExitGame();
+						}
+					}
+					_multiplayerGameSetup.SetHost(false);
+					_screenInterface = _multiplayerGameSetup;
+					break;
+				}
+				case Screen.MultiplayerPreGameServer:
+				{
+					if (_multiplayerGameSetup == null)
+					{
+						string reason;
+						_multiplayerGameSetup = new MultiplayerGameSetup();
+						if (!_multiplayerGameSetup.Initialize(this, out reason))
+						{
+							MessageBox.Show("Error in loading Multiplayer PreGame Screen.  Reason: " + reason);
+							ExitGame();
+						}
+					}
+					_multiplayerGameSetup.SetHost(true);
+					_screenInterface = _multiplayerGameSetup;
+					break;
+				}
+			}
 		}
 
 		public void MouseDown(MouseEventArgs e)

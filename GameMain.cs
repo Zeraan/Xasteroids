@@ -26,6 +26,8 @@ namespace Xasteroids
 
 		private Form _parentForm;
 
+		private BackgroundStars _backgroundStars;
+
 		public Random Random { get; private set; }
 		public Point MousePos;
 		public Point ScreenSize { get; private set; }
@@ -60,6 +62,12 @@ namespace Xasteroids
 			_screenInterface = _mainMenu;
 			_currentScreen = Screen.MainMenu;
 
+			_backgroundStars = new BackgroundStars();
+			if (!_backgroundStars.Initialize(this, out reason))
+			{
+				return false;
+			}
+
 			Cursor = SpriteManager.GetSprite("Cursor", Random);
 			if (Cursor == null)
 			{
@@ -79,6 +87,8 @@ namespace Xasteroids
 		//Handle events
 		public void ProcessGame(float frameDeltaTime)
 		{
+			_backgroundStars.Draw();
+
 			_screenInterface.Update(MousePos.X, MousePos.Y, frameDeltaTime);
 			_screenInterface.DrawScreen();
 

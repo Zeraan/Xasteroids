@@ -17,6 +17,7 @@ namespace Xasteroids.Screens
 		private BBSingleLineTextBox _playerNameTextBox;
 		private BBButton _cancelButton;
 
+		private bool _showingShipSelection;
 		private bool _showingMultiplayerOptions;
 
 		public bool Initialize(GameMain gameMain, out string reason)
@@ -39,6 +40,7 @@ namespace Xasteroids.Screens
 			_playerNameTextBox = new BBSingleLineTextBox();
 
 			_showingMultiplayerOptions = false;
+			_showingShipSelection = false;
 
 			int x = _gameMain.ScreenSize.X / 2 - 130;
 			int y = _gameMain.ScreenSize.Y / 2 + 50;
@@ -99,10 +101,19 @@ namespace Xasteroids.Screens
 				_hostOrConnectButton.Draw();
 				_cancelButton.Draw();
 			}
+			if (_showingShipSelection)
+			{
+				_gameMain.ShipSelectionWindow.Draw();
+			}
 		}
 
 		public void Update(int x, int y, float frameDeltaTime)
 		{
+			if (_showingShipSelection)
+			{
+				_gameMain.ShipSelectionWindow.MouseHover(x, y, frameDeltaTime);
+				return;
+			}
 			if (!_showingMultiplayerOptions)
 			{
 				_singlePlayerButton.MouseHover(x, y, frameDeltaTime);
@@ -120,6 +131,11 @@ namespace Xasteroids.Screens
 
 		public void MouseDown(int x, int y)
 		{
+			if (_showingShipSelection)
+			{
+				_gameMain.ShipSelectionWindow.MouseDown(x, y);
+				return;
+			}
 			if (!_showingMultiplayerOptions)
 			{
 				_singlePlayerButton.MouseDown(x, y);
@@ -137,11 +153,24 @@ namespace Xasteroids.Screens
 
 		public void MouseUp(int x, int y)
 		{
+			if (_showingShipSelection)
+			{
+				if (!_gameMain.ShipSelectionWindow.MouseUp(x, y))
+				{
+					_showingShipSelection = false;
+					_gameMain.ShipSelectionWindow.OnSelectShip = null;
+				}
+				return;
+			}
 			if (!_showingMultiplayerOptions)
 			{
 				if (_singlePlayerButton.MouseUp(x, y))
 				{
-					//Start single player game
+					_gameMain.PlayerManager.ClearMainPlayer(_gameMain.Random);
+					var player = _gameMain.PlayerManager.MainPlayer;
+					_gameMain.ShipSelectionWindow.LoadShip(player.ShipSize, player.ShipStyle, player.ShipColor, player.Bank);
+					_gameMain.ShipSelectionWindow.OnSelectShip = OnSelectShip;
+					_showingShipSelection = true;
 				}
 				if (_multiPlayerButton.MouseUp(x, y))
 				{
@@ -215,6 +244,22 @@ namespace Xasteroids.Screens
 				}
 			}
 			return true;
+		}
+
+		private void OnSelectShip(int size, int style, Color color, int shipCost)
+		{
+			var player = _gameMain.PlayerManager.MainPlayer;
+			player.ShipSize = size;
+			player.ShipStyle = style;
+			player.ShipColor = color;
+			player.Bank -= shipCost;
+			player.ShipSprite = SpriteManager.GetShipSprite(size, style, _gameMain.Random);
+
+			_showingShipSelection = false;
+			_gameMain.ShipSelectionWindow.OnSelectShip = null;
+
+			//Start the game!
+			//_gameMain.ChangeToScreen(Screen.PurchaseUpgrades);
 		}
 	}
 }

@@ -82,7 +82,7 @@ namespace Xasteroids
 						color = Color.Yellow;
 						break;
 				}
-				BackgroundStar newStar = new BackgroundStar(gameMain.Random.Next(gameMain.ScreenSize.X), gameMain.Random.Next(gameMain.ScreenSize.Y), _gameMain.Random.Next(1, 100), color);
+				BackgroundStar newStar = new BackgroundStar(gameMain.Random.Next(gameMain.ScreenSize.X), gameMain.Random.Next(gameMain.ScreenSize.Y), _gameMain.Random.Next(1, 50), color);
 				_backGroundStars[i] = newStar;
 			}
 

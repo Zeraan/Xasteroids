@@ -67,9 +67,12 @@
     <Compile Include="FontManager.cs" />
     <Compile Include="GameMain.cs" />
     <Compile Include="InterfaceManagement.cs" />
+    <Compile Include="PlayerManager.cs" />
     <Compile Include="Screens\MainMenu.cs" />
     <Compile Include="Screens\MultiplayerGameSetup.cs" />
     <Compile Include="Screens\ScreenInterface.cs" />
+    <Compile Include="Screens\ShipSelectionWindow.cs" />
+    <Compile Include="Screens\WindowInterface.cs" />
     <Compile Include="SpriteManager.cs" />
     <Compile Include="Utility.cs" />
     <Compile Include="Xasteroids.cs">

@@ -58,5 +58,51 @@ namespace Xasteroids
 			}
 			return null;
 		}
+
+		public static BBSprite GetShipSprite(int size, int style, Random r)
+		{
+			string nameBuilder;
+			string styleString;
+			if (style <= 6)
+			{
+				//Human ship
+				nameBuilder = "Human";
+				styleString = style.ToString();
+			}
+			else if (style <= 12)
+			{
+				//Space Hamster ship
+				nameBuilder = "SpaceHamster";
+				styleString = (style - 6).ToString();
+			}
+			else
+			{
+				//Zero People ship
+				nameBuilder = "ZeroPeople";
+				styleString = (style - 12).ToString();
+			}
+			switch (size)
+			{
+				case 1:
+					nameBuilder += "TinyShip" + styleString;
+					return GetSprite(nameBuilder, r);
+				case 2:
+					nameBuilder += "SmallShip" + styleString;
+					return GetSprite(nameBuilder, r);
+				case 3:
+					nameBuilder += "MediumShip" + styleString;
+					return GetSprite(nameBuilder, r);
+				case 4:
+					nameBuilder += "LargeShip" + styleString;
+					return GetSprite(nameBuilder, r);
+				case 5:
+					nameBuilder += "HugeShip" + styleString;
+					return GetSprite(nameBuilder, r);
+				case 6:
+					nameBuilder += "TitanShip";
+					return GetSprite(nameBuilder, r);
+			}
+			return null;
+		}
 	}
 }

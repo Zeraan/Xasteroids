@@ -28,12 +28,15 @@ namespace Xasteroids
 
 		private BackgroundStars _backgroundStars;
 
+		public PlayerManager PlayerManager { get; private set; }
 		public Random Random { get; private set; }
 		public Point MousePos;
 		public Point ScreenSize { get; private set; }
 		public GorgonLibrary.Graphics.FXShader ShipShader { get; private set; }
 
 		private BBSprite Cursor;
+
+		public ShipSelectionWindow ShipSelectionWindow { get; private set; }
 
 		public bool Initialize(int screenWidth, int screenHeight, Form parentForm, out string reason)
 		{
@@ -72,6 +75,13 @@ namespace Xasteroids
 			if (Cursor == null)
 			{
 				reason = "Cursor is not defined in sprites.xml";
+				return false;
+			}
+
+			PlayerManager = new PlayerManager();
+			ShipSelectionWindow = new ShipSelectionWindow();
+			if (!ShipSelectionWindow.Initialize(this, out reason))
+			{
 				return false;
 			}
 

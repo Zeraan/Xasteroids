@@ -81,12 +81,15 @@ namespace Xasteroids.Screens
 			_hostOrConnectButton.SetTextColor(Color.Gold, Color.Black);
 			_cancelButton.SetTextColor(Color.Gold, Color.Black);
 
+			_gameMain.AsteroidManager.SetUpLevel(3000, 3000, new[] { AsteroidType.GENERIC, AsteroidType.EXPLOSIVE, AsteroidType.DENSE, AsteroidType.CLUMPY, AsteroidType.BLACK, AsteroidType.GOLD, AsteroidType.GRAVITIC, AsteroidType.MAGNETIC, AsteroidType.PHASING, AsteroidType.REPULSER, AsteroidType.ZIPPY }, 100, _gameMain.Random);
+
 			reason = null;
 			return true;
 		}
 
 		public void DrawScreen()
 		{
+			_gameMain.DrawObjects();
 			_title.Draw(_gameMain.ScreenSize.X / 2 - 400, (_gameMain.ScreenSize.Y / 2) - 300);
 			if (!_showingMultiplayerOptions)
 			{

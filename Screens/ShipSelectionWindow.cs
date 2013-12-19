@@ -200,7 +200,7 @@ namespace Xasteroids.Screens
 				_size--;
 				if (_size < 1)
 				{
-					_size = 6;
+					_size = 5;
 				}
 				RefreshShipSprite();
 				RefreshShipCost();
@@ -208,7 +208,7 @@ namespace Xasteroids.Screens
 			if (_downButton.MouseUp(x, y))
 			{
 				_size++;
-				if (_size > 6)
+				if (_size > 5)
 				{
 					_size = 1;
 				}

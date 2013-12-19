@@ -98,8 +98,29 @@ namespace Xasteroids
 				case 5:
 					nameBuilder += "HugeShip" + styleString;
 					return GetSprite(nameBuilder, r);
-				case 6:
-					nameBuilder += "TitanShip";
+			}
+			return null;
+		}
+
+		public static BBSprite GetAsteroidSprite(int size, int style, Random r)
+		{
+			string nameBuilder = string.Empty;
+			switch (size)
+			{
+				case 1:
+					nameBuilder += "TinyAst" + style;
+					return GetSprite(nameBuilder, r);
+				case 2:
+					nameBuilder += "SmallAst" + style;
+					return GetSprite(nameBuilder, r);
+				case 3:
+					nameBuilder += "MediumAst" + style;
+					return GetSprite(nameBuilder, r);
+				case 4:
+					nameBuilder += "LargeAst" + style;
+					return GetSprite(nameBuilder, r);
+				case 5:
+					nameBuilder += "HugeAst" + style;
 					return GetSprite(nameBuilder, r);
 			}
 			return null;

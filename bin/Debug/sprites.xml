@@ -588,9 +588,6 @@
   <Sprite name="HumanHugeShip6" file="humans.png">
     <Frame x="800" y="320" width="160" height="160" axisX="80" axisY="80" />
   </Sprite>
-  <Sprite name="HumanTitanShip" file="humans.png">
-    <Frame x="768" y="64" width="256" height="256" axisX="128" axisY="128" />
-  </Sprite>
   <!--Space Hamsters-->
   <Sprite name="SpaceHamsterTinyShip1" file="space_hamsters.png">
     <Frame x="0" y="0" width="32" height="32" axisX="16" axisY="16" />
@@ -682,9 +679,6 @@
   <Sprite name="SpaceHamsterHugeShip6" file="space_hamsters.png">
     <Frame x="800" y="320" width="160" height="160" axisX="80" axisY="80" />
   </Sprite>
-  <Sprite name="SpaceHamsterTitanShip" file="space_hamsters.png">
-    <Frame x="768" y="64" width="256" height="256" axisX="128" axisY="128" />
-  </Sprite>
   <!--Zero People-->
   <Sprite name="ZeroPeopleTinyShip1" file="zero_people.png">
     <Frame x="0" y="0" width="32" height="32" axisX="16" axisY="16" />
@@ -775,8 +769,5 @@
   </Sprite>
   <Sprite name="ZeroPeopleHugeShip6" file="zero_people.png">
     <Frame x="800" y="320" width="160" height="160" axisX="80" axisY="80" />
-  </Sprite>
-  <Sprite name="ZeroPeopleTitanShip" file="zero_people.png">
-    <Frame x="768" y="64" width="256" height="256" axisX="128" axisY="128" />
   </Sprite>
 </Sprites>

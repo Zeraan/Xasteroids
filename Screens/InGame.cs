@@ -70,10 +70,11 @@ namespace Xasteroids.Screens
 		{
 			var player = _gameMain.PlayerManager.MainPlayer;
 			_gameMain.AsteroidManager.UpdatePhysics(_gameMain.PlayerManager.Players, frameDeltaTime, _gameMain.Random);
-			//TODO: Update Players and Phsyic Objects (explosions, bullets, etc)
+			_gameMain.PlayerManager.UpdatePhysics(frameDeltaTime);
+			//TODO: Update Physic Objects (explosions, bullets, etc)
 
 			//After every object's physics are updated, proceed to move/rotate/etc
-			_gameMain.AsteroidManager.UpdateAsteroids(frameDeltaTime);
+			_gameMain.AsteroidManager.Update(frameDeltaTime);
 			_gameMain.PlayerManager.Update(frameDeltaTime);
 
 			_gameMain.MoveStars(-player.VelocityX * frameDeltaTime, -player.VelocityY * frameDeltaTime);

@@ -128,7 +128,7 @@ namespace Xasteroids.Screens
 		public void Update(int x, int y, float frameDeltaTime)
 		{
 			_gameMain.AsteroidManager.UpdatePhysics(null, frameDeltaTime, _gameMain.Random);
-			_gameMain.AsteroidManager.UpdateAsteroids(frameDeltaTime);
+			_gameMain.AsteroidManager.Update(frameDeltaTime);
 
 			if (_showingShipSelection)
 			{

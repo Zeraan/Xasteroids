@@ -90,15 +90,21 @@ namespace Xasteroids
 
 		public void UpdatePhysics(List<Player> players, float frameDeltaTime, Random r)
 		{
-			//First, update the asteroids' collision
+			//First, update the asteroids' collision between each other
 			UpdateAsteroidPhysics(frameDeltaTime, r);
+
+			if (players != null)
+			{
+				//Second, update the asteroid vs ship collisions
+				UpdateAsteroidVsShipPhysics(players, frameDeltaTime, r);
+			}
 		}
 
 		private void UpdateAsteroidPhysics(float frameDeltaTime, Random r)
 		{
 			List<Asteroid> asteroidsToRemove = new List<Asteroid>();
 
-			for (int i = 0; i < Asteroids.Count; i++)
+			for (int i = 0; i < Asteroids.Count - 1; i++)
 			{
 				for (int j = i + 1; j < Asteroids.Count; j++)
 				{
@@ -112,6 +118,8 @@ namespace Xasteroids
 					float y1 = Asteroids[i].PositionY;
 					float x2 = Asteroids[j].PositionX;
 					float y2 = Asteroids[j].PositionY;
+
+					//TODO: Add a simple rectangle bounding check to skip expensive circle calculations, and do opposite side collision checking (5 and Width-5 should collide)
 
 					float v1x = Asteroids[i].VelocityX; //e.FrameDeltaTime is the time between frames, less than 1
 					float v1y = Asteroids[i].VelocityY;
@@ -180,7 +188,75 @@ namespace Xasteroids
 			}
 		}
 
-		public void UpdateAsteroids(float frameDeltaTime)
+		private void UpdateAsteroidVsShipPhysics(List<Player> players, float frameDeltaTime, Random r)
+		{
+			List<Asteroid> asteroidsToRemove = new List<Asteroid>();
+
+			for (int i = 0; i < Asteroids.Count; i++)
+			{
+				for (int j = 0; j < players.Count; j++)
+				{
+					if (Asteroids[i].ToBeRemoved || players[j].IsDead)
+					{
+						//Some asteroids have clumped together, don't calculate between any asteroids with the asteroid to be removed;
+						continue;
+					}
+					//create variables that'd be easier to read than function calls
+					float x1 = Asteroids[i].PositionX;
+					float y1 = Asteroids[i].PositionY;
+					float x2 = players[j].PositionX;
+					float y2 = players[j].PositionY;
+
+					//TODO: Add a simple rectangle bounding check to skip expensive circle calculations, and do opposite side collision checking (5 and Width-5 should collide)
+
+					float v1x = Asteroids[i].VelocityX; //e.FrameDeltaTime is the time between frames, less than 1
+					float v1y = Asteroids[i].VelocityY;
+					float v2x = players[j].VelocityX;
+					float v2y = players[j].VelocityY;
+
+					//get the position plus velocity
+					float tx1 = x1 + v1x * frameDeltaTime;
+					float ty1 = y1 + v1y * frameDeltaTime;
+					float tx2 = x2 + v2x * frameDeltaTime;
+					float ty2 = y2 + v2y * frameDeltaTime;
+
+					float dx = tx2 - tx1;
+					float dy = ty2 - ty1;
+					float dx2 = x2 - x1;
+					float dy2 = y2 - y1;
+					float r1 = (float)Math.Sqrt(dx * dx + dy * dy); //Get the distance between centers of asteroids
+					float r2 = (float)Math.Sqrt(dx2 * dx2 + dy2 * dy2);
+
+					if (r1 < (Asteroids[i].Size * 16 + players[j].ShipSize * 16) && r1 < r2) //Collision!
+					{
+						//Calculate the impulse or change of momentum, or whatever people call it
+						float rx = dx / r1;
+						float ry = dy / r1;
+						float k1 = 2 * players[j].Mass * (rx * (v2x - v1x) + ry * (v2y - v1y)) / (Asteroids[i].Mass + players[j].Mass);
+						float k2 = 2 * Asteroids[i].Mass * (rx * (v1x - v2x) + ry * (v1y - v2y)) / (Asteroids[i].Mass + players[j].Mass);
+
+						//Adjust the velocities
+						v1x += k1 * rx;
+						v1y += k1 * ry;
+						v2x += k2 * rx;
+						v2y += k2 * ry;
+
+						//Assign the final value to asteroids
+						Asteroids[i].VelocityX = v1x;
+						Asteroids[i].VelocityY = v1y;
+						players[j].VelocityX = v2x;
+						players[j].VelocityY = v2y;
+					}
+				}
+			}
+
+			foreach (var asteroid in asteroidsToRemove)
+			{
+				Asteroids.Remove(asteroid);
+			}
+		}
+
+		public void Update(float frameDeltaTime)
 		{
 			//Rotate/move asteroids
 			foreach (var asteroid in Asteroids)

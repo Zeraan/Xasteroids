@@ -387,7 +387,7 @@ namespace Xasteroids
 			}
 			LevelSize = new Point(Random.Next(3000, 5000), Random.Next(3000, 5000));
 
-			AsteroidManager.SetUpLevel(types.ToArray(), LevelNumber * 10, Random);
+			AsteroidManager.SetUpLevel(types.ToArray(), LevelNumber * 10 * (PlayerManager.Players.Count == 0 ? 1 : PlayerManager.Players.Count), Random);
 		}
 
 		public bool IsKeyDown(KeyboardKeys whichKey)

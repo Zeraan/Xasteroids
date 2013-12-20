@@ -122,5 +122,10 @@ namespace Xasteroids
 		{
 			Cursor.Hide();
 		}
+
+		public bool IsKeyDown(KeyboardKeys whichKey)
+		{
+			return _keyboard.KeyStates[whichKey] == KeyState.Down;
+		}
 	}
 }

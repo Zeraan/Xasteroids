@@ -31,7 +31,8 @@ namespace Xasteroids
 		public float PositionY { get; private set; }
 		public float VelocityX { get; private set; }
 		public float VelocityY { get; private set; }
-		public float Angle { get; private set; }
+		public float Angle { get; set; }
+		public float RotationSpeed { get { return 90; } } //90 degress per sec
 
 		public int MaxEnergy { get; private set; }
 		public float Energy { get; private set; }
@@ -42,7 +43,23 @@ namespace Xasteroids
 
 		public int ShipSize { get; set; }
 		public int ShipStyle { get; set; }
-		public Color ShipColor { get; set; }
+		private Color _shipColor;
+		public Color ShipColor
+		{
+			get { return _shipColor; }
+			set 
+			{ 
+				_shipColor = value;
+				ShipConvertedColor = new[]
+								{
+									_shipColor.R / 255.0f,
+									_shipColor.G / 255.0f,
+									_shipColor.B / 255.0f,
+									1
+								};
+			}
+		}
+		public float[] ShipConvertedColor { get; private set; }
 		public BBSprite ShipSprite { get; set; }
 
 		public int Bank { get; set; }
@@ -53,6 +70,9 @@ namespace Xasteroids
 			ShipStyle = shipStyle;
 			ShipColor = shipColor;
 			ShipSprite = shipSprite;
+
+			MaxEnergy = ShipSize * 100;
+			Energy = MaxEnergy;
 		}
 	}
 }

@@ -86,10 +86,16 @@ namespace Xasteroids
 			}
 		}
 
-		public void UpdateAsteroids(Random r, float frameDeltaTime)
+		public void UpdatePhysics(List<Player> players, float frameDeltaTime, Random r)
+		{
+			//First, update the asteroids' collision
+			UpdateAsteroidPhysics(frameDeltaTime, r);
+		}
+
+		private void UpdateAsteroidPhysics(float frameDeltaTime, Random r)
 		{
 			List<Asteroid> asteroidsToRemove = new List<Asteroid>();
-			//Handle physics here
+
 			for (int i = 0; i < Asteroids.Count; i++)
 			{
 				for (int j = i + 1; j < Asteroids.Count; j++)
@@ -170,7 +176,10 @@ namespace Xasteroids
 			{
 				Asteroids.Remove(asteroid);
 			}
+		}
 
+		public void UpdateAsteroids(float frameDeltaTime)
+		{
 			//Rotate/move asteroids
 			foreach (var asteroid in Asteroids)
 			{

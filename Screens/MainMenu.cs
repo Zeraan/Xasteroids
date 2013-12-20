@@ -85,15 +85,15 @@ namespace Xasteroids.Screens
 			AsteroidType[] typesToInclude = new [] {
 													//AsteroidType.GENERIC, 
 													//AsteroidType.EXPLOSIVE, 
-													AsteroidType.DENSE, 
+													//AsteroidType.DENSE, 
 													//AsteroidType.CLUMPY, 
-													//AsteroidType.BLACK, 
+													AsteroidType.BLACK, 
 													//AsteroidType.GOLD, 
 													//AsteroidType.GRAVITIC, 
 													//AsteroidType.MAGNETIC, 
 													//AsteroidType.PHASING, 
 													//AsteroidType.REPULSER, 
-													AsteroidType.ZIPPY
+													//AsteroidType.ZIPPY
 												};
 
 			_gameMain.AsteroidManager.SetUpLevel(3000, 3000, typesToInclude, 500, _gameMain.Random);
@@ -127,6 +127,9 @@ namespace Xasteroids.Screens
 
 		public void Update(int x, int y, float frameDeltaTime)
 		{
+			_gameMain.AsteroidManager.UpdatePhysics(null, frameDeltaTime, _gameMain.Random);
+			_gameMain.AsteroidManager.UpdateAsteroids(frameDeltaTime);
+
 			if (_showingShipSelection)
 			{
 				_gameMain.ShipSelectionWindow.MouseHover(x, y, frameDeltaTime);
@@ -276,8 +279,11 @@ namespace Xasteroids.Screens
 			_showingShipSelection = false;
 			_gameMain.ShipSelectionWindow.OnSelectShip = null;
 
+			_gameMain.ResetGame();
+			_gameMain.SetupLevel();
+
 			//Start the game!
-			//_gameMain.ChangeToScreen(Screen.PurchaseUpgrades);
+			_gameMain.ChangeToScreen(Screen.InGame);
 		}
 	}
 }

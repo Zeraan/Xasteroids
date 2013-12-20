@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Collections.Generic;
+using System.Drawing;
 using GorgonLibrary.InputDevices;
 
 namespace Xasteroids.Screens
@@ -81,7 +82,21 @@ namespace Xasteroids.Screens
 			_hostOrConnectButton.SetTextColor(Color.Gold, Color.Black);
 			_cancelButton.SetTextColor(Color.Gold, Color.Black);
 
-			_gameMain.AsteroidManager.SetUpLevel(3000, 3000, new[] { AsteroidType.GENERIC, AsteroidType.EXPLOSIVE, AsteroidType.DENSE, AsteroidType.CLUMPY, AsteroidType.BLACK, AsteroidType.GOLD, AsteroidType.GRAVITIC, AsteroidType.MAGNETIC, AsteroidType.PHASING, AsteroidType.REPULSER, AsteroidType.ZIPPY }, 100, _gameMain.Random);
+			AsteroidType[] typesToInclude = new [] {
+													//AsteroidType.GENERIC, 
+													//AsteroidType.EXPLOSIVE, 
+													AsteroidType.DENSE, 
+													//AsteroidType.CLUMPY, 
+													//AsteroidType.BLACK, 
+													//AsteroidType.GOLD, 
+													//AsteroidType.GRAVITIC, 
+													//AsteroidType.MAGNETIC, 
+													//AsteroidType.PHASING, 
+													//AsteroidType.REPULSER, 
+													AsteroidType.ZIPPY
+												};
+
+			_gameMain.AsteroidManager.SetUpLevel(3000, 3000, typesToInclude, 500, _gameMain.Random);
 
 			reason = null;
 			return true;

@@ -86,17 +86,102 @@ namespace Xasteroids
 			}
 		}
 
-		public void UpdateAsteroids(float frameDeltaTime)
+		public void UpdateAsteroids(Random r, float frameDeltaTime)
 		{
+			List<Asteroid> asteroidsToRemove = new List<Asteroid>();
+			//Handle physics here
+			for (int i = 0; i < Asteroids.Count; i++)
+			{
+				for (int j = i + 1; j < Asteroids.Count; j++)
+				{
+					if (Asteroids[i].ToBeRemoved || Asteroids[j].ToBeRemoved)
+					{
+						//Some asteroids have clumped together, don't calculate between any asteroids with the asteroid to be removed;
+						continue;
+					}
+					//create variables that'd be easier to read than function calls
+					float x1 = Asteroids[i].PositionX;
+					float y1 = Asteroids[i].PositionY;
+					float x2 = Asteroids[j].PositionX;
+					float y2 = Asteroids[j].PositionY;
+
+					float v1x = Asteroids[i].VelocityX; //e.FrameDeltaTime is the time between frames, less than 1
+					float v1y = Asteroids[i].VelocityY;
+					float v2x = Asteroids[j].VelocityX;
+					float v2y = Asteroids[j].VelocityY;
+
+					//get the position plus velocity
+					float tx1 = x1 + v1x * frameDeltaTime;
+					float ty1 = y1 + v1y * frameDeltaTime;
+					float tx2 = x2 + v2x * frameDeltaTime;
+					float ty2 = y2 + v2y * frameDeltaTime;
+
+					float dx = tx2 - tx1;
+					float dy = ty2 - ty1;
+					float dx2 = x2 - x1;
+					float dy2 = y2 - y1;
+					float r1 = (float)Math.Sqrt(dx * dx + dy * dy); //Get the distance between centers of asteroids
+					float r2 = (float)Math.Sqrt(dx2 * dx2 + dy2 * dy2);
+
+					if (r1 < (Asteroids[i].Size * 16 + Asteroids[j].Size * 16) && r1 < r2) //Collision!
+					{
+						if (!((Asteroids[i] is ClumpyAsteroid && Asteroids[j] is ClumpyAsteroid) && Asteroids[i].Size + Asteroids[j].Size <= 5)) //Make sure it's not clumpy asteroids that can clump together
+						{
+							//Calculate the impulse or change of momentum, or whatever people call it
+							float rx = dx / r1;
+							float ry = dy / r1;
+							float k1 = 2 * Asteroids[j].Mass * (rx * (v2x - v1x) + ry * (v2y - v1y)) / (Asteroids[i].Mass + Asteroids[j].Mass);
+							float k2 = 2 * Asteroids[i].Mass * (rx * (v1x - v2x) + ry * (v1y - v2y)) / (Asteroids[i].Mass + Asteroids[j].Mass);
+
+							//Adjust the velocities
+							v1x += k1 * rx;
+							v1y += k1 * ry;
+							v2x += k2 * rx;
+							v2y += k2 * ry;
+
+							//Assign the final value to asteroids
+							Asteroids[i].VelocityX = v1x;
+							Asteroids[i].VelocityY = v1y;
+							Asteroids[j].VelocityX = v2x;
+							Asteroids[j].VelocityY = v2y;
+						}
+						else //it's clumpy, clump them together
+						{
+							float firstAsteroidFactor = (Asteroids[i].Size * 1.0f) / (Asteroids[i].Size + Asteroids[j].Size);
+							float secondAsteroidFactor = 1.0f - firstAsteroidFactor;
+							Asteroids[i].Size += Asteroids[j].Size;
+							Asteroids[i].Mass = Asteroids[i].Size * 300;
+							Asteroids[i].PositionX = (Asteroids[i].PositionX + Asteroids[j].PositionX) / 2;
+							Asteroids[i].PositionY = (Asteroids[i].PositionY + Asteroids[j].PositionY) / 2;
+							//Combine position and velocity:
+							Asteroids[i].VelocityX = (Asteroids[i].VelocityX * firstAsteroidFactor) + (Asteroids[j].VelocityX * secondAsteroidFactor);
+							Asteroids[i].VelocityY = (Asteroids[i].VelocityY * firstAsteroidFactor) + (Asteroids[j].VelocityY * secondAsteroidFactor);
+							Asteroids[i].AsteroidSprite = SpriteManager.GetAsteroidSprite(Asteroids[i].Size, Asteroids[i].Style, r);
+							//TODO: Combine the remaining HP
+
+							Asteroids[j].ToBeRemoved = true;
+							asteroidsToRemove.Add(Asteroids[j]);
+						}
+					}
+				}
+			}
+
+			foreach (var asteroid in asteroidsToRemove)
+			{
+				Asteroids.Remove(asteroid);
+			}
+
+			//Rotate/move asteroids
 			foreach (var asteroid in Asteroids)
 			{
-				asteroid.UpdateRotation(frameDeltaTime);
+				asteroid.Update(LevelSize.X, LevelSize.Y, frameDeltaTime);
 			}
 		}
 	}
 
 	public class Asteroid
 	{
+		public bool ToBeRemoved { get; set; }
 		public float PositionX { get; set; }
 		public float PositionY { get; set; }
 		public float VelocityX { get; set; }
@@ -113,6 +198,7 @@ namespace Xasteroids
 
 		public Asteroid(int width, int height, Random r)
 		{
+			ToBeRemoved = false;
 			//Safe zone can't be spawned in, 400x400 in middle of level
 			int safeWidth = (width / 2) - 200;
 			int safeHeight = (height / 2) - 200;
@@ -146,7 +232,7 @@ namespace Xasteroids
 			AsteroidSprite = SpriteManager.GetAsteroidSprite(Size, Style, r);
 		}
 
-		public void UpdateRotation(float frameDeltaTime)
+		public void Update(int width, int height, float frameDeltaTime)
 		{
 			Angle += RotationSpeed * frameDeltaTime;
 			while (Angle < 0)
@@ -156,6 +242,24 @@ namespace Xasteroids
 			while (Angle > 360)
 			{
 				Angle -= 360;
+			}
+			PositionX += VelocityX * frameDeltaTime;
+			PositionY += VelocityY * frameDeltaTime;
+			while (PositionX < 0)
+			{
+				PositionX += width;
+			}
+			while (PositionX >= width)
+			{
+				PositionX -= width;
+			}
+			while (PositionY < 0)
+			{
+				PositionY += height;
+			}
+			while (PositionY >= height)
+			{
+				PositionY -= height;
 			}
 		}
 	}
@@ -174,6 +278,8 @@ namespace Xasteroids
 
 			VelocityX = r.Next(10, 100) * (r.Next(2) > 0 ? -1 : 1);
 			VelocityY = r.Next(10, 100) * (r.Next(2) > 0 ? -1 : 1);
+
+			Mass = Size * 200;
 		}
 	}
 	public class ClumpyAsteroid : Asteroid
@@ -190,6 +296,8 @@ namespace Xasteroids
 
 			VelocityX = r.Next(40, 130) * (r.Next(2) > 0 ? -1 : 1);
 			VelocityY = r.Next(40, 130) * (r.Next(2) > 0 ? -1 : 1);
+
+			Mass = Size * 300;
 		}
 	}
 	public class MagneticAsteroid : Asteroid
@@ -206,6 +314,8 @@ namespace Xasteroids
 
 			VelocityX = r.Next(40, 120) * (r.Next(2) > 0 ? -1 : 1);
 			VelocityY = r.Next(40, 120) * (r.Next(2) > 0 ? -1 : 1);
+
+			Mass = Size * 160;
 		}
 	}
 	public class ExplosiveAsteroid : Asteroid
@@ -222,6 +332,8 @@ namespace Xasteroids
 
 			VelocityX = r.Next(80, 100) * (r.Next(2) > 0 ? -1 : 1);
 			VelocityY = r.Next(80, 100) * (r.Next(2) > 0 ? -1 : 1);
+
+			Mass = Size * 240;
 		}
 	}
 	public class BlackAsteroid : Asteroid
@@ -238,6 +350,8 @@ namespace Xasteroids
 
 			VelocityX = r.Next(10, 100) * (r.Next(2) > 0 ? -1 : 1);
 			VelocityY = r.Next(10, 100) * (r.Next(2) > 0 ? -1 : 1);
+
+			Mass = Size * 200;
 		}
 	}
 	public class DenseAsteroid : Asteroid
@@ -254,6 +368,8 @@ namespace Xasteroids
 
 			VelocityX = r.Next(10, 80) * (r.Next(2) > 0 ? -1 : 1);
 			VelocityY = r.Next(10, 80) * (r.Next(2) > 0 ? -1 : 1);
+
+			Mass = Size * 1100;
 		}
 	}
 	public class GraviticAsteroid : Asteroid
@@ -270,6 +386,8 @@ namespace Xasteroids
 
 			VelocityX = r.Next(100, 200) * (r.Next(2) > 0 ? -1 : 1);
 			VelocityY = r.Next(100, 200) * (r.Next(2) > 0 ? -1 : 1);
+
+			Mass = Size * 300;
 		}
 	}
 	public class ZippyAsteroid : Asteroid
@@ -286,6 +404,8 @@ namespace Xasteroids
 
 			VelocityX = r.Next(200, 500) * (r.Next(2) > 0 ? -1 : 1);
 			VelocityY = r.Next(200, 500) * (r.Next(2) > 0 ? -1 : 1);
+
+			Mass = Size * 30;
 		}
 	}
 	public class RepulserAsteroid : Asteroid
@@ -302,6 +422,8 @@ namespace Xasteroids
 
 			VelocityX = r.Next(100, 200) * (r.Next(2) > 0 ? -1 : 1);
 			VelocityY = r.Next(100, 200) * (r.Next(2) > 0 ? -1 : 1);
+
+			Mass = Size * 260;
 		}
 	}
 	public class PhasingAsteroid : Asteroid
@@ -318,6 +440,8 @@ namespace Xasteroids
 
 			VelocityX = r.Next(20, 140) * (r.Next(2) > 0 ? -1 : 1);
 			VelocityY = r.Next(20, 140) * (r.Next(2) > 0 ? -1 : 1);
+
+			Mass = Size * 220;
 		}
 	}
 	public class GoldAsteroid : Asteroid
@@ -334,6 +458,8 @@ namespace Xasteroids
 
 			VelocityX = r.Next(50, 150) * (r.Next(2) > 0 ? -1 : 1);
 			VelocityY = r.Next(50, 150) * (r.Next(2) > 0 ? -1 : 1);
+
+			Mass = Size * 400;
 		}
 	}
 }

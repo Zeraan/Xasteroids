@@ -100,7 +100,7 @@ namespace Xasteroids
 		public void ProcessGame(float frameDeltaTime)
 		{
 			_backgroundStars.Draw();
-			AsteroidManager.UpdateAsteroids(frameDeltaTime);
+			AsteroidManager.UpdateAsteroids(Random, frameDeltaTime);
 			_screenInterface.Update(MousePos.X, MousePos.Y, frameDeltaTime);
 			_screenInterface.DrawScreen();
 

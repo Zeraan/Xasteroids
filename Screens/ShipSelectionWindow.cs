@@ -175,6 +175,8 @@ namespace Xasteroids.Screens
 					RefreshColorValues();
 				}
 			}
+
+			_angle += 45 * frameDeltaTime;
 			return true;
 		}
 

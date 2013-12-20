@@ -44,11 +44,13 @@
     <Reference Include="GorgonInput">
       <HintPath>.\GorgonInput.dll</HintPath>
     </Reference>
+    <Reference Include="GSound">
+      <HintPath>.\GSound.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
@@ -56,6 +58,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AsteroidManager.cs" />
     <Compile Include="BackgroundStars.cs" />
     <Compile Include="BBSprite.cs" />
     <Compile Include="Configuration.cs">
@@ -67,9 +70,13 @@
     <Compile Include="FontManager.cs" />
     <Compile Include="GameMain.cs" />
     <Compile Include="InterfaceManagement.cs" />
+    <Compile Include="PlayerManager.cs" />
+    <Compile Include="Screens\InGame.cs" />
     <Compile Include="Screens\MainMenu.cs" />
     <Compile Include="Screens\MultiplayerGameSetup.cs" />
     <Compile Include="Screens\ScreenInterface.cs" />
+    <Compile Include="Screens\ShipSelectionWindow.cs" />
+    <Compile Include="Screens\WindowInterface.cs" />
     <Compile Include="SpriteManager.cs" />
     <Compile Include="Utility.cs" />
     <Compile Include="Xasteroids.cs">

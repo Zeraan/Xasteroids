@@ -267,15 +267,21 @@ namespace Xasteroids
 				}
 			}
 
-			//Set the shader that every player's ship will use
-			GorgonLibrary.Gorgon.CurrentShader = ShipShader;
 			foreach (var player in PlayerManager.Players)
 			{
 				if (player == PlayerManager.MainPlayer)
 				{
 					//Always in center of screen, just draw it there
+					GorgonLibrary.Gorgon.CurrentShader = ShipShader;
 					ShipShader.Parameters["EmpireColor"].SetValue(player.ShipConvertedColor);
 					player.ShipSprite.Draw(screenWidth, screenHeight, 1, 1, Color.White, player.Angle);
+					GorgonLibrary.Gorgon.CurrentShader = null;
+					if (player.ShieldAlpha > 0)
+					{
+						//Shield was recently activated, display it
+						byte alpha = (byte)(player.ShieldAlpha * 255);
+						player.ShieldSprite.Draw(screenWidth, screenHeight, 1, 1, Color.FromArgb(alpha, alpha, alpha, alpha));
+					}
 				}
 				int size = 16 * player.ShipSize; //For performance, cache the value
 				float modifiedX = player.PositionX;
@@ -305,11 +311,18 @@ namespace Xasteroids
 				if (modifiedX >= leftBounds - size && modifiedX < rightBounds + size && modifiedY >= topBounds - size && modifiedY < bottomBounds + size)
 				{
 					//It is visible
+					GorgonLibrary.Gorgon.CurrentShader = ShipShader;
 					ShipShader.Parameters["EmpireColor"].SetValue(player.ShipConvertedColor);
 					player.ShipSprite.Draw((modifiedX + screenWidth) - x, (modifiedY + screenHeight) - y, 1, 1, Color.White, player.Angle);
+					GorgonLibrary.Gorgon.CurrentShader = null;
+					if (player.ShieldAlpha > 0)
+					{
+						//Shield was recently activated, display it
+						byte alpha = (byte)(player.ShieldAlpha * 255);
+						player.ShieldSprite.Draw((modifiedX + screenWidth) - x, (modifiedY + screenHeight) - y, 1, 1, Color.FromArgb(alpha, alpha, alpha, alpha));
+					}
 				}
 			}
-			GorgonLibrary.Gorgon.CurrentShader = null;
 		}
 
 		public void MoveStars(float xAmount, float yAmount)

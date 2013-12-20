@@ -25,7 +25,7 @@ namespace Xasteroids
 		{
 			if (_players.Count == 0)
 			{
-				_players.Add(new Player(1, 1, Color.Red, SpriteManager.GetShipSprite(1, 1, r)));
+				_players.Add(new Player(1, 1, Color.Red, SpriteManager.GetShipSprite(1, 1, r), SpriteManager.GetShieldSprite(1, r)));
 			}
 			MainPlayer.Bank = 1000;
 		}
@@ -122,6 +122,7 @@ namespace Xasteroids
 				{
 					player.PositionY -= height;
 				}
+				player.Update(frameDeltaTime); //regeneration and stuff here
 			}
 		}
 	}
@@ -155,6 +156,8 @@ namespace Xasteroids
 		public int MaxEnergy { get; private set; }
 		public float Energy { get; private set; }
 		public float RechargeRate { get; private set; }
+		public float ShieldAlpha { get; set; }
+
 		public bool IsDead { get; set; }
 
 		public float CoolDownPeriod { get; private set; }
@@ -180,21 +183,44 @@ namespace Xasteroids
 		}
 		public float[] ShipConvertedColor { get; private set; }
 		public BBSprite ShipSprite { get; set; }
+		public BBSprite ShieldSprite { get; set; }
 
 		public int Mass { get; set; }
 
 		public int Bank { get; set; }
 
-		public Player(int shipSize, int shipStyle, Color shipColor, BBSprite shipSprite)
+		public Player(int shipSize, int shipStyle, Color shipColor, BBSprite shipSprite, BBSprite shieldSprite)
 		{
 			ShipSize = shipSize;
 			ShipStyle = shipStyle;
 			ShipColor = shipColor;
 			ShipSprite = shipSprite;
+			ShieldSprite = shieldSprite;
 			Mass = ShipSize * 20;
 
 			MaxEnergy = ShipSize * 100;
 			Energy = MaxEnergy;
+		}
+
+		public void Update(float frameDeltaTime)
+		{
+			//Update energy regeneration
+			if (IsDead)
+			{
+				//Dead, nothing to see here, move along
+				return;
+			}
+
+			Energy += RechargeRate * frameDeltaTime;
+			if (Energy > MaxEnergy)
+			{
+				Energy = MaxEnergy;
+			}
+
+			if (ShieldAlpha > 0)
+			{
+				ShieldAlpha -= frameDeltaTime;
+			}
 		}
 	}
 }

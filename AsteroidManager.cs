@@ -246,6 +246,9 @@ namespace Xasteroids
 						Asteroids[i].VelocityY = v1y;
 						players[j].VelocityX = v2x;
 						players[j].VelocityY = v2y;
+
+						//Deal damage and activate shield for player
+						players[j].ShieldAlpha = 1;
 					}
 				}
 			}

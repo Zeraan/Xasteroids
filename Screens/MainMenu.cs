@@ -275,6 +275,7 @@ namespace Xasteroids.Screens
 			player.ShipColor = color;
 			player.Bank -= shipCost;
 			player.ShipSprite = SpriteManager.GetShipSprite(size, style, _gameMain.Random);
+			player.ShieldSprite = SpriteManager.GetShieldSprite(size, _gameMain.Random);
 
 			_showingShipSelection = false;
 			_gameMain.ShipSelectionWindow.OnSelectShip = null;

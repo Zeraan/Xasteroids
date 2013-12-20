@@ -59,6 +59,24 @@ namespace Xasteroids
 			return null;
 		}
 
+		public static BBSprite GetShieldSprite(int size, Random r)
+		{
+			switch (size)
+			{
+				case 1:
+					return GetSprite("TinyShield", r);
+				case 2:
+					return GetSprite("SmallShield", r);
+				case 3:
+					return GetSprite("MediumShield", r);
+				case 4:
+					return GetSprite("LargeShield", r);
+				case 5:
+					return GetSprite("HugeShield", r);
+			}
+			return null;
+		}
+
 		public static BBSprite GetShipSprite(int size, int style, Random r)
 		{
 			string nameBuilder;

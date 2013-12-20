@@ -95,8 +95,8 @@ namespace Xasteroids.Screens
 													//AsteroidType.REPULSER, 
 													//AsteroidType.ZIPPY
 												};
-
-			_gameMain.AsteroidManager.SetUpLevel(3000, 3000, typesToInclude, 500, _gameMain.Random);
+			_gameMain.LevelNumber = 100;
+			_gameMain.SetupLevel();
 
 			reason = null;
 			return true;

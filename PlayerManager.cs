@@ -6,9 +6,15 @@ namespace Xasteroids
 {
 	public class PlayerManager
 	{
+		private GameMain _gameMain;
 		private List<Player> _players = new List<Player>();
 		public List<Player> Players { get { return _players; } }
 		public Player MainPlayer { get { return _players[0]; } } 
+
+		public PlayerManager(GameMain gameMain)
+		{
+			_gameMain = gameMain;
+		}
 
 		public void AddPlayer(Player player)
 		{
@@ -23,15 +29,64 @@ namespace Xasteroids
 			}
 			MainPlayer.Bank = 1000;
 		}
+
+		public void UpdatePhysics(List<Asteroid> asteroids, float frameDeltaTime)
+		{
+			//TODO: Implement collision handling between asteroid and ship, and ship vs ship.
+		}
+
+		public void Update(float frameDeltaTime)
+		{
+			int width = _gameMain.LevelSize.X;
+			int height = _gameMain.LevelSize.Y;
+			foreach (var player in Players)
+			{
+				player.PositionX += player.VelocityX;
+				player.PositionY += player.VelocityY;
+				while (player.PositionX < 0)
+				{
+					player.PositionX += width;
+				}
+				while (player.PositionX >= width)
+				{
+					player.PositionX -= width;
+				}
+				while (player.PositionY < 0)
+				{
+					player.PositionY += height;
+				}
+				while (player.PositionY >= height)
+				{
+					player.PositionY -= height;
+				}
+			}
+		}
 	}
 
 	public class Player
 	{
-		public float PositionX { get; private set; }
-		public float PositionY { get; private set; }
-		public float VelocityX { get; private set; }
-		public float VelocityY { get; private set; }
-		public float Angle { get; set; }
+		public float PositionX { get; set; }
+		public float PositionY { get; set; }
+		public float VelocityX { get; set; }
+		public float VelocityY { get; set; }
+		public float Acceleration { get { return 1; } } //10 pixels per sec per sec acceleration
+		private float _angle;
+		public float Angle
+		{
+			get { return _angle; }
+			set
+			{
+				_angle = value;
+				while (_angle < 0)
+				{
+					_angle += 360;
+				}
+				while (_angle >= 360)
+				{
+					_angle -= 360;
+				}
+			}
+		}
 		public float RotationSpeed { get { return 90; } } //90 degress per sec
 
 		public int MaxEnergy { get; private set; }

@@ -8,19 +8,21 @@ namespace Xasteroids
 
 	public class AsteroidManager
 	{
-		public List<Asteroid> Asteroids { get; private set; }
-		public Point LevelSize { get; private set; }
+		private GameMain _gameMain;
 
-		public AsteroidManager()
+		public List<Asteroid> Asteroids { get; private set; }
+
+		public AsteroidManager(GameMain gameMain)
 		{
+			_gameMain = gameMain;
 			Asteroids = new List<Asteroid>();
-			LevelSize = new Point();
 		}
 
-		public void SetUpLevel(int width, int height, AsteroidType[] types, int asteroidPoints, Random r)
+		public void SetUpLevel(AsteroidType[] types, int asteroidPoints, Random r)
 		{
-			LevelSize = new Point(width, height);
 			Asteroids.Clear(); //Just to make sure it's really empty
+			int width = _gameMain.LevelSize.X;
+			int height = _gameMain.LevelSize.Y;
 			while (asteroidPoints > 0)
 			{
 				var type = types[r.Next(types.Length)];
@@ -183,7 +185,7 @@ namespace Xasteroids
 			//Rotate/move asteroids
 			foreach (var asteroid in Asteroids)
 			{
-				asteroid.Update(LevelSize.X, LevelSize.Y, frameDeltaTime);
+				asteroid.Update(_gameMain.LevelSize.X, _gameMain.LevelSize.Y, frameDeltaTime);
 			}
 		}
 	}

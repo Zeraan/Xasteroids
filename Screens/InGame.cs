@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 using GorgonLibrary.InputDevices;
 
 namespace Xasteroids.Screens
@@ -11,6 +12,7 @@ namespace Xasteroids.Screens
 		private int _energyX;
 		private BBLabel _bankAmount;
 		private BBLabel _energyAmount;
+		private BBTextBox _debuggingText;
 
 		public bool Initialize(GameMain gameMain, out string reason)
 		{
@@ -43,6 +45,12 @@ namespace Xasteroids.Screens
 				return false;
 			}
 
+			_debuggingText = new BBTextBox();
+			if (!_debuggingText.Initialize(0, 0, 300, 300, true, false, "DebugText", gameMain.Random, out reason))
+			{
+				return false;
+			}
+
 			return true;
 		}
 
@@ -55,23 +63,26 @@ namespace Xasteroids.Screens
 			_horizontalEnergyBar.Draw(_energyX, 7, (380.0f / _horizontalEnergyBar.Width) * percentage, 2, Color.FromArgb(200, Color.LawnGreen));
 			_bankAmount.Draw();
 			_energyAmount.Draw();
+			_debuggingText.Draw();
 		}
 
 		public void Update(int x, int y, float frameDeltaTime)
 		{
+			var player = _gameMain.PlayerManager.MainPlayer;
 			_gameMain.AsteroidManager.UpdatePhysics(_gameMain.PlayerManager.Players, frameDeltaTime, _gameMain.Random);
 			//TODO: Update Players and Phsyic Objects (explosions, bullets, etc)
 
 			//After every object's physics are updated, proceed to move/rotate/etc
 			_gameMain.AsteroidManager.UpdateAsteroids(frameDeltaTime);
+			_gameMain.PlayerManager.Update(frameDeltaTime);
 
-			//poll the keyboard for movement for main player's ship
+			_gameMain.MoveStars(-player.VelocityX * frameDeltaTime, -player.VelocityY * frameDeltaTime);
 
 			//Update the stats
-			var player = _gameMain.PlayerManager.MainPlayer;
 			_bankAmount.SetText(string.Format("${0}", player.Bank));
 			_energyAmount.SetText(string.Format("{0}/{1}", (int)player.Energy, player.MaxEnergy));
 
+			//poll the keyboard for movement for main player's ship
 			if (_gameMain.IsKeyDown(KeyboardKeys.Left))
 			{
 				player.Angle -= (player.RotationSpeed * frameDeltaTime);
@@ -80,6 +91,16 @@ namespace Xasteroids.Screens
 			{
 				player.Angle += (player.RotationSpeed * frameDeltaTime);
 			}
+			if (_gameMain.IsKeyDown(KeyboardKeys.Up))
+			{
+				player.VelocityX += (float)Math.Cos(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime;
+				player.VelocityY += (float)Math.Sin(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime;
+			}
+			string debugText = string.Empty;
+			debugText += "Pos: " + player.PositionX + ", " + player.PositionY + "\n\r\n\r";
+			debugText += "Vel: " + player.VelocityX + ", " + player.VelocityY + "\n\r\n\r";
+			debugText += "Angle: " + player.Angle;
+			_debuggingText.SetText(debugText);
 		}
 
 		public void MouseDown(int x, int y)

@@ -43,8 +43,8 @@ namespace Xasteroids
 
 		public ShipSelectionWindow ShipSelectionWindow { get; private set; }
 
-		public int LevelNumber { get; private set; }
-		private AsteroidType[] typesToInclude;
+		public int LevelNumber { get; set; }
+		public Point LevelSize { get; private set; }
 
 		public bool Initialize(int screenWidth, int screenHeight, Xasteroids parentForm, out string reason)
 		{
@@ -77,8 +77,8 @@ namespace Xasteroids
 				return false;
 			}
 
-			PlayerManager = new PlayerManager();
-			AsteroidManager = new AsteroidManager();
+			PlayerManager = new PlayerManager(this);
+			AsteroidManager = new AsteroidManager(this);
 			ShipSelectionWindow = new ShipSelectionWindow();
 			if (!ShipSelectionWindow.Initialize(this, out reason))
 			{
@@ -93,20 +93,6 @@ namespace Xasteroids
 
 			_screenInterface = _mainMenu;
 			_currentScreen = Screen.MainMenu;
-
-			typesToInclude = new[] {
-										AsteroidType.GENERIC, 
-										AsteroidType.CLUMPY,
-										AsteroidType.DENSE, 
-										AsteroidType.EXPLOSIVE, 
-										AsteroidType.BLACK, 
-										AsteroidType.GOLD,
-										AsteroidType.GRAVITIC, 
-										AsteroidType.MAGNETIC, 
-										AsteroidType.PHASING, 
-										AsteroidType.REPULSER, 
-										AsteroidType.ZIPPY
-									};
 
 			return true;
 		}
@@ -131,6 +117,7 @@ namespace Xasteroids
 
 		public void ChangeToScreen(Screen whichScreen)
 		{
+			_currentScreen = whichScreen;
 			switch (whichScreen)
 			{
 				case Screen.MainMenu:
@@ -219,13 +206,13 @@ namespace Xasteroids
 		{
 			//Draws the asteroids, and if a game is in-progress, ships, weapons, and effects
 			//First, take the current player's position
-			float x = 0, y = 0;
+			float x, y;
 			
 			if (_currentScreen != Screen.InGame)
 			{
 				//Put in center of level
-				x = AsteroidManager.LevelSize.X / 2;
-				y = AsteroidManager.LevelSize.Y / 2;
+				x = LevelSize.X / 2;
+				y = LevelSize.Y / 2;
 			}
 			else
 			{
@@ -242,9 +229,9 @@ namespace Xasteroids
 			float bottomBounds = y + screenHeight;
 
 			bool overlapsLeft = (leftBounds - 80) < 0;
-			bool overlapsRight = !overlapsLeft && rightBounds + 80 >= AsteroidManager.LevelSize.X;
+			bool overlapsRight = !overlapsLeft && rightBounds + 80 >= LevelSize.X;
 			bool overlapsTop = (topBounds - 80) < 0;
-			bool overlapsBottom = !overlapsTop && bottomBounds + 80 >= AsteroidManager.LevelSize.Y;
+			bool overlapsBottom = !overlapsTop && bottomBounds + 80 >= LevelSize.Y;
 
 			foreach (var asteroid in AsteroidManager.Asteroids)
 			{
@@ -255,22 +242,22 @@ namespace Xasteroids
 				if (overlapsLeft && asteroid.PositionX >= rightBounds + size)
 				{
 					//It's on other side of screen, check and see if it could be visible due to overlap
-					modifiedX -= AsteroidManager.LevelSize.X;
+					modifiedX -= LevelSize.X;
 				}
 				else if (overlapsRight && asteroid.PositionX < leftBounds - size)
 				{
 					//It's on other side of screen, check and see if it could be visible due to overlap
-					modifiedX += AsteroidManager.LevelSize.X;
+					modifiedX += LevelSize.X;
 				}
 				if (overlapsTop && asteroid.PositionY >= bottomBounds + size)
 				{
 					//It's on other side of screen, check and see if it could be visible due to overlap
-					modifiedY -= AsteroidManager.LevelSize.Y;
+					modifiedY -= LevelSize.Y;
 				}
 				else if (overlapsBottom && asteroid.PositionY < topBounds - size)
 				{
 					//It's on other side of screen, check and see if it could be visible due to overlap
-					modifiedY += AsteroidManager.LevelSize.Y;
+					modifiedY += LevelSize.Y;
 				}
 				
 				if (modifiedX >= leftBounds - size && modifiedX < rightBounds + size && modifiedY >= topBounds - size && modifiedY < bottomBounds + size)
@@ -297,22 +284,22 @@ namespace Xasteroids
 				if (overlapsLeft && player.PositionX >= rightBounds + size)
 				{
 					//It's on other side of screen, check and see if it could be visible due to overlap
-					modifiedX -= AsteroidManager.LevelSize.X;
+					modifiedX -= LevelSize.X;
 				}
 				else if (overlapsRight && player.PositionX < leftBounds - size)
 				{
 					//It's on other side of screen, check and see if it could be visible due to overlap
-					modifiedX += AsteroidManager.LevelSize.X;
+					modifiedX += LevelSize.X;
 				}
 				if (overlapsTop && player.PositionY >= bottomBounds + size)
 				{
 					//It's on other side of screen, check and see if it could be visible due to overlap
-					modifiedY -= AsteroidManager.LevelSize.Y;
+					modifiedY -= LevelSize.Y;
 				}
 				else if (overlapsBottom && player.PositionY < topBounds - size)
 				{
 					//It's on other side of screen, check and see if it could be visible due to overlap
-					modifiedY += AsteroidManager.LevelSize.Y;
+					modifiedY += LevelSize.Y;
 				}
 
 				if (modifiedX >= leftBounds - size && modifiedX < rightBounds + size && modifiedY >= topBounds - size && modifiedY < bottomBounds + size)
@@ -323,6 +310,11 @@ namespace Xasteroids
 				}
 			}
 			GorgonLibrary.Gorgon.CurrentShader = null;
+		}
+
+		public void MoveStars(float xAmount, float yAmount)
+		{
+			_backgroundStars.Move(xAmount, yAmount);
 		}
 
 		public void ResetGame()
@@ -393,8 +385,9 @@ namespace Xasteroids
 			{
 				asteroidsToInlcude.Add(types[Random.Next(types.Count)]);
 			}
+			LevelSize = new Point(Random.Next(3000, 5000), Random.Next(3000, 5000));
 
-			AsteroidManager.SetUpLevel(Random.Next(3000, 5000), Random.Next(3000, 5000), types.ToArray(), LevelNumber * 10, Random);
+			AsteroidManager.SetUpLevel(types.ToArray(), LevelNumber * 10, Random);
 		}
 
 		public bool IsKeyDown(KeyboardKeys whichKey)

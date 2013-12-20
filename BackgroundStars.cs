@@ -22,8 +22,8 @@ namespace Xasteroids
 
 			public void Move(float xAmount, float yAmount, int screenWidth, int screenHeight)
 			{
-				XPos += (xAmount / _layer);
-				YPos += (yAmount / _layer);
+				XPos += (xAmount * _layer);
+				YPos += (yAmount * _layer);
 
 				if (XPos < -16)
 				{

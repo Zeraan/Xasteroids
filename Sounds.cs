@@ -29,7 +29,7 @@ namespace Xasteroids
 
 		public void SoundSetup(SoundTypes sound)
 		{
-
+			SoundTimer.Start(); //Testing git stuff :(
 			if (_musicSource != null && _musicSource.State == SoundSource.SoundStates.PLAYING)
 			{
 				return;

@@ -32,6 +32,8 @@ namespace Xasteroids
 
 		private BackgroundStars _backgroundStars;
 
+		private Sounds _sounds;
+
 		public PlayerManager PlayerManager { get; private set; }
 		public AsteroidManager AsteroidManager { get; private set; }
 		public Random Random { get; private set; }
@@ -48,6 +50,8 @@ namespace Xasteroids
 
 		public bool Initialize(int screenWidth, int screenHeight, Xasteroids parentForm, out string reason)
 		{
+			_sounds = new Sounds();
+			_sounds.SoundSetup(SoundTypes.MainTheme);
 			_parentForm = parentForm;
 			Random = new Random();
 			MousePos = new Point();

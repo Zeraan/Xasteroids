@@ -53,7 +53,7 @@ namespace Xasteroids
 					float x2 = Players[j].PositionX;
 					float y2 = Players[j].PositionY;
 
-					//TODO: Add a simple rectangle bounding check to skip expensive circle calculations, and do opposite side collision checking (5 and Width-5 should collide)
+					Utility.GetClosestDistance(x1, y1, x2, y2, _gameMain.LevelSize.X, _gameMain.LevelSize.Y, out x2, out y2);
 
 					float v1x = Players[i].VelocityX; //e.FrameDeltaTime is the time between frames, less than 1
 					float v1y = Players[i].VelocityY;

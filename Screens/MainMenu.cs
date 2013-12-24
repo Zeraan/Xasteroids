@@ -20,6 +20,8 @@ namespace Xasteroids.Screens
 		private bool _showingShipSelection;
 		private bool _showingMultiplayerOptions;
 
+		private BBLabel _debugText;
+
 		public bool Initialize(GameMain gameMain, out string reason)
 		{
 			_gameMain = gameMain;
@@ -38,6 +40,7 @@ namespace Xasteroids.Screens
 			_cancelButton = new BBButton();
 			_ipAddressTextBox = new BBSingleLineTextBox();
 			_playerNameTextBox = new BBSingleLineTextBox();
+			_debugText = new BBLabel();
 
 			_showingMultiplayerOptions = false;
 			_showingShipSelection = false;
@@ -75,14 +78,19 @@ namespace Xasteroids.Screens
 			{
 				return false;
 			}
+			if (!_debugText.Initialize(10, _gameMain.ScreenSize.Y - 30, string.Empty, Color.White, out reason))
+			{
+				return false;
+			}
 			_singlePlayerButton.SetTextColor(Color.Gold, Color.Black);
 			_multiPlayerButton.SetTextColor(Color.Gold, Color.Black);
 			_exitButton.SetTextColor(Color.Gold, Color.Black);
 			_hostOrConnectButton.SetTextColor(Color.Gold, Color.Black);
 			_cancelButton.SetTextColor(Color.Gold, Color.Black);
 
-			_gameMain.LevelNumber = 100;
+			_gameMain.LevelNumber = 500;
 			_gameMain.SetupLevel();
+			_debugText.SetText("Num of Asteroids: " + _gameMain.AsteroidManager.Asteroids.Count);
 
 			reason = null;
 			return true;
@@ -109,6 +117,7 @@ namespace Xasteroids.Screens
 			{
 				_gameMain.ShipSelectionWindow.Draw();
 			}
+			_debugText.Draw();
 		}
 
 		public void Update(int x, int y, float frameDeltaTime)
@@ -134,6 +143,8 @@ namespace Xasteroids.Screens
 				_hostOrConnectButton.MouseHover(x, y, frameDeltaTime);
 				_cancelButton.MouseHover(x, y, frameDeltaTime);
 			}
+
+			_debugText.SetText("Num of Asteroids: " + _gameMain.AsteroidManager.Asteroids.Count);
 		}
 
 		public void MouseDown(int x, int y)

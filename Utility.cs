@@ -77,6 +77,32 @@ namespace Xasteroids
 			return RationalApproximation(Math.Sqrt(-2.0 * Math.Log(1.0 - p)));
 		}
 
+		public static void GetClosestDistance(float X1, float Y1, float X2, float Y2, int width, int height, out float XM2, out float YM2)
+		{
+			//This function handles the wrapping, it takes in the two points, and sees if moving the 2nd point left, up, or both is closer to the first point
+			float dist1 = Math.Abs(X1 - X2);
+			float m = (X2 > X1 ? X2 - width : X2 + width);
+			float dist2 = Math.Abs(X1 - m);
+			if (dist2 < dist1)
+			{
+				XM2 = m; //Wrapped around is closer
+			}
+			else
+			{
+				XM2 = X2;
+			}
+			dist1 = Math.Abs(Y1 - Y2);
+			m = (Y2 > Y1 ? Y2 - height : Y2 + height);
+			dist2 = Math.Abs(Y1 - m);
+			if (dist2 < dist1)
+			{
+				YM2 = m;
+			}
+			else
+			{
+				YM2 = Y2; //Wrapped around is closer
+			}
+		}
 	}
 
 	public struct Point

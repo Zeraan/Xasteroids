@@ -513,6 +513,10 @@
     <Frame x="0" y="320" width="160" height="160" axisX="80" axisY="80" />
   </Sprite>
 
+  <Sprite name="Bullet" file="bullet.png">
+    <Frame x="0" y="0" width="4" height="4" axisX="2" axisY="2" />
+  </Sprite>
+
   <!--Race Sprites-->
   <!--Humans-->
   <Sprite name="HumanTinyShip1" file="humans.png">

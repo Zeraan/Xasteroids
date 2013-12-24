@@ -19,6 +19,8 @@ namespace Xasteroids
 
 	public class GameMain
 	{
+		public const int CELL_SIZE = 320;
+
 		#region Screens
 		private ScreenInterface _screenInterface;
 		private MainMenu _mainMenu;
@@ -235,7 +237,7 @@ namespace Xasteroids
 
 			foreach (var asteroid in AsteroidManager.Asteroids)
 			{
-				int size = 16 * asteroid.Size; //For performance, cache the value
+				int size = asteroid.Radius; //For performance, cache the value
 				float modifiedX = asteroid.PositionX;
 				float modifiedY = asteroid.PositionY;
 
@@ -332,23 +334,25 @@ namespace Xasteroids
 
 		public void ResetGame()
 		{
-			LevelNumber = 1;
+			LevelNumber = 500;
 		}
 
 		public void SetupLevel()
 		{
-			/*	AsteroidType.GENERIC, 
+			/*List<AsteroidType> asteroidsToInlcude = new List<AsteroidType>
+			{
+				AsteroidType.GENERIC, 
 				AsteroidType.CLUMPY,
 				AsteroidType.DENSE, 
 				AsteroidType.EXPLOSIVE, 
 				AsteroidType.BLACK, 
 				AsteroidType.GOLD,
-				AsteroidType.GRAVITIC, 
-				AsteroidType.MAGNETIC, 
-				AsteroidType.PHASING, 
-				AsteroidType.REPULSER, 
-				AsteroidType.ZIPPY
-			 */
+				//AsteroidType.GRAVITIC, 
+				//AsteroidType.MAGNETIC, 
+				//AsteroidType.PHASING, 
+				//AsteroidType.REPULSER, 
+				//AsteroidType.ZIPPY
+													};*/
 			var types = new List<AsteroidType>();
 			types.Add(AsteroidType.GENERIC);
 			if (LevelNumber > 5)
@@ -398,7 +402,8 @@ namespace Xasteroids
 			{
 				asteroidsToInlcude.Add(types[Random.Next(types.Count)]);
 			}
-			LevelSize = new Point(Random.Next(3000, 5000), Random.Next(3000, 5000));
+			//Will split the level up into 320x320 sections for performance, 160 is the largest object's size
+			LevelSize = new Point(Random.Next(18, 32) * CELL_SIZE, Random.Next(18, 32) * CELL_SIZE);
 
 			AsteroidManager.SetUpLevel(asteroidsToInlcude.ToArray(), LevelNumber * 10 * (PlayerManager.Players.Count == 0 ? 1 : PlayerManager.Players.Count), Random);
 		}

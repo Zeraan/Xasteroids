@@ -30,6 +30,24 @@ namespace Xasteroids
 			MainPlayer.Bank = 1000;
 		}
 
+		public void ResetPlayerPositions()
+		{
+			//Puts the players in a circle in the middle of level
+			if (Players.Count == 1)
+			{
+				//Smack dab in middle
+				MainPlayer.PositionX = _gameMain.LevelSize.X / 2;
+				MainPlayer.PositionY = _gameMain.LevelSize.Y / 2;
+				MainPlayer.VelocityX = 0;
+				MainPlayer.VelocityY = 0;
+				MainPlayer.Angle = 0;
+			}
+			else
+			{
+				//Have the ships be in a circle, facing outward
+			}
+		}
+
 		public void UpdatePhysics(float frameDeltaTime)
 		{
 			//Asteroid vs ship are handled in AsteroidManager
@@ -133,7 +151,7 @@ namespace Xasteroids
 		public float PositionY { get; set; }
 		public float VelocityX { get; set; }
 		public float VelocityY { get; set; }
-		public float Acceleration { get { return 100; } } //10 pixels per sec per sec acceleration
+		public float Acceleration { get { return 500; } } //10 pixels per sec per sec acceleration
 		private float _angle;
 		public float Angle
 		{
@@ -154,7 +172,7 @@ namespace Xasteroids
 		public float RotationSpeed { get { return 90; } } //90 degress per sec
 
 		public int MaxEnergy { get; private set; }
-		public float Energy { get; private set; }
+		public float Energy { get; set; }
 		public float RechargeRate { get; private set; }
 		public float ShieldAlpha { get; set; }
 
@@ -200,6 +218,7 @@ namespace Xasteroids
 
 			MaxEnergy = ShipSize * 100;
 			Energy = MaxEnergy;
+			RechargeRate = 5;
 		}
 
 		public void Update(float frameDeltaTime)

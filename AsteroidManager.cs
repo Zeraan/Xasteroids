@@ -35,6 +35,12 @@ namespace Xasteroids
 					return;
 				}
 
+				if ((ast1.Phase < 100 && ast2.Phase >= 100) || (ast1.Phase >= 100 && ast2.Phase < 100))
+				{
+					//Out of phase asteroids won't collide with each other.  Phased asteroids will collide, as non-phased asteroids will.
+					return;
+				}
+
 				//create variables that'd be easier to read than function calls
 				float x1 = ast1.PositionX;
 				float y1 = ast1.PositionY;
@@ -54,56 +60,124 @@ namespace Xasteroids
 				float tx2 = x2 + v2x * frameDeltaTime;
 				float ty2 = y2 + v2y * frameDeltaTime;
 
-				//if (Utility.QuickDistCollisionCheck(tx1, ty1, Asteroids[i].Size * 16, tx2, ty2, Asteroids[j].Size * 16))
+				float dx = tx2 - tx1;
+				float dy = ty2 - ty1;
+				float dx2 = x2 - x1;
+				float dy2 = y2 - y1;
+				float r1 = (float)Math.Sqrt(dx * dx + dy * dy); //Get the distance between centers of asteroids
+				float r2 = (float)Math.Sqrt(dx2 * dx2 + dy2 * dy2);
+
+				if (r1 < ast1.Radius + ast2.Radius && r1 < r2) //Collision!
 				{
-					float dx = tx2 - tx1;
-					float dy = ty2 - ty1;
-					float dx2 = x2 - x1;
-					float dy2 = y2 - y1;
-					float r1 = dx * dx + dy * dy; //Get the distance between centers of asteroids
-					float r2 = dx2 * dx2 + dy2 * dy2;
-
-					if (r1 < Math.Pow(ast1.Radius + ast2.Radius, 2) && r1 < r2) //Collision!
+					if (!((ast1 is ClumpyAsteroid && ast2 is ClumpyAsteroid) && ast1.Size + ast2.Size <= 5)) //Make sure it's not clumpy asteroids that can clump together
 					{
-						r1 = (float)Math.Sqrt(r1); //Didn't square root earlier for performance
-						if (!((ast1 is ClumpyAsteroid && ast2 is ClumpyAsteroid) && ast1.Size + ast2.Size <= 5)) //Make sure it's not clumpy asteroids that can clump together
+						//Calculate the impulse or change of momentum, or whatever people call it
+						float rx = dx / r1;
+						float ry = dy / r1;
+						float k1 = 2 * ast2.Mass * (rx * (v2x - v1x) + ry * (v2y - v1y)) / (ast1.Mass + ast2.Mass);
+						float k2 = 2 * ast1.Mass * (rx * (v1x - v2x) + ry * (v1y - v2y)) / (ast1.Mass + ast2.Mass);
+
+						//Adjust the velocities
+						v1x += k1 * rx;
+						v1y += k1 * ry;
+						v2x += k2 * rx;
+						v2y += k2 * ry;
+
+						//Assign the final value to asteroids
+						ast1.VelocityX = v1x;
+						ast1.VelocityY = v1y;
+						ast2.VelocityX = v2x;
+						ast2.VelocityY = v2y;
+					}
+					else //it's clumpy, clump them together
+					{
+						float firstAsteroidFactor = (ast1.Size * 1.0f) / (ast1.Size + ast2.Size);
+						float secondAsteroidFactor = 1.0f - firstAsteroidFactor;
+						ast1.Size += ast2.Size;
+						ast1.Radius = ast1.Size * 16;
+						ast1.Mass = ast1.Size * 300;
+						ast1.PositionX = (ast1.PositionX + ast2.PositionX) / 2;
+						ast1.PositionY = (ast1.PositionY + ast2.PositionY) / 2;
+						//Combine position and velocity:
+						ast1.VelocityX = (ast1.VelocityX * firstAsteroidFactor) + (ast2.VelocityX * secondAsteroidFactor);
+						ast1.VelocityY = (ast1.VelocityY * firstAsteroidFactor) + (ast2.VelocityY * secondAsteroidFactor);
+						ast1.AsteroidSprite = SpriteManager.GetAsteroidSprite(ast1.Size, ast1.Style, r);
+						//TODO: Combine the remaining HP
+
+						ast2.ToBeRemoved = true;
+					}
+				}
+				if ((ast1 is RepulserAsteroid || ast2 is RepulserAsteroid) && (r1 < ast1.Size * 64 || r1 < ast2.Size * 64))
+				{
+					var degree = Math.Atan2(ty2 - ty1, tx2 - tx1);
+					float repulsingForce;
+					if (ast1 is RepulserAsteroid && ast2 is RepulserAsteroid)
+					{
+						if (r1 < ast1.Size * 64 && r1 < ast2.Size * 64)
 						{
-							//Calculate the impulse or change of momentum, or whatever people call it
-							float rx = dx / r1;
-							float ry = dy / r1;
-							float k1 = 2 * ast2.Mass * (rx * (v2x - v1x) + ry * (v2y - v1y)) / (ast1.Mass + ast2.Mass);
-							float k2 = 2 * ast1.Mass * (rx * (v1x - v2x) + ry * (v1y - v2y)) / (ast1.Mass + ast2.Mass);
-
-							//Adjust the velocities
-							v1x += k1 * rx;
-							v1y += k1 * ry;
-							v2x += k2 * rx;
-							v2y += k2 * ry;
-
-							//Assign the final value to asteroids
-							ast1.VelocityX = v1x;
-							ast1.VelocityY = v1y;
-							ast2.VelocityX = v2x;
-							ast2.VelocityY = v2y;
+							//Double the power
+							repulsingForce = ((ast1.Size * 96) - r1) + ((ast2.Size * 96) - r1);
 						}
-						else //it's clumpy, clump them together
+						else if (r1 < ast1.Size * 64)
 						{
-							float firstAsteroidFactor = (ast1.Size * 1.0f) / (ast1.Size + ast2.Size);
-							float secondAsteroidFactor = 1.0f - firstAsteroidFactor;
-							ast1.Size += ast2.Size;
-							ast1.Radius = ast1.Size * 16;
-							ast1.Mass = ast1.Size * 300;
-							ast1.PositionX = (ast1.PositionX + ast2.PositionX) / 2;
-							ast1.PositionY = (ast1.PositionY + ast2.PositionY) / 2;
-							//Combine position and velocity:
-							ast1.VelocityX = (ast1.VelocityX * firstAsteroidFactor) + (ast2.VelocityX * secondAsteroidFactor);
-							ast1.VelocityY = (ast1.VelocityY * firstAsteroidFactor) + (ast2.VelocityY * secondAsteroidFactor);
-							ast1.AsteroidSprite = SpriteManager.GetAsteroidSprite(ast1.Size, ast1.Style, r);
-							//TODO: Combine the remaining HP
-
-							ast2.ToBeRemoved = true;
+							repulsingForce = ((ast1.Size * 96) - r1);
+						}
+						else
+						{
+							repulsingForce = ((ast2.Size * 96) - r1);
 						}
 					}
+					else
+					{
+						if (ast1 is RepulserAsteroid)
+						{
+							repulsingForce = ((ast1.Size * 96) - r1);
+						}
+						else
+						{
+							repulsingForce = ((ast2.Size * 96) - r1);
+						}
+					}
+					ast2.VelocityX += (float)(repulsingForce * Math.Cos(degree) * frameDeltaTime * (ast1.Mass / (float)(ast1.Mass + ast2.Mass)));
+					ast2.VelocityY += (float)(repulsingForce * Math.Sin(degree) * frameDeltaTime * (ast1.Mass / (float)(ast1.Mass + ast2.Mass)));
+					ast1.VelocityX -= (float)(repulsingForce * Math.Cos(degree) * frameDeltaTime * (ast2.Mass / (float)(ast1.Mass + ast2.Mass)));
+					ast1.VelocityY -= (float)(repulsingForce * Math.Sin(degree) * frameDeltaTime * (ast2.Mass / (float)(ast1.Mass + ast2.Mass)));
+				}
+				if ((ast1 is GraviticAsteroid || ast2 is GraviticAsteroid) && (r1 < ast1.Size * 64 || r1 < ast2.Size * 64))
+				{
+					var degree = Math.Atan2(ty2 - ty1, tx2 - tx1);
+					float graviticForce;
+					if (ast1 is GraviticAsteroid && ast2 is GraviticAsteroid)
+					{
+						if (r1 < ast1.Size * 64 && r1 < ast2.Size * 64)
+						{
+							//Double the power
+							graviticForce = ((ast1.Size * 96) - r1) + ((ast2.Size * 96) - r1);
+						}
+						else if (r1 < ast1.Size * 64)
+						{
+							graviticForce = ((ast1.Size * 96) - r1);
+						}
+						else
+						{
+							graviticForce = ((ast2.Size * 96) - r1);
+						}
+					}
+					else
+					{
+						if (ast1 is RepulserAsteroid)
+						{
+							graviticForce = ((ast1.Size * 96) - r1);
+						}
+						else
+						{
+							graviticForce = ((ast2.Size * 96) - r1);
+						}
+					}
+					ast2.VelocityX -= (float)(graviticForce * Math.Cos(degree) * frameDeltaTime * (ast1.Mass / (float)(ast1.Mass + ast2.Mass)));
+					ast2.VelocityY -= (float)(graviticForce * Math.Sin(degree) * frameDeltaTime * (ast1.Mass / (float)(ast1.Mass + ast2.Mass)));
+					ast1.VelocityX += (float)(graviticForce * Math.Cos(degree) * frameDeltaTime * (ast2.Mass / (float)(ast1.Mass + ast2.Mass)));
+					ast1.VelocityY += (float)(graviticForce * Math.Sin(degree) * frameDeltaTime * (ast2.Mass / (float)(ast1.Mass + ast2.Mass)));
 				}
 			}
 
@@ -112,9 +186,9 @@ namespace Xasteroids
 				for (int i = 0; i < _asteroidsInCell.Count; i++)
 				{
 					var asteroid = _asteroidsInCell[i];
-					if (asteroid.ToBeRemoved || player.IsDead)
+					if (asteroid.ToBeRemoved || player.IsDead || asteroid.Phase < 100)
 					{
-						//Some asteroids have clumped together, don't calculate between any asteroids with the asteroid to be removed;
+						//No collision possible
 						continue;
 					}
 					//create variables that'd be easier to read than function calls
@@ -165,6 +239,30 @@ namespace Xasteroids
 
 						//Deal damage and activate shield for player
 						player.ShieldAlpha = 1;
+					}
+					if (asteroid is MagneticAsteroid && r1 < asteroid.Size * 64) //Within magnetic range
+					{
+						var degree = Math.Atan2(ty2 - ty1, tx2 - tx1);
+						asteroid.VelocityX += (float)(((asteroid.Size * 128) - r1) * Math.Cos(degree) * frameDeltaTime);
+						asteroid.VelocityY += (float)(((asteroid.Size * 128) - r1) * Math.Sin(degree) * frameDeltaTime);
+					}
+					if (asteroid is RepulserAsteroid && r1 < asteroid.Size * 64)
+					{
+						var degree = Math.Atan2(ty2 - ty1, tx2 - tx1);
+						float repulsingForce = ((asteroid.Size * 96) - r1);
+						player.VelocityX += (float)(repulsingForce * Math.Cos(degree) * frameDeltaTime * (asteroid.Mass / (float)(asteroid.Mass + player.Mass)));
+						player.VelocityY += (float)(repulsingForce * Math.Sin(degree) * frameDeltaTime * (asteroid.Mass / (float)(asteroid.Mass + player.Mass)));
+						asteroid.VelocityX -= (float)(repulsingForce * Math.Cos(degree) * frameDeltaTime * (player.Mass / (float)(asteroid.Mass + player.Mass)));
+						asteroid.VelocityY -= (float)(repulsingForce * Math.Sin(degree) * frameDeltaTime * (player.Mass / (float)(asteroid.Mass + player.Mass)));
+					}
+					if (asteroid is GraviticAsteroid && r1 < asteroid.Size * 64)
+					{
+						var degree = Math.Atan2(ty2 - ty1, tx2 - tx1);
+						float graviticForce = ((asteroid.Size * 96) - r1);
+						player.VelocityX -= (float)(graviticForce * Math.Cos(degree) * frameDeltaTime * (asteroid.Mass / (float)(asteroid.Mass + player.Mass)));
+						player.VelocityY -= (float)(graviticForce * Math.Sin(degree) * frameDeltaTime * (asteroid.Mass / (float)(asteroid.Mass + player.Mass)));
+						asteroid.VelocityX += (float)(graviticForce * Math.Cos(degree) * frameDeltaTime * (player.Mass / (float)(asteroid.Mass + player.Mass)));
+						asteroid.VelocityY += (float)(graviticForce * Math.Sin(degree) * frameDeltaTime * (player.Mass / (float)(asteroid.Mass + player.Mass)));
 					}
 				}
 			}
@@ -273,6 +371,12 @@ namespace Xasteroids
 			int levelHeight = _gameMain.LevelSize.Y;
 			foreach (var ast in Asteroids)
 			{
+				if (float.IsNaN(ast.PositionX) || float.IsNaN(ast.PositionY))
+				{
+					//Somehow got corrupted, eject this asteroid from level to avoid corruption of other asteroids and crashing
+					ast.ToBeRemoved = true;
+					continue;
+				}
 				int x = (int)(ast.PositionX / GameMain.CELL_SIZE);
 				int y = (int)(ast.PositionY / GameMain.CELL_SIZE);
 				int x1 = x - 1;
@@ -385,6 +489,9 @@ namespace Xasteroids
 		public int Mass { get; set; }
 		public int Size { get; set; }
 		public int Style { get; set; }
+		public float Phase { get; set; }
+		public bool IsPhasing { get; set; }
+		public int PhaseSpeed { get; set; }
 		public virtual int Point { get; set; }
 		public BBSprite AsteroidSprite { get; set; }
 
@@ -423,9 +530,11 @@ namespace Xasteroids
 			Style = r.Next(3) + 1;
 			RotationSpeed = (r.Next(1800) / 10.0f) * (r.Next(2) > 0 ? -1 : 1);
 			AsteroidSprite = SpriteManager.GetAsteroidSprite(Size, Style, r);
+			Phase = 255;
+			IsPhasing = true;
 		}
 
-		public void Update(int width, int height, float frameDeltaTime)
+		public virtual void Update(int width, int height, float frameDeltaTime)
 		{
 			Angle += RotationSpeed * frameDeltaTime;
 			while (Angle < 0)
@@ -635,6 +744,32 @@ namespace Xasteroids
 			VelocityY = r.Next(20, 140) * (r.Next(2) > 0 ? -1 : 1);
 
 			Mass = Size * 220;
+
+			PhaseSpeed = r.Next(10, 255);
+		}
+
+		public override void Update(int width, int height, float frameDeltaTime)
+		{
+			base.Update(width, height, frameDeltaTime);
+
+			if (IsPhasing)
+			{
+				Phase -= PhaseSpeed * frameDeltaTime;
+				if (Phase < 0)
+				{
+					IsPhasing = false;
+					Phase = 0;
+				}
+			}
+			else
+			{
+				Phase += PhaseSpeed * frameDeltaTime;
+				if (Phase > 255)
+				{
+					IsPhasing = true;
+					Phase = 255;
+				}
+			}
 		}
 	}
 	public class GoldAsteroid : Asteroid

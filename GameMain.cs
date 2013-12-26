@@ -113,8 +113,11 @@ namespace Xasteroids
 			_screenInterface.Update(MousePos.X, MousePos.Y, frameDeltaTime);
 			_screenInterface.DrawScreen();
 
-			Cursor.Draw(MousePos.X, MousePos.Y);
-			Cursor.Update(frameDeltaTime, Random);
+			if (_currentScreen != Screen.InGame)
+			{
+				Cursor.Draw(MousePos.X, MousePos.Y);
+				Cursor.Update(frameDeltaTime, Random);
+			}
 		}
 
 		public void ChangeToScreen(Screen whichScreen)
@@ -265,7 +268,7 @@ namespace Xasteroids
 				if (modifiedX >= leftBounds - size && modifiedX < rightBounds + size && modifiedY >= topBounds - size && modifiedY < bottomBounds + size)
 				{
 					//It is visible
-					asteroid.AsteroidSprite.Draw((modifiedX + screenWidth) - x, (modifiedY + screenHeight) - y, 1, 1, asteroid.Color, asteroid.Angle);
+					asteroid.AsteroidSprite.Draw((modifiedX + screenWidth) - x, (modifiedY + screenHeight) - y, 1, 1, Color.FromArgb((int)asteroid.Phase, asteroid.Color), asteroid.Angle);
 				}
 			}
 
@@ -334,23 +337,23 @@ namespace Xasteroids
 
 		public void ResetGame()
 		{
-			LevelNumber = 500;
+			LevelNumber = 20;
 		}
 
 		public void SetupLevel()
 		{
 			/*List<AsteroidType> asteroidsToInlcude = new List<AsteroidType>
 			{
-				AsteroidType.GENERIC, 
-				AsteroidType.CLUMPY,
-				AsteroidType.DENSE, 
-				AsteroidType.EXPLOSIVE, 
-				AsteroidType.BLACK, 
-				AsteroidType.GOLD,
-				//AsteroidType.GRAVITIC, 
+				//AsteroidType.GENERIC, 
+				//AsteroidType.CLUMPY,
+				//AsteroidType.DENSE, 
+				//AsteroidType.EXPLOSIVE, 
+				//AsteroidType.BLACK, 
+				//AsteroidType.GOLD,
+				AsteroidType.GRAVITIC, 
 				//AsteroidType.MAGNETIC, 
-				//AsteroidType.PHASING, 
-				//AsteroidType.REPULSER, 
+				AsteroidType.PHASING,
+				AsteroidType.REPULSER, 
 				//AsteroidType.ZIPPY
 													};*/
 			var types = new List<AsteroidType>();

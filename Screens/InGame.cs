@@ -13,7 +13,7 @@ namespace Xasteroids.Screens
 		private int _energyX;
 		private BBLabel _bankAmount;
 		private BBLabel _energyAmount;
-		private BBTextBox _debuggingText;
+		//private BBTextBox _debuggingText;
 		private BBStretchableImage _miniMapBackground;
 		private RenderImage _miniMapTarget;
 		private BBSprite _dot;
@@ -54,11 +54,11 @@ namespace Xasteroids.Screens
 				return false;
 			}
 
-			_debuggingText = new BBTextBox();
+			/*_debuggingText = new BBTextBox();
 			if (!_debuggingText.Initialize(0, 0, 300, 300, true, false, "DebugText", gameMain.Random, out reason))
 			{
 				return false;
-			}
+			}*/
 
 			_miniMapTarget = new RenderImage("MiniMapRender", 230, 230, ImageBufferFormats.BufferRGB888A8);
 			_miniMapTarget.BlendingMode = BlendingModes.Modulated;
@@ -104,7 +104,7 @@ namespace Xasteroids.Screens
 			}
 			foreach (var player in _gameMain.PlayerManager.Players)
 			{
-				_dot.Draw(player.PositionX / _gameMain.LevelSize.X * 230, player.PositionY / _gameMain.LevelSize.Y * 230, player.ShipSize / 10f, player.ShipSize / 10f, player.ShipColor);
+				_dot.Draw(player.PositionX / _gameMain.LevelSize.X * 230, player.PositionY / _gameMain.LevelSize.Y * 230, player.ShipSize / 5f, player.ShipSize / 5f, player.ShipColor);
 			}
 			GorgonLibrary.Gorgon.CurrentRenderTarget = old;
 			//Blit the render to screen
@@ -139,14 +139,24 @@ namespace Xasteroids.Screens
 			}
 			if (_gameMain.IsKeyDown(KeyboardKeys.Up))
 			{
-				player.VelocityX += (float)Math.Cos(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime;
-				player.VelocityY += (float)Math.Sin(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime;
+				if (_gameMain.IsKeyDown(KeyboardKeys.ShiftKey) && player.Energy > player.Acceleration * frameDeltaTime)
+				{
+					//Boosting, double the acceleration but drain the energy
+					player.VelocityX += (float)Math.Cos(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime * 2;
+					player.VelocityY += (float)Math.Sin(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime * 2;
+					player.Energy -= player.Acceleration * frameDeltaTime * 0.1f;
+				}
+				else
+				{
+					player.VelocityX += (float)Math.Cos(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime;
+					player.VelocityY += (float)Math.Sin(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime;
+				}
 			}
-			string debugText = string.Empty;
+			/*string debugText = string.Empty;
 			debugText += "Pos: " + player.PositionX + ", " + player.PositionY + "\n\r\n\r";
 			debugText += "Vel: " + player.VelocityX + ", " + player.VelocityY + "\n\r\n\r";
 			debugText += "Angle: " + player.Angle;
-			_debuggingText.SetText(debugText);
+			_debuggingText.SetText(debugText);*/
 		}
 
 		public void MouseDown(int x, int y)

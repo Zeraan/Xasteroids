@@ -88,7 +88,7 @@ namespace Xasteroids.Screens
 			_hostOrConnectButton.SetTextColor(Color.Gold, Color.Black);
 			_cancelButton.SetTextColor(Color.Gold, Color.Black);
 
-			_gameMain.LevelNumber = 500;
+			_gameMain.LevelNumber = 100;
 			_gameMain.SetupLevel();
 			_debugText.SetText("Num of Asteroids: " + _gameMain.AsteroidManager.Asteroids.Count);
 
@@ -280,6 +280,8 @@ namespace Xasteroids.Screens
 
 			_gameMain.ResetGame();
 			_gameMain.SetupLevel();
+
+			_gameMain.PlayerManager.ResetPlayerPositions();
 
 			//Start the game!
 			_gameMain.ChangeToScreen(Screen.InGame);

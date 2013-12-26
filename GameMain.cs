@@ -36,6 +36,7 @@ namespace Xasteroids
 
 		public PlayerManager PlayerManager { get; private set; }
 		public AsteroidManager AsteroidManager { get; private set; }
+		public ObjectManager ObjectManager { get; private set; }
 		public Random Random { get; private set; }
 		public Point MousePos;
 		public Point ScreenSize { get; private set; }
@@ -81,6 +82,7 @@ namespace Xasteroids
 
 			PlayerManager = new PlayerManager(this);
 			AsteroidManager = new AsteroidManager(this);
+			ObjectManager = new ObjectManager(this);
 			ShipSelectionWindow = new ShipSelectionWindow();
 			if (!ShipSelectionWindow.Initialize(this, out reason))
 			{
@@ -238,6 +240,39 @@ namespace Xasteroids
 			bool overlapsTop = (topBounds - 80) < 0;
 			bool overlapsBottom = !overlapsTop && bottomBounds + 80 >= LevelSize.Y;
 
+			foreach (var bullet in ObjectManager.Bullets)
+			{
+				int size = (int)(bullet.Scale * 2); //For performance, cache the value
+				float modifiedX = bullet.PositionX;
+				float modifiedY = bullet.PositionY;
+
+				if (overlapsLeft && bullet.PositionX >= rightBounds + size)
+				{
+					//It's on other side of screen, check and see if it could be visible due to overlap
+					modifiedX -= LevelSize.X;
+				}
+				else if (overlapsRight && bullet.PositionX < leftBounds - size)
+				{
+					//It's on other side of screen, check and see if it could be visible due to overlap
+					modifiedX += LevelSize.X;
+				}
+				if (overlapsTop && bullet.PositionY >= bottomBounds + size)
+				{
+					//It's on other side of screen, check and see if it could be visible due to overlap
+					modifiedY -= LevelSize.Y;
+				}
+				else if (overlapsBottom && bullet.PositionY < topBounds - size)
+				{
+					//It's on other side of screen, check and see if it could be visible due to overlap
+					modifiedY += LevelSize.Y;
+				}
+				if (modifiedX >= leftBounds - size && modifiedX < rightBounds + size && modifiedY >= topBounds - size && modifiedY < bottomBounds + size)
+				{
+					//It is visible
+					ObjectManager.BulletSprite.Draw((modifiedX + screenWidth) - x, (modifiedY + screenHeight) - y, 1, 1, bullet.Color);
+				}
+			}
+
 			foreach (var asteroid in AsteroidManager.Asteroids)
 			{
 				int size = asteroid.Radius; //For performance, cache the value
@@ -337,7 +372,8 @@ namespace Xasteroids
 
 		public void ResetGame()
 		{
-			LevelNumber = 20;
+			LevelNumber = 1;
+			ObjectManager.Clear();
 		}
 
 		public void SetupLevel()

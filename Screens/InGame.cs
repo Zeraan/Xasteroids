@@ -114,13 +114,14 @@ namespace Xasteroids.Screens
 		public void Update(int x, int y, float frameDeltaTime)
 		{
 			var player = _gameMain.PlayerManager.MainPlayer;
-			_gameMain.AsteroidManager.UpdatePhysics(_gameMain.PlayerManager.Players, frameDeltaTime, _gameMain.Random);
+			_gameMain.AsteroidManager.UpdatePhysics(_gameMain.PlayerManager.Players, _gameMain.ObjectManager.Bullets, frameDeltaTime, _gameMain.Random);
 			_gameMain.PlayerManager.UpdatePhysics(frameDeltaTime);
 			//TODO: Update Physic Objects (explosions, bullets, etc)
 
 			//After every object's physics are updated, proceed to move/rotate/etc
 			_gameMain.AsteroidManager.Update(frameDeltaTime);
 			_gameMain.PlayerManager.Update(frameDeltaTime);
+			_gameMain.ObjectManager.Update(frameDeltaTime);
 
 			_gameMain.MoveStars(-player.VelocityX * frameDeltaTime, -player.VelocityY * frameDeltaTime);
 
@@ -151,6 +152,12 @@ namespace Xasteroids.Screens
 					player.VelocityX += (float)Math.Cos(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime;
 					player.VelocityY += (float)Math.Sin(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime;
 				}
+			}
+			if (_gameMain.IsKeyDown(KeyboardKeys.Space) && player.Energy > 25 && player.CoolDown == 0)
+			{
+				_gameMain.ObjectManager.AddBullet(player);
+				player.Energy -= 25;
+				player.CoolDown += player.CoolDownPeriod;
 			}
 			/*string debugText = string.Empty;
 			debugText += "Pos: " + player.PositionX + ", " + player.PositionY + "\n\r\n\r";

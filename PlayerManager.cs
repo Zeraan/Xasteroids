@@ -151,7 +151,7 @@ namespace Xasteroids
 		public float PositionY { get; set; }
 		public float VelocityX { get; set; }
 		public float VelocityY { get; set; }
-		public float Acceleration { get { return 500; } } //10 pixels per sec per sec acceleration
+		public float Acceleration { get { return 100; } } //10 pixels per sec per sec acceleration
 		private float _angle;
 		public float Angle
 		{
@@ -178,8 +178,8 @@ namespace Xasteroids
 
 		public bool IsDead { get; set; }
 
-		public float CoolDownPeriod { get; private set; }
-		public float CoolDown { get; private set; }
+		public float CoolDownPeriod { get; set; }
+		public float CoolDown { get; set; }
 
 		public int ShipSize { get; set; }
 		public int ShipStyle { get; set; }
@@ -219,6 +219,7 @@ namespace Xasteroids
 			MaxEnergy = ShipSize * 100;
 			Energy = MaxEnergy;
 			RechargeRate = 5;
+			CoolDownPeriod = 1;
 		}
 
 		public void Update(float frameDeltaTime)
@@ -239,6 +240,15 @@ namespace Xasteroids
 			if (ShieldAlpha > 0)
 			{
 				ShieldAlpha -= frameDeltaTime;
+			}
+
+			if (CoolDown > 0)
+			{
+				CoolDown -= frameDeltaTime;
+				if (CoolDown < 0)
+				{
+					CoolDown = 0;
+				}
 			}
 		}
 	}

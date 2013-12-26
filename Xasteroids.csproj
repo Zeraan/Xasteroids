@@ -70,6 +70,7 @@
     <Compile Include="FontManager.cs" />
     <Compile Include="GameMain.cs" />
     <Compile Include="InterfaceManagement.cs" />
+    <Compile Include="ObjectManager.cs" />
     <Compile Include="PlayerManager.cs" />
     <Compile Include="Screens\InGame.cs" />
     <Compile Include="Screens\MainMenu.cs" />

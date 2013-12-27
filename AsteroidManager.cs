@@ -234,6 +234,15 @@ namespace Xasteroids
 						//Assign the final value to asteroids
 						asteroid.VelocityX = v1x;
 						asteroid.VelocityY = v1y;
+
+						float xDiff = Math.Abs(player.VelocityX) - Math.Abs(v2x);
+						float yDiff = Math.Abs(player.VelocityY) - Math.Abs(v2y);
+						float amount = (float)Math.Sqrt(xDiff * xDiff + yDiff * yDiff);
+						player.Energy -= amount;
+						if (player.Energy < 0)
+						{
+							player.IsDead = true;
+						}
 						player.VelocityX = v2x;
 						player.VelocityY = v2y;
 
@@ -267,7 +276,7 @@ namespace Xasteroids
 				}
 			}
 
-			public void HandleBullets(Bullet bullet, int levelWidth, int levelHeight, Random r, float frameDeltaTime)
+			public void HandleBullets(Bullet bullet, Random r, float frameDeltaTime)
 			{
 				if (bullet.Damage <= 0)
 				{
@@ -294,6 +303,54 @@ namespace Xasteroids
 						if (asteroid.HP <= 0)
 						{
 							damageDone += asteroid.HP;
+							//Give money to player who shot it
+							int value;
+							if (asteroid is GenericAsteroid)
+							{
+								value = 5;
+							}
+							else if (asteroid is ClumpyAsteroid)
+							{
+								value = 2;
+							}
+							else if (asteroid is MagneticAsteroid)
+							{
+								value = 20;
+							}
+							else if (asteroid is RepulserAsteroid)
+							{
+								value = 10;
+							}
+							else if (asteroid is GraviticAsteroid)
+							{
+								value = 15;
+							}
+							else if (asteroid is DenseAsteroid)
+							{
+								value = 10;
+							}
+							else if (asteroid is ZippyAsteroid)
+							{
+								value = 5;
+							}
+							else if (asteroid is ExplosiveAsteroid)
+							{
+								value = 10;
+							}
+							else if (asteroid is BlackAsteroid)
+							{
+								value = 10;
+							}
+							else if (asteroid is GoldAsteroid)
+							{
+								value = 50;
+							}
+							else
+							{
+								//Only phasing asteroid left
+								value = 25;
+							}
+							bullet.Owner.Bank += value * asteroid.Size;
 						}
 						bullet.Damage -= damageDone;
 					}
@@ -512,15 +569,15 @@ namespace Xasteroids
 					{
 						y2 = 0;
 					}
-					_astCells[x1][y1].HandleBullets(bullet, levelWidth, levelHeight, r, frameDeltaTime);
-					_astCells[x][y1].HandleBullets(bullet, levelWidth, levelHeight, r, frameDeltaTime);
-					_astCells[x2][y1].HandleBullets(bullet, levelWidth, levelHeight, r, frameDeltaTime);
-					_astCells[x1][y].HandleBullets(bullet, levelWidth, levelHeight, r, frameDeltaTime);
-					_astCells[x][y].HandleBullets(bullet, levelWidth, levelHeight, r, frameDeltaTime);
-					_astCells[x2][y].HandleBullets(bullet, levelWidth, levelHeight, r, frameDeltaTime);
-					_astCells[x1][y2].HandleBullets(bullet, levelWidth, levelHeight, r, frameDeltaTime);
-					_astCells[x][y2].HandleBullets(bullet, levelWidth, levelHeight, r, frameDeltaTime);
-					_astCells[x2][y2].HandleBullets(bullet, levelWidth, levelHeight, r, frameDeltaTime);
+					_astCells[x1][y1].HandleBullets(bullet, r, frameDeltaTime);
+					_astCells[x][y1].HandleBullets(bullet, r, frameDeltaTime);
+					_astCells[x2][y1].HandleBullets(bullet, r, frameDeltaTime);
+					_astCells[x1][y].HandleBullets(bullet, r, frameDeltaTime);
+					_astCells[x][y].HandleBullets(bullet, r, frameDeltaTime);
+					_astCells[x2][y].HandleBullets(bullet, r, frameDeltaTime);
+					_astCells[x1][y2].HandleBullets(bullet, r, frameDeltaTime);
+					_astCells[x][y2].HandleBullets(bullet, r, frameDeltaTime);
+					_astCells[x2][y2].HandleBullets(bullet, r, frameDeltaTime);
 				}
 			}
 			List<Asteroid> newAsteroids = new List<Asteroid>();

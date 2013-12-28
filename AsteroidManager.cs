@@ -228,8 +228,8 @@ namespace Xasteroids
 						//Adjust the velocities
 						v1x += k1 * rx;
 						v1y += k1 * ry;
-						v2x += k2 * rx;
-						v2y += k2 * ry;
+						v2x += k2 * rx * (1 - player.InertialLevel * 0.05f);
+						v2y += k2 * ry * (1 - player.InertialLevel * 0.05f);
 
 						//Assign the final value to asteroids
 						asteroid.VelocityX = v1x;
@@ -238,7 +238,7 @@ namespace Xasteroids
 						float xDiff = Math.Abs(player.VelocityX) - Math.Abs(v2x);
 						float yDiff = Math.Abs(player.VelocityY) - Math.Abs(v2y);
 						float amount = (float)Math.Sqrt(xDiff * xDiff + yDiff * yDiff);
-						player.Energy -= amount;
+						player.Energy -= amount * (1 - (player.HardnessLevel * 0.05f));
 						if (player.Energy < 0)
 						{
 							player.IsDead = true;
@@ -276,7 +276,7 @@ namespace Xasteroids
 				}
 			}
 
-			public void HandleBullets(Bullet bullet, Random r, float frameDeltaTime)
+			public void HandleBullets(Bullet bullet, float frameDeltaTime)
 			{
 				if (bullet.Damage <= 0)
 				{
@@ -284,10 +284,10 @@ namespace Xasteroids
 				}
 				foreach (var asteroid in _asteroidsInCell)
 				{
-					if (asteroid.HP <= 0)
+					if (asteroid.HP <= 0 || asteroid.ImpactedBullets.Contains(bullet))
 					{
 						continue;
-						//This asteroid was destroyed, skip checking
+						//This asteroid was destroyed, or already impacted by this bullet, skip checking
 					}
 					float tx1 = bullet.PositionX + bullet.VelocityX * frameDeltaTime;
 					float ty1 = bullet.PositionY + bullet.VelocityY * frameDeltaTime;
@@ -297,9 +297,10 @@ namespace Xasteroids
 					float ry = ty2 - ty1;
 					if ((float)Math.Sqrt(rx * rx + ry * ry) < (asteroid.Radius)) //bullet impact!
 					{
-						int damageDone = asteroid.HP;
+						float damageDone = asteroid.HP;
 						asteroid.HP -= bullet.Damage;
 						damageDone -= asteroid.HP;
+						asteroid.ImpactedBullets.Add(bullet);
 						if (asteroid.HP <= 0)
 						{
 							damageDone += asteroid.HP;
@@ -352,7 +353,7 @@ namespace Xasteroids
 							}
 							bullet.Owner.Bank += value * asteroid.Size;
 						}
-						bullet.Damage -= damageDone;
+						bullet.Damage -= damageDone * (1 - (bullet.Owner.PenetratingLevel * 0.10f));
 					}
 				}
 			}
@@ -569,15 +570,15 @@ namespace Xasteroids
 					{
 						y2 = 0;
 					}
-					_astCells[x1][y1].HandleBullets(bullet, r, frameDeltaTime);
-					_astCells[x][y1].HandleBullets(bullet, r, frameDeltaTime);
-					_astCells[x2][y1].HandleBullets(bullet, r, frameDeltaTime);
-					_astCells[x1][y].HandleBullets(bullet, r, frameDeltaTime);
-					_astCells[x][y].HandleBullets(bullet, r, frameDeltaTime);
-					_astCells[x2][y].HandleBullets(bullet, r, frameDeltaTime);
-					_astCells[x1][y2].HandleBullets(bullet, r, frameDeltaTime);
-					_astCells[x][y2].HandleBullets(bullet, r, frameDeltaTime);
-					_astCells[x2][y2].HandleBullets(bullet, r, frameDeltaTime);
+					_astCells[x1][y1].HandleBullets(bullet, frameDeltaTime);
+					_astCells[x][y1].HandleBullets(bullet, frameDeltaTime);
+					_astCells[x2][y1].HandleBullets(bullet, frameDeltaTime);
+					_astCells[x1][y].HandleBullets(bullet, frameDeltaTime);
+					_astCells[x][y].HandleBullets(bullet, frameDeltaTime);
+					_astCells[x2][y].HandleBullets(bullet, frameDeltaTime);
+					_astCells[x1][y2].HandleBullets(bullet, frameDeltaTime);
+					_astCells[x][y2].HandleBullets(bullet, frameDeltaTime);
+					_astCells[x2][y2].HandleBullets(bullet, frameDeltaTime);
 				}
 			}
 			List<Asteroid> newAsteroids = new List<Asteroid>();
@@ -710,7 +711,7 @@ namespace Xasteroids
 		public float VelocityY { get; set; }
 		public float Angle { get; set; }
 		public float RotationSpeed { get; set; }
-		public int HP { get; set; }
+		public float HP { get; set; }
 		public Color Color { get; set; }
 		public int Radius { get; set; }
 		public int Mass { get; set; }
@@ -721,9 +722,11 @@ namespace Xasteroids
 		public int PhaseSpeed { get; set; }
 		public virtual int Point { get; set; }
 		public BBSprite AsteroidSprite { get; set; }
+		public List<Bullet> ImpactedBullets { get; set; }  //SO penetrating bullets won't continue to hit the asteroid every frame
 
 		public Asteroid(int width, int height, Random r)
 		{
+			ImpactedBullets = new List<Bullet>();
 			ToBeRemoved = false;
 			//Safe zone can't be spawned in, 400x400 in middle of level
 			int safeWidth = (width / 2) - 200;

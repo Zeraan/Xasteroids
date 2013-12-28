@@ -21,8 +21,12 @@ namespace Xasteroids
 
 		public void AddBullet(Player player)
 		{
-			Bullet bullet = new Bullet(player);
-			Bullets.Add(bullet);
+			for (int i = 0; i < player.NumberOfMounts + 1; i++)
+			{
+				float degree = (float)((((player.Angle - (15f * player.NumberOfMounts / 2) + (15f * i)) - 90) / 180) * Math.PI);
+				Bullet bullet = new Bullet(player, degree);
+				Bullets.Add(bullet);
+			}
 		}
 
 		public void Update(float frameDeltaTime)
@@ -82,24 +86,24 @@ namespace Xasteroids
 		public float PositionY { get; set; }
 		public float VelocityX { get; set; }
 		public float VelocityY { get; set; }
-		public int Damage { get; set; }
+		public float Damage { get; set; }
 		public float Scale { get; set; }
 		public Color Color { get; set; }
 		public Player Owner { get; set; } //So it don't hit the ship that fired it
 		public float Lifetime { get; set; } //Decrements until it reaches 0, then despawn
 
-		public Bullet(Player owner)
+		public Bullet(Player owner, float degree)
 		{
 			//Derive data from the owner, since it's obvious that this owner fired the bullet, aka construction call
 			Owner = owner;
 			PositionX = Owner.PositionX;
 			PositionY = Owner.PositionY;
-			VelocityX = Owner.VelocityX + (float)(Math.Cos(((Owner.Angle - 90) / 180) * Math.PI) * 250);
-			VelocityY = Owner.VelocityY + (float)(Math.Sin(((Owner.Angle - 90) / 180) * Math.PI) * 250);
+			VelocityX = Owner.VelocityX + (float)(Math.Cos(degree) * (Owner.VelocityLevel * 100 + 100));
+			VelocityY = Owner.VelocityY + (float)(Math.Sin(degree) * (Owner.VelocityLevel * 100 + 100));
 			Color = Color.White;
 			Scale = 1;
-			Lifetime = 1;
-			Damage = 5;
+			Lifetime = 2;
+			Damage = Owner.DamageLevel * 5;
 		}
 
 		public void Update(float frameDeltaTime)

@@ -267,7 +267,7 @@ namespace Xasteroids.Screens
 		}
 		private void RefreshShipCost()
 		{
-			int cost = _size * _size * 500;
+			int cost = _size * 120 + 400;
 			_shipCostLabel.SetText(string.Format("Ship Cost: ${0}", cost));
 			if (cost <= _bank)
 			{

@@ -279,12 +279,11 @@ namespace Xasteroids.Screens
 			_gameMain.ShipSelectionWindow.OnSelectShip = null;
 
 			_gameMain.ResetGame();
-			_gameMain.SetupLevel();
 
 			_gameMain.PlayerManager.ResetPlayerPositions();
 
 			//Start the game!
-			_gameMain.ChangeToScreen(Screen.InGame);
+			_gameMain.ChangeToScreen(Screen.Upgrade);
 		}
 	}
 }

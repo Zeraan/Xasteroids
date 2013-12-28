@@ -41,6 +41,7 @@ namespace Xasteroids
 				MainPlayer.VelocityX = 0;
 				MainPlayer.VelocityY = 0;
 				MainPlayer.Angle = 0;
+				MainPlayer.Energy = MainPlayer.MaxEnergy;
 			}
 			else
 			{
@@ -147,11 +148,37 @@ namespace Xasteroids
 
 	public class Player
 	{
+		//Energy Upgrades
+		public int RechargeLevel { get; set; }
+		public int CapacityLevel { get; set; }
+
+		//Engine Upgrades
+		public int AccelerationLevel { get; set; }
+		public int RotationLevel { get; set; }
+		public int ReverseLevel { get; set; }
+		public int BoostingLevel { get; set; }
+
+		//Shield Upgrades
+		public int ShreddingLevel { get; set; }
+		public int HardnessLevel { get; set; }
+		public int InertialLevel { get; set; }
+		public int PhasingLevel { get; set; }
+
+		//Weapon Upgrades
+		public int CooldownLevel { get; set; }
+		public int ConsumptionLevel { get; set; }
+		public int DamageLevel { get; set; }
+		public int NumberOfMounts { get; set; }
+		public int VelocityLevel { get; set; }
+		public int PenetratingLevel { get; set; }
+		public int ShrapnelLevel { get; set; }
+		public int NumberOfNukes { get; set; }
+
 		public float PositionX { get; set; }
 		public float PositionY { get; set; }
 		public float VelocityX { get; set; }
 		public float VelocityY { get; set; }
-		public float Acceleration { get { return 100; } } //10 pixels per sec per sec acceleration
+		public float Acceleration { get { return (AccelerationLevel * (25f / ShipSize) + 25); } }
 		private float _angle;
 		public float Angle
 		{
@@ -169,16 +196,15 @@ namespace Xasteroids
 				}
 			}
 		}
-		public float RotationSpeed { get { return 90; } } //90 degress per sec
-
-		public int MaxEnergy { get; private set; }
+		public float RotationSpeed { get { return ((75.0f + (15 * RotationLevel)) / ShipSize); } } //90 degress per sec
+		public int MaxEnergy { get { return CapacityLevel * 50 + ShipSize * 50; } }
 		public float Energy { get; set; }
-		public float RechargeRate { get; private set; }
+		public float RechargeRate { get { return RechargeLevel * 5;} }
 		public float ShieldAlpha { get; set; }
 
 		public bool IsDead { get; set; }
 
-		public float CoolDownPeriod { get; set; }
+		public float CoolDownPeriod { get { return 1.0f - (CooldownLevel * 0.05f); } }
 		public float CoolDown { get; set; }
 
 		public int ShipSize { get; set; }
@@ -216,10 +242,29 @@ namespace Xasteroids
 			ShieldSprite = shieldSprite;
 			Mass = ShipSize * 20;
 
-			MaxEnergy = ShipSize * 100;
 			Energy = MaxEnergy;
-			RechargeRate = 5;
-			CoolDownPeriod = 1;
+
+			RechargeLevel = 1;
+			CapacityLevel = 0;
+
+			AccelerationLevel = 1;
+			RotationLevel = 1;
+			ReverseLevel = 0;
+			BoostingLevel = 0;
+
+			ShreddingLevel = 0;
+			HardnessLevel = 0;
+			InertialLevel = 0;
+			PhasingLevel = 0;
+
+			CooldownLevel = 1;
+			ConsumptionLevel = 0;
+			DamageLevel = 1;
+			NumberOfMounts = 0;
+			VelocityLevel = 1;
+			PenetratingLevel = 0;
+			ShrapnelLevel = 0;
+			NumberOfNukes = 0;
 		}
 
 		public void Update(float frameDeltaTime)

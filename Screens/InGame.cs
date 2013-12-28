@@ -125,6 +125,17 @@ namespace Xasteroids.Screens
 
 			_gameMain.MoveStars(-player.VelocityX * frameDeltaTime, -player.VelocityY * frameDeltaTime);
 
+			if (_gameMain.AsteroidManager.Asteroids.Count == 0)
+			{
+				//No asteroids left, move to upgrade window
+				_gameMain.ChangeToScreen(Screen.Upgrade);
+			}
+			if (_gameMain.PlayerManager.MainPlayer.Energy < 0)
+			{
+				//Player died, return to main menu
+				_gameMain.ChangeToScreen(Screen.MainMenu);
+			}
+
 			//Update the stats
 			_bankAmount.SetText(string.Format("${0}", player.Bank));
 			_energyAmount.SetText(string.Format("{0}/{1}", (int)player.Energy, player.MaxEnergy));
@@ -140,11 +151,11 @@ namespace Xasteroids.Screens
 			}
 			if (_gameMain.IsKeyDown(KeyboardKeys.Up))
 			{
-				if (_gameMain.IsKeyDown(KeyboardKeys.ShiftKey) && player.Energy > player.Acceleration * frameDeltaTime)
+				if (player.BoostingLevel > 0 && _gameMain.IsKeyDown(KeyboardKeys.ShiftKey) && player.Energy > player.Acceleration * frameDeltaTime)
 				{
 					//Boosting, double the acceleration but drain the energy
-					player.VelocityX += (float)Math.Cos(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime * 2;
-					player.VelocityY += (float)Math.Sin(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime * 2;
+					player.VelocityX += (float)Math.Cos(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime * (1 + 0.5f * player.BoostingLevel);
+					player.VelocityY += (float)Math.Sin(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime * (1 + 0.5f * player.BoostingLevel);
 					player.Energy -= player.Acceleration * frameDeltaTime * 0.1f;
 				}
 				else
@@ -153,10 +164,10 @@ namespace Xasteroids.Screens
 					player.VelocityY += (float)Math.Sin(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime;
 				}
 			}
-			if (_gameMain.IsKeyDown(KeyboardKeys.Space) && player.Energy > 25 && player.CoolDown == 0)
+			if (_gameMain.IsKeyDown(KeyboardKeys.Space) && player.CoolDown == 0 && player.Energy >= (20 * player.DamageLevel) * (player.NumberOfMounts + 1) * (1 - (player.ConsumptionLevel * 0.05f)))
 			{
 				_gameMain.ObjectManager.AddBullet(player);
-				player.Energy -= 25;
+				player.Energy -= (20 * player.DamageLevel) * (player.NumberOfMounts + 1) * (1 - (player.ConsumptionLevel * 0.05f));
 				player.CoolDown += player.CoolDownPeriod;
 			}
 			/*string debugText = string.Empty;

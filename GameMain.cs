@@ -15,6 +15,7 @@ namespace Xasteroids
 		MultiplayerPreGameClient,
 		MultiplayerPreGameServer,
 		InGame,
+		Upgrade,
 	};
 
 	public class GameMain
@@ -26,6 +27,7 @@ namespace Xasteroids
 		private MainMenu _mainMenu;
 		private MultiplayerGameSetup _multiplayerGameSetup;
 		private InGame _inGame;
+		private UpgradeAndWaitScreen _upgradeAndWaitScreen;
 
 		private Screen _currentScreen;
 		#endregion
@@ -130,6 +132,9 @@ namespace Xasteroids
 				case Screen.MainMenu:
 				{
 					//Main Menu is always initialized before this point
+					PlayerManager.Players.Clear();
+					LevelNumber = 100;
+					SetupLevel();
 					_screenInterface = _mainMenu;
 					break;
 				}
@@ -177,7 +182,24 @@ namespace Xasteroids
 							ExitGame();
 						}
 					}
+					ObjectManager.Clear();
 					_screenInterface = _inGame;
+					break;
+				}
+				case Screen.Upgrade:
+				{
+					if (_upgradeAndWaitScreen == null)
+					{
+						string reason;
+						_upgradeAndWaitScreen = new UpgradeAndWaitScreen();
+						if (!_upgradeAndWaitScreen.Initialize(this, out reason))
+						{
+							MessageBox.Show("Error in loading Upgrade Screen.  Reason: " + reason);
+							ExitGame();
+						}
+					}
+					_upgradeAndWaitScreen.RefreshLabels();
+					_screenInterface = _upgradeAndWaitScreen;
 					break;
 				}
 			}
@@ -372,7 +394,7 @@ namespace Xasteroids
 
 		public void ResetGame()
 		{
-			LevelNumber = 1;
+			LevelNumber = 0;
 			ObjectManager.Clear();
 		}
 
@@ -442,7 +464,7 @@ namespace Xasteroids
 				asteroidsToInlcude.Add(types[Random.Next(types.Count)]);
 			}
 			//Will split the level up into 320x320 sections for performance, 160 is the largest object's size
-			LevelSize = new Point(Random.Next(18, 32) * CELL_SIZE, Random.Next(18, 32) * CELL_SIZE);
+			LevelSize = new Point(10 * CELL_SIZE, 10 * CELL_SIZE);
 
 			AsteroidManager.SetUpLevel(asteroidsToInlcude.ToArray(), LevelNumber * 10 * (PlayerManager.Players.Count == 0 ? 1 : PlayerManager.Players.Count), Random);
 		}

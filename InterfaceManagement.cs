@@ -2933,6 +2933,7 @@ namespace Xasteroids
 		private int _maxWidth;
 		public int Width { get; private set; }
 		public int Height { get; private set; }
+		public string Text { get; private set; }
 
 		public bool Initialize(int xPos, int yPos, int width, int height, bool wrapText, bool allowScrollbar, string name, Random r, out string reason)
 		{
@@ -2988,6 +2989,7 @@ namespace Xasteroids
 
 		public void SetText(string text)
 		{
+			Text = text;
 			if (string.IsNullOrEmpty(text))
 			{
 				text = " "; //Blank so it don't crash with 0 width

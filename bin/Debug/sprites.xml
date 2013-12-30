@@ -9,26 +9,8 @@
   <Sprite name="Title" file="title.png">
     <Frame x="0" y="0" width="800" height="300" />
   </Sprite>
-  <Sprite name="BackgroundStar1" file="main.png">
-	  <Frame x="208" y="128" width="16" height="16" axisX="8" axisY="8" />
-  </Sprite>
-  <Sprite name="BackgroundStar2" file="main.png">
-	  <Frame x="224" y="128" width="16" height="16" axisX="8" axisY="8" />
-  </Sprite>
-  <Sprite name="BackgroundStar3" file="main.png">
-	  <Frame x="240" y="128" width="16" height="16" axisX="8" axisY="8" />
-  </Sprite>
-  <Sprite name="BackgroundStar4" file="main.png">
-	  <Frame x="256" y="128" width="16" height="16" axisX="8" axisY="8" />
-  </Sprite>
-  <Sprite name="BackgroundStar5" file="main.png">
-	  <Frame x="272" y="128" width="16" height="16" axisX="8" axisY="8" />
-  </Sprite>
-  <Sprite name="BackgroundStar6" file="main.png">
-	  <Frame x="288" y="128" width="16" height="16" axisX="8" axisY="8" />
-  </Sprite>
-  <Sprite name="BackgroundStar7" file="main.png">
-	  <Frame x="304" y="128" width="16" height="16" axisX="8" axisY="8" />
+  <Sprite name="BackgroundStar" file="star.png">
+	  <Frame x="0" y="0" width="32" height="32" axisX="16" axisY="16" />
   </Sprite>
 
   <Sprite name="TinyAst1" file="Asteroids.png">
@@ -606,9 +588,6 @@
   <Sprite name="HumanHugeShip6" file="humans.png">
     <Frame x="800" y="320" width="160" height="160" axisX="80" axisY="80" />
   </Sprite>
-  <Sprite name="HumanTitanShip" file="humans.png">
-    <Frame x="768" y="64" width="256" height="256" axisX="128" axisY="128" />
-  </Sprite>
   <!--Space Hamsters-->
   <Sprite name="SpaceHamsterTinyShip1" file="space_hamsters.png">
     <Frame x="0" y="0" width="32" height="32" axisX="16" axisY="16" />
@@ -700,9 +679,6 @@
   <Sprite name="SpaceHamsterHugeShip6" file="space_hamsters.png">
     <Frame x="800" y="320" width="160" height="160" axisX="80" axisY="80" />
   </Sprite>
-  <Sprite name="SpaceHamsterTitanShip" file="space_hamsters.png">
-    <Frame x="768" y="64" width="256" height="256" axisX="128" axisY="128" />
-  </Sprite>
   <!--Zero People-->
   <Sprite name="ZeroPeopleTinyShip1" file="zero_people.png">
     <Frame x="0" y="0" width="32" height="32" axisX="16" axisY="16" />
@@ -793,8 +769,5 @@
   </Sprite>
   <Sprite name="ZeroPeopleHugeShip6" file="zero_people.png">
     <Frame x="800" y="320" width="160" height="160" axisX="80" axisY="80" />
-  </Sprite>
-  <Sprite name="ZeroPeopleTitanShip" file="zero_people.png">
-    <Frame x="768" y="64" width="256" height="256" axisX="128" axisY="128" />
   </Sprite>
 </Sprites>

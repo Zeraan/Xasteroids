@@ -496,6 +496,27 @@
   <Sprite name="ConfirmFG" file="main.png">
     <Frame x="141" y="300" width="75" height="35" />
   </Sprite>
+
+  <Sprite name="TinyShield" file="shield.png">
+    <Frame x="0" y="0" width="32" height="32" axisX="16" axisY="16" />
+  </Sprite>
+  <Sprite name="SmallShield" file="shield.png">
+    <Frame x="0" y="32" width="64" height="64" axisX="32" axisY="32" />
+  </Sprite>
+  <Sprite name="MediumShield" file="shield.png">
+    <Frame x="0" y="96" width="96" height="96" axisX="48" axisY="48" />
+  </Sprite>
+  <Sprite name="LargeShield" file="shield.png">
+    <Frame x="0" y="192" width="128" height="128" axisX="64" axisY="64" />
+  </Sprite>
+  <Sprite name="HugeShield" file="shield.png">
+    <Frame x="0" y="320" width="160" height="160" axisX="80" axisY="80" />
+  </Sprite>
+
+  <Sprite name="Bullet" file="bullet.png">
+    <Frame x="0" y="0" width="4" height="4" axisX="2" axisY="2" />
+  </Sprite>
+
   <!--Race Sprites-->
   <!--Humans-->
   <Sprite name="HumanTinyShip1" file="humans.png">

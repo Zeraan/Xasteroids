@@ -46,6 +46,8 @@ namespace Xasteroids
 
 				Gorgon.Idle += Gorgon_Idle;
 
+				//Gorgon.FrameStatsVisible = true;
+
 				_input = Input.LoadInputPlugIn(Environment.CurrentDirectory + @"\GorgonInput.DLL", "Gorgon.RawInput");
 				_input.Bind(this);
 

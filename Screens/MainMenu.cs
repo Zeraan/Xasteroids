@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Drawing;
+﻿using System.Drawing;
 using GorgonLibrary.InputDevices;
 
 namespace Xasteroids.Screens
@@ -21,6 +20,8 @@ namespace Xasteroids.Screens
 		private bool _showingShipSelection;
 		private bool _showingMultiplayerOptions;
 
+		private BBLabel _debugText;
+
 		public bool Initialize(GameMain gameMain, out string reason)
 		{
 			_gameMain = gameMain;
@@ -39,6 +40,7 @@ namespace Xasteroids.Screens
 			_cancelButton = new BBButton();
 			_ipAddressTextBox = new BBSingleLineTextBox();
 			_playerNameTextBox = new BBSingleLineTextBox();
+			_debugText = new BBLabel();
 
 			_showingMultiplayerOptions = false;
 			_showingShipSelection = false;
@@ -76,27 +78,19 @@ namespace Xasteroids.Screens
 			{
 				return false;
 			}
+			if (!_debugText.Initialize(10, _gameMain.ScreenSize.Y - 30, string.Empty, Color.White, out reason))
+			{
+				return false;
+			}
 			_singlePlayerButton.SetTextColor(Color.Gold, Color.Black);
 			_multiPlayerButton.SetTextColor(Color.Gold, Color.Black);
 			_exitButton.SetTextColor(Color.Gold, Color.Black);
 			_hostOrConnectButton.SetTextColor(Color.Gold, Color.Black);
 			_cancelButton.SetTextColor(Color.Gold, Color.Black);
 
-			AsteroidType[] typesToInclude = new [] {
-													//AsteroidType.GENERIC, 
-													//AsteroidType.EXPLOSIVE, 
-													//AsteroidType.DENSE, 
-													//AsteroidType.CLUMPY, 
-													AsteroidType.BLACK, 
-													//AsteroidType.GOLD, 
-													//AsteroidType.GRAVITIC, 
-													//AsteroidType.MAGNETIC, 
-													//AsteroidType.PHASING, 
-													//AsteroidType.REPULSER, 
-													//AsteroidType.ZIPPY
-												};
 			_gameMain.LevelNumber = 100;
 			_gameMain.SetupLevel();
+			_debugText.SetText("Num of Asteroids: " + _gameMain.AsteroidManager.Asteroids.Count);
 
 			reason = null;
 			return true;
@@ -123,12 +117,13 @@ namespace Xasteroids.Screens
 			{
 				_gameMain.ShipSelectionWindow.Draw();
 			}
+			_debugText.Draw();
 		}
 
 		public void Update(int x, int y, float frameDeltaTime)
 		{
-			_gameMain.AsteroidManager.UpdatePhysics(null, frameDeltaTime, _gameMain.Random);
-			_gameMain.AsteroidManager.UpdateAsteroids(frameDeltaTime);
+			_gameMain.AsteroidManager.UpdatePhysics(null, null, frameDeltaTime, _gameMain.Random);
+			_gameMain.AsteroidManager.Update(frameDeltaTime);
 
 			if (_showingShipSelection)
 			{
@@ -148,6 +143,8 @@ namespace Xasteroids.Screens
 				_hostOrConnectButton.MouseHover(x, y, frameDeltaTime);
 				_cancelButton.MouseHover(x, y, frameDeltaTime);
 			}
+
+			_debugText.SetText("Num of Asteroids: " + _gameMain.AsteroidManager.Asteroids.Count);
 		}
 
 		public void MouseDown(int x, int y)
@@ -180,6 +177,7 @@ namespace Xasteroids.Screens
 				{
 					_showingShipSelection = false;
 					_gameMain.ShipSelectionWindow.OnSelectShip = null;
+					_gameMain.PlayerManager.Players.Clear();
 				}
 				return;
 			}
@@ -275,15 +273,17 @@ namespace Xasteroids.Screens
 			player.ShipColor = color;
 			player.Bank -= shipCost;
 			player.ShipSprite = SpriteManager.GetShipSprite(size, style, _gameMain.Random);
+			player.ShieldSprite = SpriteManager.GetShieldSprite(size, _gameMain.Random);
 
 			_showingShipSelection = false;
 			_gameMain.ShipSelectionWindow.OnSelectShip = null;
 
 			_gameMain.ResetGame();
-			_gameMain.SetupLevel();
+
+			_gameMain.PlayerManager.ResetPlayerPositions();
 
 			//Start the game!
-			_gameMain.ChangeToScreen(Screen.InGame);
+			_gameMain.ChangeToScreen(Screen.Upgrade);
 		}
 	}
 }

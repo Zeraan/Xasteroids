@@ -18,15 +18,19 @@ namespace Xasteroids
 		MultiplayerPreGameClient,
 		MultiplayerPreGameServer,
 		InGame,
+		Upgrade,
 	};
 
 	public class GameMain
 	{
+		public const int CELL_SIZE = 320;
+
 		#region Screens
 		private ScreenInterface _screenInterface;
 		private MainMenu _mainMenu;
 		private MultiplayerGameSetup _multiplayerGameSetup;
 		private InGame _inGame;
+		private UpgradeAndWaitScreen _upgradeAndWaitScreen;
 
 		private Screen _currentScreen;
 		#endregion
@@ -37,6 +41,7 @@ namespace Xasteroids
 
 		public PlayerManager PlayerManager { get; private set; }
 		public AsteroidManager AsteroidManager { get; private set; }
+		public ObjectManager ObjectManager { get; private set; }
 		public Random Random { get; private set; }
 		public Point MousePos;
 		public Point ScreenSize { get; private set; }
@@ -81,6 +86,7 @@ namespace Xasteroids
 
 			PlayerManager = new PlayerManager(this);
 			AsteroidManager = new AsteroidManager(this);
+			ObjectManager = new ObjectManager(this);
 			ShipSelectionWindow = new ShipSelectionWindow();
 			if (!ShipSelectionWindow.Initialize(this, out reason))
 			{
@@ -117,8 +123,6 @@ namespace Xasteroids
 			Cursor.Update(frameDeltaTime, Random);
 		}
 
-		private List<IPEndPoint> ClientUdpEndPoints = new List<IPEndPoint>();
-
 		public void ChangeToScreen(Screen whichScreen)
 		{
 			_currentScreen = whichScreen;
@@ -127,6 +131,9 @@ namespace Xasteroids
 				case Screen.MainMenu:
 				{
 					//Main Menu is always initialized before this point
+					PlayerManager.Players.Clear();
+					LevelNumber = 100;
+					SetupLevel();
 					_screenInterface = _mainMenu;
 					break;
 				}
@@ -174,7 +181,24 @@ namespace Xasteroids
 							ExitGame();
 						}
 					}
+					ObjectManager.Clear();
 					_screenInterface = _inGame;
+					break;
+				}
+				case Screen.Upgrade:
+				{
+					if (_upgradeAndWaitScreen == null)
+					{
+						string reason;
+						_upgradeAndWaitScreen = new UpgradeAndWaitScreen();
+						if (!_upgradeAndWaitScreen.Initialize(this, out reason))
+						{
+							MessageBox.Show("Error in loading Upgrade Screen.  Reason: " + reason);
+							ExitGame();
+						}
+					}
+					_upgradeAndWaitScreen.RefreshLabels();
+					_screenInterface = _upgradeAndWaitScreen;
 					break;
 				}
 			}
@@ -237,9 +261,42 @@ namespace Xasteroids
 			bool overlapsTop = (topBounds - 80) < 0;
 			bool overlapsBottom = !overlapsTop && bottomBounds + 80 >= LevelSize.Y;
 
+			foreach (var bullet in ObjectManager.Bullets)
+			{
+				int size = (int)(bullet.Scale * 2); //For performance, cache the value
+				float modifiedX = bullet.PositionX;
+				float modifiedY = bullet.PositionY;
+
+				if (overlapsLeft && bullet.PositionX >= rightBounds + size)
+				{
+					//It's on other side of screen, check and see if it could be visible due to overlap
+					modifiedX -= LevelSize.X;
+				}
+				else if (overlapsRight && bullet.PositionX < leftBounds - size)
+				{
+					//It's on other side of screen, check and see if it could be visible due to overlap
+					modifiedX += LevelSize.X;
+				}
+				if (overlapsTop && bullet.PositionY >= bottomBounds + size)
+				{
+					//It's on other side of screen, check and see if it could be visible due to overlap
+					modifiedY -= LevelSize.Y;
+				}
+				else if (overlapsBottom && bullet.PositionY < topBounds - size)
+				{
+					//It's on other side of screen, check and see if it could be visible due to overlap
+					modifiedY += LevelSize.Y;
+				}
+				if (modifiedX >= leftBounds - size && modifiedX < rightBounds + size && modifiedY >= topBounds - size && modifiedY < bottomBounds + size)
+				{
+					//It is visible
+					ObjectManager.BulletSprite.Draw((modifiedX + screenWidth) - x, (modifiedY + screenHeight) - y, 1, 1, bullet.Color);
+				}
+			}
+
 			foreach (var asteroid in AsteroidManager.Asteroids)
 			{
-				int size = 16 * asteroid.Size; //For performance, cache the value
+				int size = asteroid.Radius; //For performance, cache the value
 				float modifiedX = asteroid.PositionX;
 				float modifiedY = asteroid.PositionY;
 
@@ -267,19 +324,25 @@ namespace Xasteroids
 				if (modifiedX >= leftBounds - size && modifiedX < rightBounds + size && modifiedY >= topBounds - size && modifiedY < bottomBounds + size)
 				{
 					//It is visible
-					asteroid.AsteroidSprite.Draw((modifiedX + screenWidth) - x, (modifiedY + screenHeight) - y, 1, 1, asteroid.Color, asteroid.Angle);
+					asteroid.AsteroidSprite.Draw((modifiedX + screenWidth) - x, (modifiedY + screenHeight) - y, 1, 1, Color.FromArgb((int)asteroid.Phase, asteroid.Color), asteroid.Angle);
 				}
 			}
 
-			//Set the shader that every player's ship will use
-			GorgonLibrary.Gorgon.CurrentShader = ShipShader;
 			foreach (var player in PlayerManager.Players)
 			{
 				if (player == PlayerManager.MainPlayer)
 				{
 					//Always in center of screen, just draw it there
+					GorgonLibrary.Gorgon.CurrentShader = ShipShader;
 					ShipShader.Parameters["EmpireColor"].SetValue(player.ShipConvertedColor);
 					player.ShipSprite.Draw(screenWidth, screenHeight, 1, 1, Color.White, player.Angle);
+					GorgonLibrary.Gorgon.CurrentShader = null;
+					if (player.ShieldAlpha > 0)
+					{
+						//Shield was recently activated, display it
+						byte alpha = (byte)(player.ShieldAlpha * 255);
+						player.ShieldSprite.Draw(screenWidth, screenHeight, 1, 1, Color.FromArgb(alpha, alpha, alpha, alpha));
+					}
 				}
 				int size = 16 * player.ShipSize; //For performance, cache the value
 				float modifiedX = player.PositionX;
@@ -309,11 +372,18 @@ namespace Xasteroids
 				if (modifiedX >= leftBounds - size && modifiedX < rightBounds + size && modifiedY >= topBounds - size && modifiedY < bottomBounds + size)
 				{
 					//It is visible
+					GorgonLibrary.Gorgon.CurrentShader = ShipShader;
 					ShipShader.Parameters["EmpireColor"].SetValue(player.ShipConvertedColor);
 					player.ShipSprite.Draw((modifiedX + screenWidth) - x, (modifiedY + screenHeight) - y, 1, 1, Color.White, player.Angle);
+					GorgonLibrary.Gorgon.CurrentShader = null;
+					if (player.ShieldAlpha > 0)
+					{
+						//Shield was recently activated, display it
+						byte alpha = (byte)(player.ShieldAlpha * 255);
+						player.ShieldSprite.Draw((modifiedX + screenWidth) - x, (modifiedY + screenHeight) - y, 1, 1, Color.FromArgb(alpha, alpha, alpha, alpha));
+					}
 				}
 			}
-			GorgonLibrary.Gorgon.CurrentShader = null;
 		}
 
 		public void MoveStars(float xAmount, float yAmount)
@@ -323,23 +393,26 @@ namespace Xasteroids
 
 		public void ResetGame()
 		{
-			LevelNumber = 1;
+			LevelNumber = 0;
+			ObjectManager.Clear();
 		}
 
 		public void SetupLevel()
 		{
-			/*	AsteroidType.GENERIC, 
-				AsteroidType.CLUMPY,
-				AsteroidType.DENSE, 
-				AsteroidType.EXPLOSIVE, 
-				AsteroidType.BLACK, 
-				AsteroidType.GOLD,
+			/*List<AsteroidType> asteroidsToInlcude = new List<AsteroidType>
+			{
+				//AsteroidType.GENERIC, 
+				//AsteroidType.CLUMPY,
+				//AsteroidType.DENSE, 
+				//AsteroidType.EXPLOSIVE, 
+				//AsteroidType.BLACK, 
+				//AsteroidType.GOLD,
 				AsteroidType.GRAVITIC, 
-				AsteroidType.MAGNETIC, 
-				AsteroidType.PHASING, 
+				//AsteroidType.MAGNETIC, 
+				AsteroidType.PHASING,
 				AsteroidType.REPULSER, 
-				AsteroidType.ZIPPY
-			 */
+				//AsteroidType.ZIPPY
+													};*/
 			var types = new List<AsteroidType>();
 			types.Add(AsteroidType.GENERIC);
 			if (LevelNumber > 5)
@@ -389,9 +462,10 @@ namespace Xasteroids
 			{
 				asteroidsToInlcude.Add(types[Random.Next(types.Count)]);
 			}
-			LevelSize = new Point(Random.Next(3000, 5000), Random.Next(3000, 5000));
+			//Will split the level up into 320x320 sections for performance, 160 is the largest object's size
+			LevelSize = new Point(10 * CELL_SIZE, 10 * CELL_SIZE);
 
-			AsteroidManager.SetUpLevel(types.ToArray(), LevelNumber * 10, Random);
+			AsteroidManager.SetUpLevel(asteroidsToInlcude.ToArray(), LevelNumber * 10 * (PlayerManager.Players.Count == 0 ? 1 : PlayerManager.Players.Count), Random);
 		}
 
 		public bool IsKeyDown(KeyboardKeys whichKey)

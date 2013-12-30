@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Collections.Generic;
+using System.Drawing;
 
 namespace Xasteroids
 {
@@ -10,20 +11,20 @@ namespace Xasteroids
 			public float YPos { get; private set; }
 			public Color Color { get; private set; }
 
-			private int _layer;
+			public int Layer { get; private set; }
 
-			public BackgroundStar(float xPos, float yPos, int Layer, Color color)
+			public BackgroundStar(float xPos, float yPos, int layer, Color color)
 			{
 				XPos = xPos;
 				YPos = yPos;
-				_layer = Layer;
+				Layer = layer;
 				Color = color;
 			}
 
 			public void Move(float xAmount, float yAmount, int screenWidth, int screenHeight)
 			{
-				XPos += (xAmount * _layer);
-				YPos += (yAmount * _layer);
+				XPos += (xAmount / Layer);
+				YPos += (yAmount / Layer);
 
 				if (XPos < -16)
 				{
@@ -61,6 +62,7 @@ namespace Xasteroids
 			int numOfStars = (_gameMain.ScreenSize.X * _gameMain.ScreenSize.Y) / 500;
 
 			_backGroundStars = new BackgroundStar[numOfStars];
+			List<BackgroundStar> orderedBackgroundStars = new List<BackgroundStar>(); 
 			for (int i = 0; i < numOfStars; i++)
 			{
 				Color color = Color.White;
@@ -82,9 +84,11 @@ namespace Xasteroids
 						color = Color.Yellow;
 						break;
 				}
-				BackgroundStar newStar = new BackgroundStar(gameMain.Random.Next(gameMain.ScreenSize.X), gameMain.Random.Next(gameMain.ScreenSize.Y), _gameMain.Random.Next(1, 50), color);
-				_backGroundStars[i] = newStar;
+				BackgroundStar newStar = new BackgroundStar(gameMain.Random.Next(gameMain.ScreenSize.X), gameMain.Random.Next(gameMain.ScreenSize.Y), _gameMain.Random.Next(1, 20), color);
+				orderedBackgroundStars.Add(newStar);
 			}
+			orderedBackgroundStars.Sort((a, b) => { return a.Layer.CompareTo(b.Layer); });
+			_backGroundStars = orderedBackgroundStars.ToArray();
 
 			reason = null;
 			return true;

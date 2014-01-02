@@ -164,6 +164,21 @@ namespace Xasteroids.Screens
 					player.VelocityY += (float)Math.Sin(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime;
 				}
 			}
+			if (_gameMain.IsKeyDown(KeyboardKeys.Down))
+			{
+				if (player.BoostingLevel > 0 && _gameMain.IsKeyDown(KeyboardKeys.ShiftKey) && player.Energy > player.Acceleration * frameDeltaTime)
+				{
+					//Boosting, double the acceleration but drain the energy
+					player.VelocityX -= (float)Math.Cos(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime * (1 + 0.5f * player.BoostingLevel) * (0.25f * player.ReverseLevel);
+					player.VelocityY -= (float)Math.Sin(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime * (1 + 0.5f * player.BoostingLevel) * (0.25f * player.ReverseLevel);
+					player.Energy -= player.Acceleration * frameDeltaTime * 0.1f;
+				}
+				else
+				{
+					player.VelocityX -= (float)Math.Cos(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime * (0.25f * player.ReverseLevel);
+					player.VelocityY -= (float)Math.Sin(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime * (0.25f * player.ReverseLevel);
+				}
+			}
 			if (_gameMain.IsKeyDown(KeyboardKeys.Space) && player.CoolDown == 0 && player.Energy >= (20 * player.DamageLevel) * (player.NumberOfMounts + 1) * (1 - (player.ConsumptionLevel * 0.05f)))
 			{
 				_gameMain.ObjectManager.AddBullet(player);

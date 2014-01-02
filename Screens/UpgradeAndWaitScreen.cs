@@ -5,23 +5,23 @@ namespace Xasteroids.Screens
 {
 	public class UpgradeAndWaitScreen : ScreenInterface
 	{
-		private const int RECHARGE_COST = 250;
-		private const int CAPACITY_COST = 500;
+		private const int RECHARGE_COST = 150;
+		private const int CAPACITY_COST = 300;
 		private const int BATTERY_COST = 1000;
-		private const int ACCELERATION_COST = 200;
-		private const int ROTATION_COST = 150;
-		private const int REVERSE_COST = 250;
-		private const int BOOST_COST = 2000;
-		private const int COOLDOWN_COST = 200;
-		private const int CONSUMPTION_COST = 250;
-		private const int DAMAGE_COST = 300;
-		private const int VELOCITY_COST = 150;
+		private const int ACCELERATION_COST = 150;
+		private const int ROTATION_COST = 100;
+		private const int REVERSE_COST = 200;
+		private const int BOOST_COST = 1500;
+		private const int COOLDOWN_COST = 100;
+		private const int CONSUMPTION_COST = 200;
+		private const int DAMAGE_COST = 200;
+		private const int VELOCITY_COST = 100;
 		private const int PENETRATING_COST = 1000;
 		private const int MOUNTS_COST = 300;
 		private const int SHRAPNEL_COST = 1000;
 		private const int NUKE_COST = 1000;
 		private const int SHREDDING_COST = 500;
-		private const int HARDNESS_COST = 300;
+		private const int HARDNESS_COST = 250;
 		private const int INERTIAL_COST = 1000; //Inertial reduces the velocity change, which in turn reduces damage as well (if 50% reduction in velocity change, then also 50% reduction in damage)
 		private const int PHASING_COST = 5000;
 
@@ -36,6 +36,10 @@ namespace Xasteroids.Screens
 
 		private BBStretchableImage _playerStatusBackground;
 		private BBStretchableImage _chatBackground;
+
+		private BBTextBox _playerStatusTextBox;
+		private BBTextBox _chatTextBox;
+		private BBSingleLineTextBox _messageTextBox;
 
 		private BBStretchButton[] _energyButtons;
 		private BBStretchButton[] _engineButtons;
@@ -68,6 +72,10 @@ namespace Xasteroids.Screens
 
 			_playerStatusBackground = new BBStretchableImage();
 			_chatBackground = new BBStretchableImage();
+
+			_playerStatusTextBox = new BBTextBox();
+			_chatTextBox = new BBTextBox();
+			_messageTextBox = new BBSingleLineTextBox();
 
 			_readyButton = new BBButton();
 
@@ -131,6 +139,19 @@ namespace Xasteroids.Screens
 				return false;
 			}
 			if (!_chatBackground.Initialize(x + 400, y + 450, 400, 150, StretchableImageType.ThinBorderBG, _gameMain.Random, out reason))
+			{
+				return false;
+			}
+
+			if (!_playerStatusTextBox.Initialize(x + 410, y + 460, 380, 95, false, true, "PlayerStatusTextBox", _gameMain.Random, out reason))
+			{
+				return false;
+			}
+			if (!_chatTextBox.Initialize(x + 10, y + 460, 380, 100, true, true, "UpgradeChatTextBox", _gameMain.Random, out reason))
+			{
+				return false;
+			}
+			if (!_messageTextBox.Initialize(string.Empty, x + 10, y + 560, 380, 30, false, _gameMain.Random, out reason))
 			{
 				return false;
 			}
@@ -285,6 +306,10 @@ namespace Xasteroids.Screens
 				_shieldButtons[i].Draw();
 				_shieldLabels[i].Draw();
 			}
+
+			_playerStatusTextBox.Draw();
+			_chatTextBox.Draw();
+			_messageTextBox.Draw();
 
 			_readyButton.Draw();
 		}
@@ -656,7 +681,7 @@ namespace Xasteroids.Screens
 				}
 			}
 
-			if (player.ConsumptionLevel == 10)
+			if (player.ConsumptionLevel == 15)
 			{
 				_weaponLabels[1].SetText("Max");
 				_weaponLabels[1].SetColor(Color.Red, Color.Empty);
@@ -823,7 +848,7 @@ namespace Xasteroids.Screens
 				}
 			}
 
-			if (player.HardnessLevel == 10)
+			if (player.HardnessLevel == 15)
 			{
 				_shieldLabels[1].SetText("Max");
 				_shieldLabels[1].SetColor(Color.Red, Color.Empty);
@@ -845,7 +870,7 @@ namespace Xasteroids.Screens
 				}
 			}
 
-			if (player.InertialLevel == 10)
+			if (player.InertialLevel == 15)
 			{
 				_shieldLabels[2].SetText("Max");
 				_shieldLabels[2].SetColor(Color.Red, Color.Empty);
@@ -888,6 +913,11 @@ namespace Xasteroids.Screens
 					_shieldButtons[3].Enabled = false;
 				}
 			}
+
+			//Refresh the player status text box
+			string status = player.Name + " ($" + player.Bank + ") - Shopping";
+			//TODO- Add other players to status
+			_playerStatusTextBox.SetText(status);
 		}
 	}
 }

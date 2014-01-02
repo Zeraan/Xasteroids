@@ -119,8 +119,11 @@ namespace Xasteroids
 			_screenInterface.Update(MousePos.X, MousePos.Y, frameDeltaTime);
 			_screenInterface.DrawScreen();
 
-			Cursor.Draw(MousePos.X, MousePos.Y);
-			Cursor.Update(frameDeltaTime, Random);
+			if (_currentScreen != Screen.InGame)
+			{
+				Cursor.Draw(MousePos.X, MousePos.Y);
+				Cursor.Update(frameDeltaTime, Random);
+			}
 		}
 
 		public void ChangeToScreen(Screen whichScreen)
@@ -290,7 +293,7 @@ namespace Xasteroids
 				if (modifiedX >= leftBounds - size && modifiedX < rightBounds + size && modifiedY >= topBounds - size && modifiedY < bottomBounds + size)
 				{
 					//It is visible
-					ObjectManager.BulletSprite.Draw((modifiedX + screenWidth) - x, (modifiedY + screenHeight) - y, 1, 1, bullet.Color);
+					ObjectManager.BulletSprite.Draw((modifiedX + screenWidth) - x, (modifiedY + screenHeight) - y, bullet.Scale, bullet.Scale, bullet.Color);
 				}
 			}
 

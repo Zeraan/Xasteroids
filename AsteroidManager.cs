@@ -237,7 +237,7 @@ namespace Xasteroids
 
 						float xDiff = Math.Abs(player.VelocityX) - Math.Abs(v2x);
 						float yDiff = Math.Abs(player.VelocityY) - Math.Abs(v2y);
-						float amount = (float)Math.Sqrt(xDiff * xDiff + yDiff * yDiff);
+						float amount = (float)Math.Sqrt(xDiff * xDiff + yDiff * yDiff) / 2;
 						player.Energy -= amount * (1 - (player.HardnessLevel * 0.05f));
 						if (player.Energy < 0)
 						{
@@ -808,8 +808,8 @@ namespace Xasteroids
 		{
 			Color = Color.White;
 
-			VelocityX = r.Next(10, 100) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(10, 100) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityX = r.Next(20, 200) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityY = r.Next(20, 200) * (r.Next(2) > 0 ? -1 : 1);
 
 			Mass = Size * 200;
 			HP = Size * 5;
@@ -827,8 +827,8 @@ namespace Xasteroids
 		{
 			Color = Color.MediumPurple;
 
-			VelocityX = r.Next(40, 130) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(40, 130) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityX = r.Next(80, 260) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityY = r.Next(80, 260) * (r.Next(2) > 0 ? -1 : 1);
 
 			Mass = Size * 300;
 			HP = Size * 10;
@@ -846,8 +846,8 @@ namespace Xasteroids
 		{
 			Color = Color.Blue;
 
-			VelocityX = r.Next(40, 120) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(40, 120) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityX = r.Next(80, 240) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityY = r.Next(80, 240) * (r.Next(2) > 0 ? -1 : 1);
 
 			Mass = Size * 160;
 			HP = Size * 10;
@@ -865,8 +865,8 @@ namespace Xasteroids
 		{
 			Color = Color.OrangeRed;
 
-			VelocityX = r.Next(80, 100) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(80, 100) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityX = r.Next(160, 200) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityY = r.Next(160, 200) * (r.Next(2) > 0 ? -1 : 1);
 
 			Mass = Size * 240;
 			HP = Size * 3;
@@ -884,8 +884,8 @@ namespace Xasteroids
 		{
 			Color = Color.Black;
 
-			VelocityX = r.Next(10, 100) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(10, 100) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityX = r.Next(20, 200) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityY = r.Next(20, 200) * (r.Next(2) > 0 ? -1 : 1);
 
 			Mass = Size * 200;
 			HP = Size * 5;
@@ -903,8 +903,8 @@ namespace Xasteroids
 		{
 			Color = Color.Gray;
 
-			VelocityX = r.Next(10, 80) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(10, 80) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityX = r.Next(20, 160) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityY = r.Next(20, 160) * (r.Next(2) > 0 ? -1 : 1);
 
 			Mass = Size * 1100;
 			HP = Size * 50;
@@ -922,8 +922,8 @@ namespace Xasteroids
 		{
 			Color = Color.Cyan;
 
-			VelocityX = r.Next(100, 200) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(100, 200) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityX = r.Next(200, 400) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityY = r.Next(200, 400) * (r.Next(2) > 0 ? -1 : 1);
 
 			Mass = Size * 300;
 			HP = Size * 10;
@@ -941,8 +941,8 @@ namespace Xasteroids
 		{
 			Color = Color.GreenYellow;
 
-			VelocityX = r.Next(200, 500) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(200, 500) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityX = r.Next(400, 1000) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityY = r.Next(400, 1000) * (r.Next(2) > 0 ? -1 : 1);
 
 			Mass = Size * 30;
 			HP = Size * 5;
@@ -960,8 +960,8 @@ namespace Xasteroids
 		{
 			Color = Color.HotPink;
 
-			VelocityX = r.Next(100, 200) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(100, 200) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityX = r.Next(200, 400) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityY = r.Next(200, 400) * (r.Next(2) > 0 ? -1 : 1);
 
 			Mass = Size * 260;
 			HP = Size * 10;
@@ -979,8 +979,8 @@ namespace Xasteroids
 		{
 			Color = Color.DarkRed;
 
-			VelocityX = r.Next(20, 140) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(20, 140) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityX = r.Next(40, 280) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityY = r.Next(40, 280) * (r.Next(2) > 0 ? -1 : 1);
 
 			Mass = Size * 220;
 			HP = Size * 20;
@@ -1024,8 +1024,8 @@ namespace Xasteroids
 		{
 			Color = Color.Gold;
 
-			VelocityX = r.Next(50, 150) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(50, 150) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityX = r.Next(100, 300) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityY = r.Next(100, 300) * (r.Next(2) > 0 ? -1 : 1);
 
 			Mass = Size * 400;
 			HP = Size * 40;

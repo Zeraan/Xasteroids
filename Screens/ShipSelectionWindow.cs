@@ -246,7 +246,7 @@ namespace Xasteroids.Screens
 			{
 				if (OnSelectShip != null)
 				{
-					OnSelectShip(_size, _style, Color.FromArgb(_colorSliders[0].TopIndex, _colorSliders[1].TopIndex, _colorSliders[2].TopIndex), _size * _size * 500);
+					OnSelectShip(_size, _style, Color.FromArgb(_colorSliders[0].TopIndex, _colorSliders[1].TopIndex, _colorSliders[2].TopIndex), (_size * 120 + 400));
 				}
 			}
 			return base.MouseUp(x, y);

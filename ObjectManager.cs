@@ -70,6 +70,14 @@ namespace Xasteroids
 			}
 			foreach (var bullet in bulletsToRemove)
 			{
+				if (!bullet.IsShrapnel && bullet.Owner.ShrapnelLevel > 0)
+				{
+					for (int i = 0; i < bullet.Owner.ShrapnelLevel; i++)
+					{
+						//This is a constructor for adding shrapnel
+						Bullets.Add(new Bullet(bullet, (float)((_gameMain.Random.Next(360) / 180.0f) * Math.PI)));
+					}
+				}
 				Bullets.Remove(bullet);
 			}
 		}
@@ -91,6 +99,7 @@ namespace Xasteroids
 		public Color Color { get; set; }
 		public Player Owner { get; set; } //So it don't hit the ship that fired it
 		public float Lifetime { get; set; } //Decrements until it reaches 0, then despawn
+		public bool IsShrapnel { get; set; }
 
 		public Bullet(Player owner, float degree)
 		{
@@ -98,12 +107,29 @@ namespace Xasteroids
 			Owner = owner;
 			PositionX = Owner.PositionX;
 			PositionY = Owner.PositionY;
-			VelocityX = Owner.VelocityX + (float)(Math.Cos(degree) * (Owner.VelocityLevel * 100 + 100));
-			VelocityY = Owner.VelocityY + (float)(Math.Sin(degree) * (Owner.VelocityLevel * 100 + 100));
+			VelocityX = Owner.VelocityX + (float)(Math.Cos(degree) * (Owner.VelocityLevel * 100 + 200));
+			VelocityY = Owner.VelocityY + (float)(Math.Sin(degree) * (Owner.VelocityLevel * 100 + 200));
 			Color = Color.White;
 			Scale = 1;
-			Lifetime = 2;
+			Lifetime = 1;
 			Damage = Owner.DamageLevel * 5;
+			IsShrapnel = false;
+		}
+
+		public Bullet(Bullet bullet, float degree)
+		{
+			//This is a shrapnel
+			//add new bullets in random velocities
+			Owner = bullet.Owner;
+			PositionX = bullet.PositionX;
+			PositionY = bullet.PositionY;
+			VelocityX = bullet.VelocityX + (float)(Math.Cos(degree) * 100);
+			VelocityY = bullet.VelocityY + (float)(Math.Sin(degree) * 100);
+			Color = Color.White;
+			Scale = 0.5f;
+			Lifetime = 1;
+			Damage = 5;
+			IsShrapnel = true;
 		}
 
 		public void Update(float frameDeltaTime)

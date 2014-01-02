@@ -148,6 +148,8 @@ namespace Xasteroids
 
 	public class Player
 	{
+		public string Name { get; set; }
+
 		//Energy Upgrades
 		public int RechargeLevel { get; set; }
 		public int CapacityLevel { get; set; }
@@ -178,7 +180,7 @@ namespace Xasteroids
 		public float PositionY { get; set; }
 		public float VelocityX { get; set; }
 		public float VelocityY { get; set; }
-		public float Acceleration { get { return (AccelerationLevel * (25f / ShipSize) + 25); } }
+		public float Acceleration { get { return (AccelerationLevel * (25f / ShipSize) + 50); } }
 		private float _angle;
 		public float Angle
 		{
@@ -196,7 +198,7 @@ namespace Xasteroids
 				}
 			}
 		}
-		public float RotationSpeed { get { return ((75.0f + (15 * RotationLevel)) / ShipSize); } } //90 degress per sec
+		public float RotationSpeed { get { return ((100.0f + (15 * RotationLevel)) / ShipSize); } } //90 degress per sec
 		public int MaxEnergy { get { return CapacityLevel * 50 + ShipSize * 50; } }
 		public float Energy { get; set; }
 		public float RechargeRate { get { return RechargeLevel * 5;} }
@@ -204,7 +206,7 @@ namespace Xasteroids
 
 		public bool IsDead { get; set; }
 
-		public float CoolDownPeriod { get { return 1.0f - (CooldownLevel * 0.05f); } }
+		public float CoolDownPeriod { get { return 0.5f - (CooldownLevel * 0.025f); } }
 		public float CoolDown { get; set; }
 
 		public int ShipSize { get; set; }

@@ -588,6 +588,7 @@ namespace Xasteroids
 				{
 					//If HP is 0 or less, remove the asteroid and spawn smaller asteroids
 					newAsteroids.AddRange(SpawnAsteroids(asteroid));
+					_gameMain.ObjectManager.AddExplosion(asteroid.PositionX, asteroid.PositionY, asteroid.VelocityX, asteroid.VelocityY, 4);
 					asteroid.ToBeRemoved = true;
 				}
 			}

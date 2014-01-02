@@ -12,9 +12,12 @@ namespace Xasteroids
 		public List<Bullet> Bullets { get; private set; }
 		public BBSprite BulletSprite { get; private set; }
 
+		public List<Explosion> Explosions { get; private set; } 
+
 		public ObjectManager(GameMain gameMain)
 		{
 			Bullets = new List<Bullet>();
+			Explosions = new List<Explosion>();
 			_gameMain = gameMain;
 			BulletSprite = SpriteManager.GetSprite("Bullet", gameMain.Random);
 		}
@@ -29,6 +32,12 @@ namespace Xasteroids
 			}
 		}
 
+		public void AddExplosion(float xPos, float yPos, float xVel, float yVel, int size)
+		{
+			var explosion = new Explosion(xPos, yPos, xVel, yVel, size, _gameMain.Random);
+			Explosions.Add(explosion);
+		}
+
 		public void Update(float frameDeltaTime)
 		{
 			int width = _gameMain.LevelSize.X;
@@ -40,6 +49,7 @@ namespace Xasteroids
 				if (bullet.Damage <= 0)
 				{
 					bulletsToRemove.Add(bullet);
+					AddExplosion(bullet.PositionX, bullet.PositionY, bullet.VelocityX, bullet.VelocityY, 1);
 					continue;
 				}
 				bullet.PositionX += bullet.VelocityX * frameDeltaTime;
@@ -70,21 +80,98 @@ namespace Xasteroids
 			}
 			foreach (var bullet in bulletsToRemove)
 			{
-				if (!bullet.IsShrapnel && bullet.Owner.ShrapnelLevel > 0)
+				if (!bullet.IsShrapnel)
 				{
-					for (int i = 0; i < bullet.Owner.ShrapnelLevel; i++)
+					AddExplosion(bullet.PositionX, bullet.PositionY, bullet.VelocityX, bullet.VelocityY, 1);
+					if (bullet.Owner.ShrapnelLevel > 0)
 					{
-						//This is a constructor for adding shrapnel
-						Bullets.Add(new Bullet(bullet, (float)((_gameMain.Random.Next(360) / 180.0f) * Math.PI)));
+						for (int i = 0; i < bullet.Owner.ShrapnelLevel; i++)
+						{
+							//This is a constructor for adding shrapnel
+							Bullets.Add(new Bullet(bullet, (float)((_gameMain.Random.Next(360) / 180.0f) * Math.PI)));
+						}
 					}
 				}
 				Bullets.Remove(bullet);
+			}
+
+			var explosionsToRemove = new List<Explosion>();
+			foreach (var explosion in Explosions)
+			{
+				explosion.PositionX += explosion.VelocityX * frameDeltaTime;
+				explosion.PositionY += explosion.VelocityY * frameDeltaTime;
+
+				while (explosion.PositionX < 0)
+				{
+					explosion.PositionX += width;
+				}
+				while (explosion.PositionX >= width)
+				{
+					explosion.PositionX -= width;
+				}
+				while (explosion.PositionY < 0)
+				{
+					explosion.PositionY += height;
+				}
+				while (explosion.PositionY >= height)
+				{
+					explosion.PositionY -= height;
+				}
+
+				explosion.Update(frameDeltaTime, _gameMain.Random);
+				if (explosion.LifeTime <= 0)
+				{
+					explosionsToRemove.Add(explosion);
+				}
+			}
+			foreach (var explosionToRemove in explosionsToRemove)
+			{
+				Explosions.Remove(explosionToRemove);
 			}
 		}
 
 		public void Clear()
 		{
 			Bullets.Clear();
+		}
+	}
+
+	public class Explosion
+	{
+		public float PositionX { get; set; }
+		public float PositionY { get; set; }
+		public float VelocityX { get; set; }
+		public float VelocityY { get; set; }
+		public BBSprite Sprite { get; private set; }
+		public float LifeTime { get; private set; }
+		public int Size { get; private set; }
+
+		public Explosion(float xPos, float yPos, float xvel, float yvel, int size, Random r)
+		{
+			switch (size)
+			{
+				case 1:
+					Sprite = SpriteManager.GetSprite("SmallExplosion", r);
+					break;
+				case 2:
+					Sprite = SpriteManager.GetSprite("MediumExplosion", r);
+					break;
+				case 4:
+					Sprite = SpriteManager.GetSprite("LargeExplosion", r);
+					break;
+			}
+			PositionX = xPos;
+			PositionY = yPos;
+			VelocityX = xvel;
+			VelocityY = yvel;
+			LifeTime = 0.25f;
+			Size = (size * 8);
+		}
+
+		public void Update(float frameDeltaTime, Random r)
+		{
+			LifeTime -= frameDeltaTime;
+			Sprite.Update(frameDeltaTime, r);
 		}
 	}
 

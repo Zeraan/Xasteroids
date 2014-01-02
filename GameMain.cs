@@ -387,6 +387,39 @@ namespace Xasteroids
 					}
 				}
 			}
+
+			foreach (var explosion in ObjectManager.Explosions)
+			{
+				int size = explosion.Size;
+				float modifiedX = explosion.PositionX;
+				float modifiedY = explosion.PositionY;
+
+				if (overlapsLeft && explosion.PositionX >= rightBounds + size)
+				{
+					//It's on other side of screen, check and see if it could be visible due to overlap
+					modifiedX -= LevelSize.X;
+				}
+				else if (overlapsRight && explosion.PositionX < leftBounds - size)
+				{
+					//It's on other side of screen, check and see if it could be visible due to overlap
+					modifiedX += LevelSize.X;
+				}
+				if (overlapsTop && explosion.PositionY >= bottomBounds + size)
+				{
+					//It's on other side of screen, check and see if it could be visible due to overlap
+					modifiedY -= LevelSize.Y;
+				}
+				else if (overlapsBottom && explosion.PositionY < topBounds - size)
+				{
+					//It's on other side of screen, check and see if it could be visible due to overlap
+					modifiedY += LevelSize.Y;
+				}
+				if (modifiedX >= leftBounds - size && modifiedX < rightBounds + size && modifiedY >= topBounds - size && modifiedY < bottomBounds + size)
+				{
+					//It is visible
+					explosion.Sprite.Draw((modifiedX + screenWidth) - x, (modifiedY + screenHeight) - y);
+				}
+			}
 		}
 
 		public void MoveStars(float xAmount, float yAmount)

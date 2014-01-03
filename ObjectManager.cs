@@ -11,15 +11,19 @@ namespace Xasteroids
 		//This class is for handling bullets, nukes, and other various objects
 		public List<Bullet> Bullets { get; private set; }
 		public BBSprite BulletSprite { get; private set; }
+		public BBSprite ShockwaveSprite { get; private set; }
 
-		public List<Explosion> Explosions { get; private set; } 
+		public List<Explosion> Explosions { get; private set; }
+		public List<Shockwave> Shockwaves { get; private set; } 
 
 		public ObjectManager(GameMain gameMain)
 		{
 			Bullets = new List<Bullet>();
 			Explosions = new List<Explosion>();
+			Shockwaves = new List<Shockwave>();
 			_gameMain = gameMain;
-			BulletSprite = SpriteManager.GetSprite("Bullet", gameMain.Random);
+			BulletSprite = SpriteManager.GetSprite("Bullet", _gameMain.Random);
+			ShockwaveSprite = SpriteManager.GetSprite("Shockwave", _gameMain.Random);
 		}
 
 		public void AddBullet(Player player)
@@ -36,6 +40,12 @@ namespace Xasteroids
 		{
 			var explosion = new Explosion(xPos, yPos, xVel, yVel, size, _gameMain.Random);
 			Explosions.Add(explosion);
+		}
+
+		public void AddShockwave(float xPos, float yPos, int size, Player owner)
+		{
+			var shockwave = new Shockwave(xPos, yPos, size, owner);
+			Shockwaves.Add(shockwave);
 		}
 
 		public void Update(float frameDeltaTime)
@@ -128,11 +138,59 @@ namespace Xasteroids
 			{
 				Explosions.Remove(explosionToRemove);
 			}
+
+			var shockwavesToRemove = new List<Shockwave>();
+			foreach (var shockwave in Shockwaves)
+			{
+				shockwave.Update(frameDeltaTime);
+				if (shockwave.Boomed)
+				{
+					shockwavesToRemove.Add(shockwave);
+				}
+			}
+			foreach (var shockwaveToRemove in shockwavesToRemove)
+			{
+				Shockwaves.Remove(shockwaveToRemove);
+			}
 		}
 
 		public void Clear()
 		{
 			Bullets.Clear();
+		}
+	}
+
+	public class Shockwave
+	{
+		public float PositionX { get; set; }
+		public float PositionY { get; set; }
+		public float TimeTilBoom { get; private set; }
+		public int Radius { get; private set; }
+		public int Size { get; private set; }
+		public bool Boomed { get; private set; }
+		public Player Owner { get; private set; } //For nukes
+
+		public Shockwave(float xPos, float yPos, int size, Player owner)
+		{
+			TimeTilBoom = 0.2f;
+			PositionX = xPos;
+			PositionY = yPos;
+			Radius = 72 * size;
+			Size = size;
+			Owner = owner;
+		}
+
+		public void Update(float frameDeltaTime)
+		{
+			if (TimeTilBoom <= 0)
+			{
+				Boomed = true;
+			}
+			else
+			{
+				//Don't check for 0 or below, allowing for one cycle of physics update before this gets removed, so objects gets damaged
+				TimeTilBoom -= frameDeltaTime;
+			}
 		}
 	}
 

@@ -17,6 +17,8 @@ namespace Xasteroids.Screens
 		private BBStretchableImage _miniMapBackground;
 		private RenderImage _miniMapTarget;
 		private BBSprite _dot;
+		private bool _showingShipSelection;
+		private float _delay;
 
 		public bool Initialize(GameMain gameMain, out string reason)
 		{
@@ -69,7 +71,7 @@ namespace Xasteroids.Screens
 				reason = "Star sprite doesn't exist.";
 				return false;
 			}
-
+			_showingShipSelection = false;
 			return true;
 		}
 
@@ -85,6 +87,10 @@ namespace Xasteroids.Screens
 			_energyAmount.Draw();
 			//_debuggingText.Draw();
 			DrawMiniMap();
+			if (_gameMain.PlayerManager.MainPlayer.IsDead && _showingShipSelection && _delay <= 0)
+			{
+				_gameMain.ShipSelectionWindow.Draw();
+			}
 		}
 
 		private void DrawMiniMap()
@@ -114,7 +120,8 @@ namespace Xasteroids.Screens
 		public void Update(int x, int y, float frameDeltaTime)
 		{
 			var player = _gameMain.PlayerManager.MainPlayer;
-			_gameMain.AsteroidManager.UpdatePhysics(_gameMain.PlayerManager.Players, _gameMain.ObjectManager.Bullets, frameDeltaTime, _gameMain.Random);
+			bool isDead = player.IsDead;
+			_gameMain.AsteroidManager.UpdatePhysics(_gameMain.PlayerManager.Players, _gameMain.ObjectManager.Bullets, _gameMain.ObjectManager.Shockwaves, frameDeltaTime, _gameMain.Random);
 			_gameMain.PlayerManager.UpdatePhysics(frameDeltaTime);
 			//TODO: Update Physic Objects (explosions, bullets, etc)
 
@@ -123,68 +130,98 @@ namespace Xasteroids.Screens
 			_gameMain.PlayerManager.Update(frameDeltaTime);
 			_gameMain.ObjectManager.Update(frameDeltaTime);
 
-			_gameMain.MoveStars(-player.VelocityX * frameDeltaTime, -player.VelocityY * frameDeltaTime);
-
 			if (_gameMain.AsteroidManager.Asteroids.Count == 0)
 			{
 				//No asteroids left, move to upgrade window
 				_gameMain.ChangeToScreen(Screen.Upgrade);
 			}
-			if (_gameMain.PlayerManager.MainPlayer.Energy < 0)
+			if (_gameMain.PlayerManager.MainPlayer.IsDead && !isDead)
 			{
-				//Player died, return to main menu
-				_gameMain.ChangeToScreen(Screen.MainMenu);
+				_delay = 5;
+				_showingShipSelection = true;
+				//Player died, return to main menu if single player and insufficient funds to buy a new ship
+				//_gameMain.ChangeToScreen(Screen.MainMenu);
+			}
+			else if (_gameMain.PlayerManager.MainPlayer.IsDead && _showingShipSelection)
+			{
+				if (_delay > 0)
+				{
+					_delay -= frameDeltaTime;
+					if (_delay <= 0)
+					{
+						if (player.Bank >= 520)
+						{
+							_gameMain.ShipSelectionWindow.LoadShip(player.ShipSize, player.ShipStyle, player.ShipColor, player.Bank);
+							_gameMain.ShipSelectionWindow.OnSelectShip = OnSelectShip;
+						}
+						else
+						{
+							_gameMain.ChangeToScreen(Screen.MainMenu);
+							_showingShipSelection = false;
+						}
+					}
+				}
+				else
+				{
+					_gameMain.ShipSelectionWindow.MouseHover(x, y, frameDeltaTime);
+				}
 			}
 
 			//Update the stats
 			_bankAmount.SetText(string.Format("${0}", player.Bank));
 			_energyAmount.SetText(string.Format("{0}/{1}", (int)player.Energy, player.MaxEnergy));
 
-			//poll the keyboard for movement for main player's ship
-			if (_gameMain.IsKeyDown(KeyboardKeys.Left))
+			if (!player.IsDead)
 			{
-				player.Angle -= (player.RotationSpeed * frameDeltaTime);
-			}
-			else if (_gameMain.IsKeyDown(KeyboardKeys.Right))
-			{
-				player.Angle += (player.RotationSpeed * frameDeltaTime);
-			}
-			if (_gameMain.IsKeyDown(KeyboardKeys.Up))
-			{
-				if (player.BoostingLevel > 0 && _gameMain.IsKeyDown(KeyboardKeys.ShiftKey) && player.Energy > player.Acceleration * frameDeltaTime)
+				_gameMain.MoveStars(-player.VelocityX * frameDeltaTime, -player.VelocityY * frameDeltaTime);
+
+				//poll the keyboard for movement for main player's ship
+				if (_gameMain.IsKeyDown(KeyboardKeys.Left))
 				{
-					//Boosting, double the acceleration but drain the energy
-					player.VelocityX += (float)Math.Cos(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime * (1 + 0.5f * player.BoostingLevel);
-					player.VelocityY += (float)Math.Sin(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime * (1 + 0.5f * player.BoostingLevel);
-					player.Energy -= player.Acceleration * frameDeltaTime * 0.1f;
+					player.Angle -= (player.RotationSpeed * frameDeltaTime);
 				}
-				else
+				else if (_gameMain.IsKeyDown(KeyboardKeys.Right))
 				{
-					player.VelocityX += (float)Math.Cos(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime;
-					player.VelocityY += (float)Math.Sin(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime;
+					player.Angle += (player.RotationSpeed * frameDeltaTime);
+				}
+				if (_gameMain.IsKeyDown(KeyboardKeys.Up))
+				{
+					if (player.BoostingLevel > 0 && _gameMain.IsKeyDown(KeyboardKeys.ShiftKey) && player.Energy > player.Acceleration * frameDeltaTime)
+					{
+						//Boosting, double the acceleration but drain the energy
+						player.VelocityX += (float)Math.Cos(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime * (1 + 0.5f * player.BoostingLevel);
+						player.VelocityY += (float)Math.Sin(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime * (1 + 0.5f * player.BoostingLevel);
+						player.Energy -= player.Acceleration * frameDeltaTime * 0.1f;
+					}
+					else
+					{
+						player.VelocityX += (float)Math.Cos(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime;
+						player.VelocityY += (float)Math.Sin(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime;
+					}
+				}
+				if (_gameMain.IsKeyDown(KeyboardKeys.Down))
+				{
+					if (player.BoostingLevel > 0 && _gameMain.IsKeyDown(KeyboardKeys.ShiftKey) && player.Energy > player.Acceleration * frameDeltaTime)
+					{
+						//Boosting, double the acceleration but drain the energy
+						player.VelocityX -= (float)Math.Cos(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime * (1 + 0.5f * player.BoostingLevel) * (0.25f * player.ReverseLevel);
+						player.VelocityY -= (float)Math.Sin(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime * (1 + 0.5f * player.BoostingLevel) * (0.25f * player.ReverseLevel);
+						player.Energy -= player.Acceleration * frameDeltaTime * 0.1f;
+					}
+					else
+					{
+						player.VelocityX -= (float)Math.Cos(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime * (0.25f * player.ReverseLevel);
+						player.VelocityY -= (float)Math.Sin(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime * (0.25f * player.ReverseLevel);
+					}
+				}
+				if (_gameMain.IsKeyDown(KeyboardKeys.Space) && player.CoolDown == 0 && player.Energy >= (20 * player.DamageLevel) * (player.NumberOfMounts + 1) * (1 - (player.ConsumptionLevel * 0.05f)))
+				{
+					_gameMain.ObjectManager.AddBullet(player);
+					player.Energy -= (20 * player.DamageLevel) * (player.NumberOfMounts + 1) * (1 - (player.ConsumptionLevel * 0.05f));
+					player.CoolDown += player.CoolDownPeriod;
 				}
 			}
-			if (_gameMain.IsKeyDown(KeyboardKeys.Down))
-			{
-				if (player.BoostingLevel > 0 && _gameMain.IsKeyDown(KeyboardKeys.ShiftKey) && player.Energy > player.Acceleration * frameDeltaTime)
-				{
-					//Boosting, double the acceleration but drain the energy
-					player.VelocityX -= (float)Math.Cos(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime * (1 + 0.5f * player.BoostingLevel) * (0.25f * player.ReverseLevel);
-					player.VelocityY -= (float)Math.Sin(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime * (1 + 0.5f * player.BoostingLevel) * (0.25f * player.ReverseLevel);
-					player.Energy -= player.Acceleration * frameDeltaTime * 0.1f;
-				}
-				else
-				{
-					player.VelocityX -= (float)Math.Cos(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime * (0.25f * player.ReverseLevel);
-					player.VelocityY -= (float)Math.Sin(((player.Angle - 90) / 180) * Math.PI) * player.Acceleration * frameDeltaTime * (0.25f * player.ReverseLevel);
-				}
-			}
-			if (_gameMain.IsKeyDown(KeyboardKeys.Space) && player.CoolDown == 0 && player.Energy >= (20 * player.DamageLevel) * (player.NumberOfMounts + 1) * (1 - (player.ConsumptionLevel * 0.05f)))
-			{
-				_gameMain.ObjectManager.AddBullet(player);
-				player.Energy -= (20 * player.DamageLevel) * (player.NumberOfMounts + 1) * (1 - (player.ConsumptionLevel * 0.05f));
-				player.CoolDown += player.CoolDownPeriod;
-			}
+
 			/*string debugText = string.Empty;
 			debugText += "Pos: " + player.PositionX + ", " + player.PositionY + "\n\r\n\r";
 			debugText += "Vel: " + player.VelocityX + ", " + player.VelocityY + "\n\r\n\r";
@@ -192,14 +229,51 @@ namespace Xasteroids.Screens
 			_debuggingText.SetText(debugText);*/
 		}
 
+		private void OnSelectShip(int size, int style, Color color, int shipCost)
+		{
+			var player = _gameMain.PlayerManager.MainPlayer;
+			player.ShipSize = size;
+			player.ShipStyle = style;
+			player.ShipColor = color;
+			player.Bank -= shipCost;
+			player.ShipSprite = SpriteManager.GetShipSprite(size, style, _gameMain.Random);
+			player.ShieldSprite = SpriteManager.GetShieldSprite(size, _gameMain.Random);
+			player.IsDead = false;
+
+			_showingShipSelection = false;
+			_gameMain.ShipSelectionWindow.OnSelectShip = null;
+			
+			//if (singleplayer)
+			{
+				_gameMain.PlayerManager.ResetPlayerPositions();
+
+				//Start the game!
+				_gameMain.ChangeToScreen(Screen.Upgrade);
+				_gameMain.LevelNumber--; //Need to re-do the level
+			}
+		}
+
 		public void MouseDown(int x, int y)
 		{
-			
+			if (_gameMain.PlayerManager.MainPlayer.IsDead && _showingShipSelection && _delay <= 0)
+			{
+				_gameMain.ShipSelectionWindow.MouseDown(x, y);
+			}
 		}
 
 		public void MouseUp(int x, int y)
 		{
-			
+			if (_gameMain.PlayerManager.MainPlayer.IsDead && _showingShipSelection && _delay <= 0)
+			{
+				if (!_gameMain.ShipSelectionWindow.MouseUp(x, y))
+				{
+					//Cancelled buying a ship
+					_showingShipSelection = false;
+					_gameMain.ShipSelectionWindow.OnSelectShip = null;
+					_gameMain.PlayerManager.Players.Clear();
+					_gameMain.ChangeToScreen(Screen.MainMenu);
+				}
+			}
 		}
 
 		public void MouseScroll(int direction, int x, int y)

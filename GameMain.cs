@@ -119,7 +119,7 @@ namespace Xasteroids
 			_screenInterface.Update(MousePos.X, MousePos.Y, frameDeltaTime);
 			_screenInterface.DrawScreen();
 
-			if (_currentScreen != Screen.InGame)
+			if (_currentScreen != Screen.InGame || PlayerManager.MainPlayer.IsDead)
 			{
 				Cursor.Draw(MousePos.X, MousePos.Y);
 				Cursor.Update(frameDeltaTime, Random);
@@ -333,6 +333,11 @@ namespace Xasteroids
 
 			foreach (var player in PlayerManager.Players)
 			{
+				if (player.IsDead)
+				{
+					//No need to draw dead players
+					continue;
+				}
 				if (player == PlayerManager.MainPlayer)
 				{
 					//Always in center of screen, just draw it there
@@ -420,6 +425,40 @@ namespace Xasteroids
 					explosion.Sprite.Draw((modifiedX + screenWidth) - x, (modifiedY + screenHeight) - y);
 				}
 			}
+
+			foreach (var shockwave in ObjectManager.Shockwaves)
+			{
+				float radius = shockwave.Radius * (1 - (shockwave.TimeTilBoom / 0.2f));
+				float modifiedX = shockwave.PositionX;
+				float modifiedY = shockwave.PositionY;
+
+				if (overlapsLeft && shockwave.PositionX >= rightBounds + radius)
+				{
+					//It's on other side of screen, check and see if it could be visible due to overlap
+					modifiedX -= LevelSize.X;
+				}
+				else if (overlapsRight && shockwave.PositionX < leftBounds - radius)
+				{
+					//It's on other side of screen, check and see if it could be visible due to overlap
+					modifiedX += LevelSize.X;
+				}
+				if (overlapsTop && shockwave.PositionY >= bottomBounds + radius)
+				{
+					//It's on other side of screen, check and see if it could be visible due to overlap
+					modifiedY -= LevelSize.Y;
+				}
+				else if (overlapsBottom && shockwave.PositionY < topBounds - radius)
+				{
+					//It's on other side of screen, check and see if it could be visible due to overlap
+					modifiedY += LevelSize.Y;
+				}
+				if (modifiedX >= leftBounds - radius && modifiedX < rightBounds + radius && modifiedY >= topBounds - radius && modifiedY < bottomBounds + radius)
+				{
+					float scale = (radius / 100);
+					//It is visible
+					ObjectManager.ShockwaveSprite.Draw(modifiedX + screenWidth - x, modifiedY + screenHeight - y, scale, scale);
+				}
+			}
 		}
 
 		public void MoveStars(float xAmount, float yAmount)
@@ -440,13 +479,13 @@ namespace Xasteroids
 				//AsteroidType.GENERIC, 
 				//AsteroidType.CLUMPY,
 				//AsteroidType.DENSE, 
-				//AsteroidType.EXPLOSIVE, 
+				AsteroidType.EXPLOSIVE, 
 				//AsteroidType.BLACK, 
 				//AsteroidType.GOLD,
-				AsteroidType.GRAVITIC, 
+				//AsteroidType.GRAVITIC, 
 				//AsteroidType.MAGNETIC, 
-				AsteroidType.PHASING,
-				AsteroidType.REPULSER, 
+				//AsteroidType.PHASING,
+				//AsteroidType.REPULSER, 
 				//AsteroidType.ZIPPY
 													};*/
 			var types = new List<AsteroidType>();

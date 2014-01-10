@@ -237,7 +237,7 @@ namespace Xasteroids
 
 						float xDiff = Math.Abs(player.VelocityX) - Math.Abs(v2x);
 						float yDiff = Math.Abs(player.VelocityY) - Math.Abs(v2y);
-						float amount = (float)Math.Sqrt(xDiff * xDiff + yDiff * yDiff);
+						float amount = (float)Math.Sqrt(xDiff * xDiff + yDiff * yDiff) / 2;
 						player.Energy -= amount * (1 - (player.HardnessLevel * 0.05f));
 						if (player.Energy < 0)
 						{
@@ -357,6 +357,77 @@ namespace Xasteroids
 					}
 				}
 			}
+
+			public void HandleShockwave(Shockwave shockwave, float frameDeltaTime)
+			{
+				foreach (var asteroid in _asteroidsInCell)
+				{
+					if (asteroid.HP <= 0)
+					{
+						continue;
+						//This asteroid was destroyed already, stop checking
+					}
+					float tx2 = asteroid.PositionX + asteroid.VelocityX * frameDeltaTime;
+					float ty2 = asteroid.PositionY + asteroid.VelocityY * frameDeltaTime;
+					float rx = tx2 - shockwave.PositionX;
+					float ry = ty2 - shockwave.PositionY;
+					if ((float)Math.Sqrt(rx * rx + ry * ry) < (shockwave.Radius)) //Shockwave hits it
+					{
+						asteroid.HP -= shockwave.Size * 100;
+						if (asteroid.HP <= 0 && shockwave.Owner != null)
+						{
+							//Give money to player who destroyed it
+							int value;
+							if (asteroid is GenericAsteroid)
+							{
+								value = 5;
+							}
+							else if (asteroid is ClumpyAsteroid)
+							{
+								value = 2;
+							}
+							else if (asteroid is MagneticAsteroid)
+							{
+								value = 20;
+							}
+							else if (asteroid is RepulserAsteroid)
+							{
+								value = 10;
+							}
+							else if (asteroid is GraviticAsteroid)
+							{
+								value = 15;
+							}
+							else if (asteroid is DenseAsteroid)
+							{
+								value = 10;
+							}
+							else if (asteroid is ZippyAsteroid)
+							{
+								value = 5;
+							}
+							else if (asteroid is ExplosiveAsteroid)
+							{
+								value = 10;
+							}
+							else if (asteroid is BlackAsteroid)
+							{
+								value = 10;
+							}
+							else if (asteroid is GoldAsteroid)
+							{
+								value = 50;
+							}
+							else
+							{
+								//Only phasing asteroid left
+								value = 25;
+							}
+							shockwave.Owner.Bank += value * asteroid.Size;
+						}
+					}
+				}
+			}
 		}
 
 		private GameMain _gameMain;
@@ -449,7 +520,7 @@ namespace Xasteroids
 			}
 		}
 
-		public void UpdatePhysics(List<Player> players, List<Bullet> bullets, float frameDeltaTime, Random r)
+		public void UpdatePhysics(List<Player> players, List<Bullet> bullets, List<Shockwave> shockwaves, float frameDeltaTime, Random r)
 		{
 			for (int i = 0; i < _astCells.Length; i++)
 			{
@@ -506,6 +577,10 @@ namespace Xasteroids
 				//Second, update the asteroid vs ship collisions
 				foreach (var player in players)
 				{
+					if (player.IsDead)
+					{
+						continue;
+					}
 					int x = (int)(player.PositionX / GameMain.CELL_SIZE);
 					int y = (int)(player.PositionY / GameMain.CELL_SIZE);
 					int x1 = x - 1;
@@ -537,6 +612,10 @@ namespace Xasteroids
 					_astCells[x1][y2].HandleCollision(player, levelWidth, levelHeight, r, frameDeltaTime);
 					_astCells[x][y2].HandleCollision(player, levelWidth, levelHeight, r, frameDeltaTime);
 					_astCells[x2][y2].HandleCollision(player, levelWidth, levelHeight, r, frameDeltaTime);
+					if (player.IsDead)
+					{
+						_gameMain.ObjectManager.AddShockwave(player.PositionX, player.PositionY, player.ShipSize, null);
+					}
 				}
 			}
 			
@@ -581,14 +660,66 @@ namespace Xasteroids
 					_astCells[x2][y2].HandleBullets(bullet, frameDeltaTime);
 				}
 			}
+			if (shockwaves != null)
+			{
+				foreach (var shockwave in shockwaves)
+				{
+					if (shockwave.TimeTilBoom > 0)
+					{
+						continue;
+					}
+					int x = (int)(shockwave.PositionX / GameMain.CELL_SIZE);
+					int y = (int)(shockwave.PositionY / GameMain.CELL_SIZE);
+					int x1 = x - 1;
+					int x2 = x + 1;
+					int y1 = y - 1;
+					int y2 = y + 1;
+					if (x1 < 0)
+					{
+						x1 = _astCells.Length - 1;
+					}
+					if (y1 < 0)
+					{
+						y1 = _astCells[x].Length - 1;
+					}
+					if (x2 >= _astCells.Length)
+					{
+						x2 = 0;
+					}
+					if (y2 >= _astCells[x].Length)
+					{
+						y2 = 0;
+					}
+					_astCells[x1][y1].HandleShockwave(shockwave, frameDeltaTime);
+					_astCells[x][y1].HandleShockwave(shockwave, frameDeltaTime);
+					_astCells[x2][y1].HandleShockwave(shockwave, frameDeltaTime);
+					_astCells[x1][y].HandleShockwave(shockwave, frameDeltaTime);
+					_astCells[x][y].HandleShockwave(shockwave, frameDeltaTime);
+					_astCells[x2][y].HandleShockwave(shockwave, frameDeltaTime);
+					_astCells[x1][y2].HandleShockwave(shockwave, frameDeltaTime);
+					_astCells[x][y2].HandleShockwave(shockwave, frameDeltaTime);
+					_astCells[x2][y2].HandleShockwave(shockwave, frameDeltaTime);
+				}
+			}
+
 			List<Asteroid> newAsteroids = new List<Asteroid>();
 			foreach (var asteroid in Asteroids)
 			{
+				//If HP is 0 or less, remove the asteroid and spawn smaller asteroids, unless it's explosive asteroid, in which case it simply emits a shockwave
 				if (asteroid.HP <= 0)
 				{
-					//If HP is 0 or less, remove the asteroid and spawn smaller asteroids
-					newAsteroids.AddRange(SpawnAsteroids(asteroid));
-					asteroid.ToBeRemoved = true;
+					if (asteroid is ExplosiveAsteroid)
+					{
+						_gameMain.ObjectManager.AddShockwave(asteroid.PositionX, asteroid.PositionY, asteroid.Size, null);
+						_gameMain.ObjectManager.AddExplosion(asteroid.PositionX, asteroid.PositionY, asteroid.VelocityX, asteroid.VelocityY, 4);
+						asteroid.ToBeRemoved = true;
+					}
+					else
+					{
+						newAsteroids.AddRange(SpawnAsteroids(asteroid));
+						_gameMain.ObjectManager.AddExplosion(asteroid.PositionX, asteroid.PositionY, asteroid.VelocityX, asteroid.VelocityY, 4);
+						asteroid.ToBeRemoved = true;
+					}
 				}
 			}
 			Asteroids.AddRange(newAsteroids);
@@ -621,7 +752,6 @@ namespace Xasteroids
 			while (point > 0)
 			{
 				//Continue spawning until points run out
-				float tempDegree = (float)Math.Atan2(whichAsteroid.PositionX - whichAsteroid.VelocityX, whichAsteroid.PositionY - whichAsteroid.VelocityY);
 				float addVel = 0; //for yellow asteroids, they explode fragments FAST
 				int newSize = _gameMain.Random.Next(whichAsteroid.Size - 1) + 1;
 				Asteroid newAsteroid;
@@ -808,8 +938,8 @@ namespace Xasteroids
 		{
 			Color = Color.White;
 
-			VelocityX = r.Next(10, 100) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(10, 100) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityX = r.Next(20, 200) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityY = r.Next(20, 200) * (r.Next(2) > 0 ? -1 : 1);
 
 			Mass = Size * 200;
 			HP = Size * 5;
@@ -827,8 +957,8 @@ namespace Xasteroids
 		{
 			Color = Color.MediumPurple;
 
-			VelocityX = r.Next(40, 130) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(40, 130) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityX = r.Next(80, 260) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityY = r.Next(80, 260) * (r.Next(2) > 0 ? -1 : 1);
 
 			Mass = Size * 300;
 			HP = Size * 10;
@@ -846,8 +976,8 @@ namespace Xasteroids
 		{
 			Color = Color.Blue;
 
-			VelocityX = r.Next(40, 120) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(40, 120) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityX = r.Next(80, 240) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityY = r.Next(80, 240) * (r.Next(2) > 0 ? -1 : 1);
 
 			Mass = Size * 160;
 			HP = Size * 10;
@@ -865,8 +995,8 @@ namespace Xasteroids
 		{
 			Color = Color.OrangeRed;
 
-			VelocityX = r.Next(80, 100) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(80, 100) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityX = r.Next(160, 200) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityY = r.Next(160, 200) * (r.Next(2) > 0 ? -1 : 1);
 
 			Mass = Size * 240;
 			HP = Size * 3;
@@ -884,8 +1014,8 @@ namespace Xasteroids
 		{
 			Color = Color.Black;
 
-			VelocityX = r.Next(10, 100) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(10, 100) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityX = r.Next(20, 200) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityY = r.Next(20, 200) * (r.Next(2) > 0 ? -1 : 1);
 
 			Mass = Size * 200;
 			HP = Size * 5;
@@ -903,8 +1033,8 @@ namespace Xasteroids
 		{
 			Color = Color.Gray;
 
-			VelocityX = r.Next(10, 80) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(10, 80) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityX = r.Next(20, 160) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityY = r.Next(20, 160) * (r.Next(2) > 0 ? -1 : 1);
 
 			Mass = Size * 1100;
 			HP = Size * 50;
@@ -922,8 +1052,8 @@ namespace Xasteroids
 		{
 			Color = Color.Cyan;
 
-			VelocityX = r.Next(100, 200) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(100, 200) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityX = r.Next(200, 400) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityY = r.Next(200, 400) * (r.Next(2) > 0 ? -1 : 1);
 
 			Mass = Size * 300;
 			HP = Size * 10;
@@ -941,8 +1071,8 @@ namespace Xasteroids
 		{
 			Color = Color.GreenYellow;
 
-			VelocityX = r.Next(200, 500) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(200, 500) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityX = r.Next(400, 1000) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityY = r.Next(400, 1000) * (r.Next(2) > 0 ? -1 : 1);
 
 			Mass = Size * 30;
 			HP = Size * 5;
@@ -960,8 +1090,8 @@ namespace Xasteroids
 		{
 			Color = Color.HotPink;
 
-			VelocityX = r.Next(100, 200) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(100, 200) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityX = r.Next(200, 400) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityY = r.Next(200, 400) * (r.Next(2) > 0 ? -1 : 1);
 
 			Mass = Size * 260;
 			HP = Size * 10;
@@ -979,8 +1109,8 @@ namespace Xasteroids
 		{
 			Color = Color.DarkRed;
 
-			VelocityX = r.Next(20, 140) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(20, 140) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityX = r.Next(40, 280) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityY = r.Next(40, 280) * (r.Next(2) > 0 ? -1 : 1);
 
 			Mass = Size * 220;
 			HP = Size * 20;
@@ -1024,8 +1154,8 @@ namespace Xasteroids
 		{
 			Color = Color.Gold;
 
-			VelocityX = r.Next(50, 150) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(50, 150) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityX = r.Next(100, 300) * (r.Next(2) > 0 ? -1 : 1);
+			VelocityY = r.Next(100, 300) * (r.Next(2) > 0 ? -1 : 1);
 
 			Mass = Size * 400;
 			HP = Size * 40;

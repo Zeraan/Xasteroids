@@ -121,8 +121,11 @@ namespace Xasteroids
 			_screenInterface.Update(MousePos.X, MousePos.Y, frameDeltaTime);
 			_screenInterface.DrawScreen();
 
-			Cursor.Draw(MousePos.X, MousePos.Y);
-			Cursor.Update(frameDeltaTime, Random);
+			if (_currentScreen != Screen.InGame || PlayerManager.MainPlayer.IsDead)
+			{
+				Cursor.Draw(MousePos.X, MousePos.Y);
+				Cursor.Update(frameDeltaTime, Random);
+			}
 		}
 
 		public void ConnectToHostAt(IPAddress address)
@@ -286,6 +289,134 @@ namespace Xasteroids
 			_screenInterface.KeyDown(e);
 		}
 
+		public void ExitGame()
+		{
+			//dispose of any resources in use
+			_parentForm.Close();
+		}
+
+		//Handle events
+		public void ProcessGame(float frameDeltaTime)
+		{
+			_backgroundStars.Draw();
+
+			_screenInterface.Update(MousePos.X, MousePos.Y, frameDeltaTime);
+			_screenInterface.DrawScreen();
+
+			if (_currentScreen != Screen.InGame || PlayerManager.MainPlayer.IsDead)
+			{
+				Cursor.Draw(MousePos.X, MousePos.Y);
+				Cursor.Update(frameDeltaTime, Random);
+			}
+		}
+
+		public void ChangeToScreen(Screen whichScreen)
+		{
+			_currentScreen = whichScreen;
+			switch (whichScreen)
+			{
+				case Screen.MainMenu:
+				{
+					//Main Menu is always initialized before this point
+					PlayerManager.Players.Clear();
+					LevelNumber = 100;
+					SetupLevel();
+					_screenInterface = _mainMenu;
+					break;
+				}
+				case Screen.MultiplayerPreGameClient:
+				{
+					if (_multiplayerGameSetup == null)
+					{
+						string reason;
+						_multiplayerGameSetup = new MultiplayerGameSetup();
+						if (!_multiplayerGameSetup.Initialize(this, out reason))
+						{
+							MessageBox.Show("Error in loading Multiplayer PreGame Screen.  Reason: " + reason);
+							ExitGame();
+						}
+					}
+					_multiplayerGameSetup.SetHost(false);
+					_screenInterface = _multiplayerGameSetup;
+					break;
+				}
+				case Screen.MultiplayerPreGameServer:
+				{
+					if (_multiplayerGameSetup == null)
+					{
+						string reason;
+						_multiplayerGameSetup = new MultiplayerGameSetup();
+						if (!_multiplayerGameSetup.Initialize(this, out reason))
+						{
+							MessageBox.Show("Error in loading Multiplayer PreGame Screen.  Reason: " + reason);
+							ExitGame();
+						}
+					}
+					_multiplayerGameSetup.SetHost(true);
+					_screenInterface = _multiplayerGameSetup;
+					break;
+				}
+				case Screen.InGame:
+				{
+					if (_inGame == null)
+					{
+						string reason;
+						_inGame = new InGame();
+						if (!_inGame.Initialize(this, out reason))
+						{
+							MessageBox.Show("Error in loading In-Game Screen.  Reason: " + reason);
+							ExitGame();
+						}
+					}
+					ObjectManager.Clear();
+					_screenInterface = _inGame;
+					break;
+				}
+				case Screen.Upgrade:
+				{
+					if (_upgradeAndWaitScreen == null)
+					{
+						string reason;
+						_upgradeAndWaitScreen = new UpgradeAndWaitScreen();
+						if (!_upgradeAndWaitScreen.Initialize(this, out reason))
+						{
+							MessageBox.Show("Error in loading Upgrade Screen.  Reason: " + reason);
+							ExitGame();
+						}
+					}
+					_upgradeAndWaitScreen.RefreshLabels();
+					_screenInterface = _upgradeAndWaitScreen;
+					break;
+				}
+			}
+		}
+
+		public void MouseDown(MouseEventArgs e)
+		{
+			if (e.Button == MouseButtons.Left)
+			{
+				_screenInterface.MouseDown(e.X, e.Y);
+			}
+		}
+
+		public void MouseUp(MouseEventArgs e)
+		{
+			if (e.Button == MouseButtons.Left)
+			{
+				_screenInterface.MouseUp(e.X, e.Y);
+			}
+		}
+
+		public void MouseScroll(int delta)
+		{
+			_screenInterface.MouseScroll(delta, MousePos.X, MousePos.Y);
+		}
+
+		public void KeyDown(KeyboardInputEventArgs e)
+		{
+			_screenInterface.KeyDown(e);
+		}
+
 		public void DrawObjects()
 		{
 			//Draws the asteroids, and if a game is in-progress, ships, weapons, and effects
@@ -346,7 +477,7 @@ namespace Xasteroids
 				if (modifiedX >= leftBounds - size && modifiedX < rightBounds + size && modifiedY >= topBounds - size && modifiedY < bottomBounds + size)
 				{
 					//It is visible
-					ObjectManager.BulletSprite.Draw((modifiedX + screenWidth) - x, (modifiedY + screenHeight) - y, 1, 1, bullet.Color);
+					ObjectManager.BulletSprite.Draw((modifiedX + screenWidth) - x, (modifiedY + screenHeight) - y, bullet.Scale, bullet.Scale, bullet.Color);
 				}
 			}
 
@@ -386,6 +517,11 @@ namespace Xasteroids
 
 			foreach (var player in PlayerManager.Players)
 			{
+				if (player.IsDead)
+				{
+					//No need to draw dead players
+					continue;
+				}
 				if (player == PlayerManager.MainPlayer)
 				{
 					//Always in center of screen, just draw it there
@@ -440,6 +576,73 @@ namespace Xasteroids
 					}
 				}
 			}
+
+			foreach (var explosion in ObjectManager.Explosions)
+			{
+				int size = explosion.Size;
+				float modifiedX = explosion.PositionX;
+				float modifiedY = explosion.PositionY;
+
+				if (overlapsLeft && explosion.PositionX >= rightBounds + size)
+				{
+					//It's on other side of screen, check and see if it could be visible due to overlap
+					modifiedX -= LevelSize.X;
+				}
+				else if (overlapsRight && explosion.PositionX < leftBounds - size)
+				{
+					//It's on other side of screen, check and see if it could be visible due to overlap
+					modifiedX += LevelSize.X;
+				}
+				if (overlapsTop && explosion.PositionY >= bottomBounds + size)
+				{
+					//It's on other side of screen, check and see if it could be visible due to overlap
+					modifiedY -= LevelSize.Y;
+				}
+				else if (overlapsBottom && explosion.PositionY < topBounds - size)
+				{
+					//It's on other side of screen, check and see if it could be visible due to overlap
+					modifiedY += LevelSize.Y;
+				}
+				if (modifiedX >= leftBounds - size && modifiedX < rightBounds + size && modifiedY >= topBounds - size && modifiedY < bottomBounds + size)
+				{
+					//It is visible
+					explosion.Sprite.Draw((modifiedX + screenWidth) - x, (modifiedY + screenHeight) - y);
+				}
+			}
+
+			foreach (var shockwave in ObjectManager.Shockwaves)
+			{
+				float radius = shockwave.Radius * (1 - (shockwave.TimeTilBoom / 0.2f));
+				float modifiedX = shockwave.PositionX;
+				float modifiedY = shockwave.PositionY;
+
+				if (overlapsLeft && shockwave.PositionX >= rightBounds + radius)
+				{
+					//It's on other side of screen, check and see if it could be visible due to overlap
+					modifiedX -= LevelSize.X;
+				}
+				else if (overlapsRight && shockwave.PositionX < leftBounds - radius)
+				{
+					//It's on other side of screen, check and see if it could be visible due to overlap
+					modifiedX += LevelSize.X;
+				}
+				if (overlapsTop && shockwave.PositionY >= bottomBounds + radius)
+				{
+					//It's on other side of screen, check and see if it could be visible due to overlap
+					modifiedY -= LevelSize.Y;
+				}
+				else if (overlapsBottom && shockwave.PositionY < topBounds - radius)
+				{
+					//It's on other side of screen, check and see if it could be visible due to overlap
+					modifiedY += LevelSize.Y;
+				}
+				if (modifiedX >= leftBounds - radius && modifiedX < rightBounds + radius && modifiedY >= topBounds - radius && modifiedY < bottomBounds + radius)
+				{
+					float scale = (radius / 100);
+					//It is visible
+					ObjectManager.ShockwaveSprite.Draw(modifiedX + screenWidth - x, modifiedY + screenHeight - y, scale, scale);
+				}
+			}
 		}
 
 		public void MoveStars(float xAmount, float yAmount)
@@ -460,13 +663,13 @@ namespace Xasteroids
 				//AsteroidType.GENERIC, 
 				//AsteroidType.CLUMPY,
 				//AsteroidType.DENSE, 
-				//AsteroidType.EXPLOSIVE, 
+				AsteroidType.EXPLOSIVE, 
 				//AsteroidType.BLACK, 
 				//AsteroidType.GOLD,
-				AsteroidType.GRAVITIC, 
+				//AsteroidType.GRAVITIC, 
 				//AsteroidType.MAGNETIC, 
-				AsteroidType.PHASING,
-				AsteroidType.REPULSER, 
+				//AsteroidType.PHASING,
+				//AsteroidType.REPULSER, 
 				//AsteroidType.ZIPPY
 													};*/
 			var types = new List<AsteroidType>();

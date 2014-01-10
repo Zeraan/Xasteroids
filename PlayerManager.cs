@@ -51,6 +51,33 @@ namespace Xasteroids
 
 		public void UpdatePhysics(float frameDeltaTime)
 		{
+			foreach (var player in Players)
+			{
+				if (player.IsDead)
+				{
+					continue;
+				}
+				float tx2 = player.PositionX + player.VelocityX * frameDeltaTime;
+				float ty2 = player.PositionY + player.VelocityY * frameDeltaTime;
+				foreach (var shockwave in _gameMain.ObjectManager.Shockwaves)
+				{
+					float rx = tx2 - shockwave.PositionX;
+					float ry = ty2 - shockwave.PositionY;
+					if ((float)Math.Sqrt(rx * rx + ry * ry) < (shockwave.Radius)) //Shockwave hits player
+					{
+						player.Energy -= (shockwave.Size * 100) * (1 - (0.05f * player.HardnessLevel));
+					}
+				}
+			}
+			foreach (var player in Players)
+			{
+				//Just died from shockwave, add after processing shockwaves
+				if (player.Energy < 0 && !player.IsDead)
+				{
+					player.IsDead = true;
+					_gameMain.ObjectManager.AddShockwave(player.PositionX, player.PositionY, player.ShipSize, null);
+				}
+			}
 			//Asteroid vs ship are handled in AsteroidManager
 			if (Players.Count < 2)
 			{
@@ -63,7 +90,6 @@ namespace Xasteroids
 				{
 					if (Players[i].IsDead || Players[j].IsDead)
 					{
-						//Some asteroids have clumped together, don't calculate between any asteroids with the asteroid to be removed;
 						continue;
 					}
 					//create variables that'd be easier to read than function calls
@@ -102,10 +128,29 @@ namespace Xasteroids
 						float k2 = 2 * Players[i].Mass * (rx * (v1x - v2x) + ry * (v1y - v2y)) / (Players[i].Mass + Players[j].Mass);
 
 						//Adjust the velocities
-						v1x += k1 * rx;
-						v1y += k1 * ry;
-						v2x += k2 * rx;
-						v2y += k2 * ry;
+						v1x += k1 * rx * (1 - Players[i].InertialLevel * 0.05f);
+						v1y += k1 * ry * (1 - Players[i].InertialLevel * 0.05f);
+						v2x += k2 * rx * (1 - Players[j].InertialLevel * 0.05f);
+						v2y += k2 * ry * (1 - Players[j].InertialLevel * 0.05f);
+
+						float xDiff = Math.Abs(Players[i].VelocityX) - Math.Abs(v1x);
+						float yDiff = Math.Abs(Players[i].VelocityY) - Math.Abs(v1y);
+						float amount = (float)Math.Sqrt(xDiff * xDiff + yDiff * yDiff) / 2;
+						Players[i].Energy -= amount * (1 - (Players[i].HardnessLevel * 0.05f));
+						if (Players[i].Energy < 0)
+						{
+							Players[i].IsDead = true;
+							_gameMain.ObjectManager.AddShockwave(Players[i].PositionX, Players[i].PositionY, Players[i].ShipSize, null);
+						}
+						xDiff = Math.Abs(Players[j].VelocityX) - Math.Abs(v2x);
+						yDiff = Math.Abs(Players[j].VelocityY) - Math.Abs(v2y);
+						amount = (float)Math.Sqrt(xDiff * xDiff + yDiff * yDiff) / 2;
+						Players[j].Energy -= amount * (1 - (Players[j].HardnessLevel * 0.05f));
+						if (Players[j].Energy < 0)
+						{
+							Players[j].IsDead = true;
+							_gameMain.ObjectManager.AddShockwave(Players[j].PositionX, Players[j].PositionY, Players[j].ShipSize, null);
+						}
 
 						//Assign the final value to asteroids
 						Players[i].VelocityX = v1x;
@@ -123,6 +168,10 @@ namespace Xasteroids
 			int height = _gameMain.LevelSize.Y;
 			foreach (var player in Players)
 			{
+				if (player.IsDead)
+				{
+					continue;
+				}
 				player.PositionX += player.VelocityX * frameDeltaTime;
 				player.PositionY += player.VelocityY * frameDeltaTime;
 				while (player.PositionX < 0)
@@ -148,6 +197,8 @@ namespace Xasteroids
 
 	public class Player
 	{
+		public string Name { get; set; }
+
 		//Energy Upgrades
 		public int RechargeLevel { get; set; }
 		public int CapacityLevel { get; set; }
@@ -178,7 +229,7 @@ namespace Xasteroids
 		public float PositionY { get; set; }
 		public float VelocityX { get; set; }
 		public float VelocityY { get; set; }
-		public float Acceleration { get { return (AccelerationLevel * (25f / ShipSize) + 25); } }
+		public float Acceleration { get { return (AccelerationLevel * (25f / ShipSize) + 50); } }
 		private float _angle;
 		public float Angle
 		{
@@ -196,7 +247,7 @@ namespace Xasteroids
 				}
 			}
 		}
-		public float RotationSpeed { get { return ((75.0f + (15 * RotationLevel)) / ShipSize); } } //90 degress per sec
+		public float RotationSpeed { get { return ((100.0f + (15 * RotationLevel)) / ShipSize); } } //90 degress per sec
 		public int MaxEnergy { get { return CapacityLevel * 50 + ShipSize * 50; } }
 		public float Energy { get; set; }
 		public float RechargeRate { get { return RechargeLevel * 5;} }
@@ -204,7 +255,7 @@ namespace Xasteroids
 
 		public bool IsDead { get; set; }
 
-		public float CoolDownPeriod { get { return 1.0f - (CooldownLevel * 0.05f); } }
+		public float CoolDownPeriod { get { return 0.5f - (CooldownLevel * 0.025f); } }
 		public float CoolDown { get; set; }
 
 		public int ShipSize { get; set; }

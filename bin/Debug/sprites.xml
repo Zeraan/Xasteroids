@@ -516,6 +516,30 @@
   <Sprite name="Bullet" file="bullet.png">
     <Frame x="0" y="0" width="4" height="4" axisX="2" axisY="2" />
   </Sprite>
+  <Sprite name="Shockwave" file="shockwave.png">
+    <Frame x="0" y="0" width="200" height="200" axisX="100" axisY="100" />
+  </Sprite>
+  <Sprite name="SmallExplosion" file="explosions.png">
+    <Frame x="0" y="0" width="16" height="16" axisX="8" axisY="8" frameLength="50" />
+    <Frame x="16" y="0" width="16" height="16" axisX="8" axisY="8" frameLength="50" />
+    <Frame x="32" y="0" width="16" height="16" axisX="8" axisY="8" frameLength="50" />
+    <Frame x="48" y="0" width="16" height="16" axisX="8" axisY="8" frameLength="50" />
+    <Frame x="64" y="0" width="16" height="16" axisX="8" axisY="8" frameLength="50" />
+  </Sprite>
+  <Sprite name="MediumExplosion" file="explosions.png">
+    <Frame x="0" y="16" width="32" height="32" axisX="16" axisY="16" frameLength="50" />
+    <Frame x="32" y="16" width="32" height="32" axisX="16" axisY="16" frameLength="50" />
+    <Frame x="64" y="16" width="32" height="32" axisX="16" axisY="16" frameLength="50" />
+    <Frame x="96" y="16" width="32" height="32" axisX="16" axisY="16" frameLength="50" />
+    <Frame x="128" y="16" width="32" height="32" axisX="16" axisY="16" frameLength="50" />
+  </Sprite>
+  <Sprite name="LargeExplosion" file="explosions.png">
+    <Frame x="0" y="48" width="64" height="64" axisX="32" axisY="32" frameLength="50" />
+    <Frame x="64" y="48" width="64" height="64" axisX="32" axisY="32" frameLength="50" />
+    <Frame x="128" y="48" width="64" height="64" axisX="32" axisY="32" frameLength="50" />
+    <Frame x="192" y="48" width="64" height="64" axisX="32" axisY="32" frameLength="50" />
+    <Frame x="256" y="48" width="64" height="64" axisX="32" axisY="32" frameLength="50" />
+  </Sprite>
 
   <!--Race Sprites-->
   <!--Humans-->

@@ -50,7 +50,7 @@ namespace Xasteroids.Screens
 			int x = _gameMain.ScreenSize.X / 2 - 130;
 			int y = _gameMain.ScreenSize.Y / 2 + 50;
 
-			if (!_singlePlayerButton.Initialize("MainButtonBG", "MainButtonFG", "Single Player", "LargeComputerFont", ButtonTextAlignment.CENTER, x, y, 260, 40, _gameMain.Random, out reason))
+			if (!_singlePlayerButton.Initialize("MainButtonBG", "MainButtonFG", "Single Player", "LargeComputerFont", ButtonTextAlignment.CENTER, x, y + 50, 260, 40, _gameMain.Random, out reason))
 			{
 				return false;
 			}
@@ -68,15 +68,15 @@ namespace Xasteroids.Screens
 			{
 				return false;
 			}
-			if (!_ipAddressTextBox.Initialize(string.Empty, x - 150, y + 100, 260, 40, false, _gameMain.Random, out reason))
+			if (!_ipAddressTextBox.Initialize(string.Empty, x - 150, y + 50, 260, 40, false, _gameMain.Random, out reason))
 			{
 				return false;
 			}
-			if (!_hostOrConnectButton.Initialize("MainButtonBG", "MainButtonFG", "Host", "LargeComputerFont", ButtonTextAlignment.CENTER, x + 150, y + 100, 260, 40, _gameMain.Random, out reason))
+			if (!_hostOrConnectButton.Initialize("MainButtonBG", "MainButtonFG", "Host", "LargeComputerFont", ButtonTextAlignment.CENTER, x + 150, y + 50, 260, 40, _gameMain.Random, out reason))
 			{
 				return false;
 			}
-			if (!_cancelButton.Initialize("MainButtonBG", "MainButtonFG", "Back", "LargeComputerFont", ButtonTextAlignment.CENTER, x, y + 200, 260, 40, _gameMain.Random, out reason))
+			if (!_cancelButton.Initialize("MainButtonBG", "MainButtonFG", "Back", "LargeComputerFont", ButtonTextAlignment.CENTER, x, y + 100, 260, 40, _gameMain.Random, out reason))
 			{
 				return false;
 			}
@@ -102,6 +102,7 @@ namespace Xasteroids.Screens
 		{
 			_gameMain.DrawObjects();
 			_title.Draw(_gameMain.ScreenSize.X / 2 - 400, (_gameMain.ScreenSize.Y / 2) - 300);
+			_playerNameTextBox.Draw();
 			if (!_showingMultiplayerOptions)
 			{
 				_singlePlayerButton.Draw();
@@ -110,7 +111,6 @@ namespace Xasteroids.Screens
 			}
 			else
 			{
-				_playerNameTextBox.Draw();
 				_ipAddressTextBox.Draw();
 				_hostOrConnectButton.Draw();
 				_cancelButton.Draw();
@@ -124,7 +124,7 @@ namespace Xasteroids.Screens
 
 		public void Update(int x, int y, float frameDeltaTime)
 		{
-			_gameMain.AsteroidManager.UpdatePhysics(null, null, frameDeltaTime, _gameMain.Random);
+			_gameMain.AsteroidManager.UpdatePhysics(null, null, null, frameDeltaTime, _gameMain.Random);
 			_gameMain.AsteroidManager.Update(frameDeltaTime);
 
 			if (_showingShipSelection)
@@ -132,6 +132,7 @@ namespace Xasteroids.Screens
 				_gameMain.ShipSelectionWindow.MouseHover(x, y, frameDeltaTime);
 				return;
 			}
+			_playerNameTextBox.Update(frameDeltaTime);
 			if (!_showingMultiplayerOptions)
 			{
 				_singlePlayerButton.MouseHover(x, y, frameDeltaTime);
@@ -140,7 +141,6 @@ namespace Xasteroids.Screens
 			}
 			else
 			{
-				_playerNameTextBox.Update(frameDeltaTime);
 				_ipAddressTextBox.Update(frameDeltaTime);
 				_hostOrConnectButton.MouseHover(x, y, frameDeltaTime);
 				_cancelButton.MouseHover(x, y, frameDeltaTime);
@@ -156,6 +156,7 @@ namespace Xasteroids.Screens
 				_gameMain.ShipSelectionWindow.MouseDown(x, y);
 				return;
 			}
+			_playerNameTextBox.MouseDown(x, y);
 			if (!_showingMultiplayerOptions)
 			{
 				_singlePlayerButton.MouseDown(x, y);
@@ -164,7 +165,6 @@ namespace Xasteroids.Screens
 			}
 			else
 			{
-				_playerNameTextBox.MouseDown(x, y);
 				_ipAddressTextBox.MouseDown(x, y);
 				_hostOrConnectButton.MouseDown(x, y);
 				_cancelButton.MouseDown(x, y);
@@ -183,6 +183,7 @@ namespace Xasteroids.Screens
 				}
 				return;
 			}
+			_playerNameTextBox.MouseUp(x, y);
 			if (!_showingMultiplayerOptions)
 			{
 				if (_singlePlayerButton.MouseUp(x, y))
@@ -205,7 +206,6 @@ namespace Xasteroids.Screens
 			}
 			else
 			{
-				_playerNameTextBox.MouseUp(x, y);
 				_ipAddressTextBox.MouseUp(x, y);
 				if (_hostOrConnectButton.MouseUp(x, y))
 				{
@@ -288,6 +288,7 @@ namespace Xasteroids.Screens
 			player.Bank -= shipCost;
 			player.ShipSprite = SpriteManager.GetShipSprite(size, style, _gameMain.Random);
 			player.ShieldSprite = SpriteManager.GetShieldSprite(size, _gameMain.Random);
+			player.Name = _playerNameTextBox.Text;
 
 			_showingShipSelection = false;
 			_gameMain.ShipSelectionWindow.OnSelectShip = null;

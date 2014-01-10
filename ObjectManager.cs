@@ -11,12 +11,19 @@ namespace Xasteroids
 		//This class is for handling bullets, nukes, and other various objects
 		public List<Bullet> Bullets { get; private set; }
 		public BBSprite BulletSprite { get; private set; }
+		public BBSprite ShockwaveSprite { get; private set; }
+
+		public List<Explosion> Explosions { get; private set; }
+		public List<Shockwave> Shockwaves { get; private set; } 
 
 		public ObjectManager(GameMain gameMain)
 		{
 			Bullets = new List<Bullet>();
+			Explosions = new List<Explosion>();
+			Shockwaves = new List<Shockwave>();
 			_gameMain = gameMain;
-			BulletSprite = SpriteManager.GetSprite("Bullet", gameMain.Random);
+			BulletSprite = SpriteManager.GetSprite("Bullet", _gameMain.Random);
+			ShockwaveSprite = SpriteManager.GetSprite("Shockwave", _gameMain.Random);
 		}
 
 		public void AddBullet(Player player)
@@ -27,6 +34,18 @@ namespace Xasteroids
 				Bullet bullet = new Bullet(player, degree);
 				Bullets.Add(bullet);
 			}
+		}
+
+		public void AddExplosion(float xPos, float yPos, float xVel, float yVel, int size)
+		{
+			var explosion = new Explosion(xPos, yPos, xVel, yVel, size, _gameMain.Random);
+			Explosions.Add(explosion);
+		}
+
+		public void AddShockwave(float xPos, float yPos, int size, Player owner)
+		{
+			var shockwave = new Shockwave(xPos, yPos, size, owner);
+			Shockwaves.Add(shockwave);
 		}
 
 		public void Update(float frameDeltaTime)
@@ -40,6 +59,7 @@ namespace Xasteroids
 				if (bullet.Damage <= 0)
 				{
 					bulletsToRemove.Add(bullet);
+					AddExplosion(bullet.PositionX, bullet.PositionY, bullet.VelocityX, bullet.VelocityY, 1);
 					continue;
 				}
 				bullet.PositionX += bullet.VelocityX * frameDeltaTime;
@@ -70,13 +90,146 @@ namespace Xasteroids
 			}
 			foreach (var bullet in bulletsToRemove)
 			{
+				if (!bullet.IsShrapnel)
+				{
+					AddExplosion(bullet.PositionX, bullet.PositionY, bullet.VelocityX, bullet.VelocityY, 1);
+					if (bullet.Owner.ShrapnelLevel > 0)
+					{
+						for (int i = 0; i < bullet.Owner.ShrapnelLevel; i++)
+						{
+							//This is a constructor for adding shrapnel
+							Bullets.Add(new Bullet(bullet, (float)((_gameMain.Random.Next(360) / 180.0f) * Math.PI)));
+						}
+					}
+				}
 				Bullets.Remove(bullet);
+			}
+
+			var explosionsToRemove = new List<Explosion>();
+			foreach (var explosion in Explosions)
+			{
+				explosion.PositionX += explosion.VelocityX * frameDeltaTime;
+				explosion.PositionY += explosion.VelocityY * frameDeltaTime;
+
+				while (explosion.PositionX < 0)
+				{
+					explosion.PositionX += width;
+				}
+				while (explosion.PositionX >= width)
+				{
+					explosion.PositionX -= width;
+				}
+				while (explosion.PositionY < 0)
+				{
+					explosion.PositionY += height;
+				}
+				while (explosion.PositionY >= height)
+				{
+					explosion.PositionY -= height;
+				}
+
+				explosion.Update(frameDeltaTime, _gameMain.Random);
+				if (explosion.LifeTime <= 0)
+				{
+					explosionsToRemove.Add(explosion);
+				}
+			}
+			foreach (var explosionToRemove in explosionsToRemove)
+			{
+				Explosions.Remove(explosionToRemove);
+			}
+
+			var shockwavesToRemove = new List<Shockwave>();
+			foreach (var shockwave in Shockwaves)
+			{
+				shockwave.Update(frameDeltaTime);
+				if (shockwave.Boomed)
+				{
+					shockwavesToRemove.Add(shockwave);
+				}
+			}
+			foreach (var shockwaveToRemove in shockwavesToRemove)
+			{
+				Shockwaves.Remove(shockwaveToRemove);
 			}
 		}
 
 		public void Clear()
 		{
 			Bullets.Clear();
+		}
+	}
+
+	public class Shockwave
+	{
+		public float PositionX { get; set; }
+		public float PositionY { get; set; }
+		public float TimeTilBoom { get; private set; }
+		public int Radius { get; private set; }
+		public int Size { get; private set; }
+		public bool Boomed { get; private set; }
+		public Player Owner { get; private set; } //For nukes
+
+		public Shockwave(float xPos, float yPos, int size, Player owner)
+		{
+			TimeTilBoom = 0.2f;
+			PositionX = xPos;
+			PositionY = yPos;
+			Radius = 72 * size;
+			Size = size;
+			Owner = owner;
+		}
+
+		public void Update(float frameDeltaTime)
+		{
+			if (TimeTilBoom <= 0)
+			{
+				Boomed = true;
+			}
+			else
+			{
+				//Don't check for 0 or below, allowing for one cycle of physics update before this gets removed, so objects gets damaged
+				TimeTilBoom -= frameDeltaTime;
+			}
+		}
+	}
+
+	public class Explosion
+	{
+		public float PositionX { get; set; }
+		public float PositionY { get; set; }
+		public float VelocityX { get; set; }
+		public float VelocityY { get; set; }
+		public BBSprite Sprite { get; private set; }
+		public float LifeTime { get; private set; }
+		public int Size { get; private set; }
+
+		public Explosion(float xPos, float yPos, float xvel, float yvel, int size, Random r)
+		{
+			switch (size)
+			{
+				case 1:
+					Sprite = SpriteManager.GetSprite("SmallExplosion", r);
+					break;
+				case 2:
+					Sprite = SpriteManager.GetSprite("MediumExplosion", r);
+					break;
+				case 4:
+					Sprite = SpriteManager.GetSprite("LargeExplosion", r);
+					break;
+			}
+			PositionX = xPos;
+			PositionY = yPos;
+			VelocityX = xvel;
+			VelocityY = yvel;
+			LifeTime = 0.25f;
+			Size = (size * 8);
+		}
+
+		public void Update(float frameDeltaTime, Random r)
+		{
+			LifeTime -= frameDeltaTime;
+			Sprite.Update(frameDeltaTime, r);
 		}
 	}
 
@@ -91,6 +244,7 @@ namespace Xasteroids
 		public Color Color { get; set; }
 		public Player Owner { get; set; } //So it don't hit the ship that fired it
 		public float Lifetime { get; set; } //Decrements until it reaches 0, then despawn
+		public bool IsShrapnel { get; set; }
 
 		public Bullet(Player owner, float degree)
 		{
@@ -98,12 +252,29 @@ namespace Xasteroids
 			Owner = owner;
 			PositionX = Owner.PositionX;
 			PositionY = Owner.PositionY;
-			VelocityX = Owner.VelocityX + (float)(Math.Cos(degree) * (Owner.VelocityLevel * 100 + 100));
-			VelocityY = Owner.VelocityY + (float)(Math.Sin(degree) * (Owner.VelocityLevel * 100 + 100));
+			VelocityX = Owner.VelocityX + (float)(Math.Cos(degree) * (Owner.VelocityLevel * 100 + 200));
+			VelocityY = Owner.VelocityY + (float)(Math.Sin(degree) * (Owner.VelocityLevel * 100 + 200));
 			Color = Color.White;
 			Scale = 1;
-			Lifetime = 2;
+			Lifetime = 1;
 			Damage = Owner.DamageLevel * 5;
+			IsShrapnel = false;
+		}
+
+		public Bullet(Bullet bullet, float degree)
+		{
+			//This is a shrapnel
+			//add new bullets in random velocities
+			Owner = bullet.Owner;
+			PositionX = bullet.PositionX;
+			PositionY = bullet.PositionY;
+			VelocityX = bullet.VelocityX + (float)(Math.Cos(degree) * 100);
+			VelocityY = bullet.VelocityY + (float)(Math.Sin(degree) * 100);
+			Color = Color.White;
+			Scale = 0.5f;
+			Lifetime = 1;
+			Damage = 5;
+			IsShrapnel = true;
 		}
 
 		public void Update(float frameDeltaTime)

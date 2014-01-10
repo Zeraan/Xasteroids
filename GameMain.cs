@@ -48,6 +48,8 @@ namespace Xasteroids
 		public GorgonLibrary.Graphics.FXShader ShipShader { get; private set; }
 
 		private BBSprite Cursor;
+		private Host _host;
+		private Client _client;
 		public ShipSelectionWindow ShipSelectionWindow { get; private set; }
 
 		public int LevelNumber { get; set; }
@@ -123,6 +125,38 @@ namespace Xasteroids
 			Cursor.Update(frameDeltaTime, Random);
 		}
 
+		public void ConnectToHostAt(IPAddress address)
+		{
+			if (_host != null)
+			{
+				_host.ShutDown();
+				_host = null;
+			}
+			if (_client != null)
+			{
+				_client.ShutDown();
+				_client.Disconnected -= OnDisconnected;
+			}
+			_client = new Client { ServerIPAddress = address };
+			/* Client will only have non-null values for ServerIPAddress
+			 * if it is connected.
+			 */
+			if (_client.ServerIPAddress!= null)
+			{
+				ChangeToScreen(Screen.MultiplayerPreGameClient);
+				_client.Disconnected += OnDisconnected;
+			}
+		}
+
+		private void OnDisconnected()
+		{
+			if (_currentScreen != Screen.MainMenu)
+			{
+				ChangeToScreen(Screen.MainMenu);
+			}
+			MessageBox.Show("Your connection with the host has been severed.");
+		}
+
 		public void ChangeToScreen(Screen whichScreen)
 		{
 			_currentScreen = whichScreen;
@@ -135,6 +169,24 @@ namespace Xasteroids
 					LevelNumber = 100;
 					SetupLevel();
 					_screenInterface = _mainMenu;
+					// Clean up _host if we have left MultiplayerPreGameServer
+					if (_host != null)
+					{
+						if (!_host.IsShutDown)
+						{
+							_host.ShutDown();
+						}
+						_host = null;
+					}
+					// Clean up _client if we have left MultiplayerPreGameServer
+					if (_client != null)
+					{
+						if (!_client.IsShutDown)
+						{
+							_client.ShutDown();
+						}
+						_client = null;
+					}
 					break;
 				}
 				case Screen.MultiplayerPreGameClient:
@@ -149,7 +201,6 @@ namespace Xasteroids
 							ExitGame();
 						}
 					}
-					_multiplayerGameSetup.SetHost(false);
 					_screenInterface = _multiplayerGameSetup;
 					break;
 				}
@@ -165,7 +216,12 @@ namespace Xasteroids
 							ExitGame();
 						}
 					}
-					_multiplayerGameSetup.SetHost(true);
+					if (_client != null)
+					{
+						_client.ShutDown();
+						_client = null;
+					}
+					_host = new Host { CurrentlyAcceptingPlayers = true };
 					_screenInterface = _multiplayerGameSetup;
 					break;
 				}

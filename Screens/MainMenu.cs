@@ -1,4 +1,6 @@
 ﻿using System.Drawing;
+using System.Net;
+using System.Windows.Forms;
 using GorgonLibrary.InputDevices;
 
 namespace Xasteroids.Screens
@@ -208,7 +210,19 @@ namespace Xasteroids.Screens
 				if (_hostOrConnectButton.MouseUp(x, y))
 				{
 					//If client, initialize connection at this point, then change screen.  Otherwise, set up listen on port
-					_gameMain.ChangeToScreen(_ipAddressTextBox.Text.Length == 0 ? Screen.MultiplayerPreGameServer : Screen.MultiplayerPreGameClient);
+					
+					if (_ipAddressTextBox.Text.Length > 0)
+					{
+						IPAddress hostAddress;
+						if (IPAddress.TryParse(_ipAddressTextBox.Text, out hostAddress))
+						{
+							_gameMain.ConnectToHostAt(hostAddress);
+						}
+					}
+					else
+					{
+						_gameMain.ChangeToScreen(Screen.MultiplayerPreGameServer);
+					}
 				}
 				if (_cancelButton.MouseUp(x, y))
 				{

@@ -113,6 +113,18 @@ namespace Xasteroids
 			_parentForm.Close();
 		}
 
+		public void PayPlayer(string playerName, int amount)
+		{
+			foreach (Player player in PlayerManager.Players)
+			{
+				if (player.Name.Equals(playerName))
+				{
+					player.Bank += amount;
+					break;
+				}
+			}
+		}
+
 		//Handle events
 		public void ProcessGame(float frameDeltaTime)
 		{

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Xasteroids
+﻿namespace Xasteroids
 {
 	public class NetworkMessage : IConfigurable
 	{
@@ -12,7 +7,7 @@ namespace Xasteroids
 		{
 			get
 			{
-				return new string[] {
+				return new[] {
 					Content
 				};
 			}
@@ -34,7 +29,7 @@ namespace Xasteroids
 		{
 			get
 			{
-				return new string[] {
+				return new[] {
 					Content
 				};
 			}

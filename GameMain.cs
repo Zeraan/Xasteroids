@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using System.Windows.Forms;
 using GorgonLibrary.InputDevices;
 using Xasteroids.Screens;
@@ -51,6 +52,18 @@ namespace Xasteroids
 		private Host _host;
 		private Client _client;
 		public ShipSelectionWindow ShipSelectionWindow { get; private set; }
+		public object ChatLock;
+		public bool NewChatMessage;
+		public StringBuilder ChatText;
+
+		public bool IsHost
+		{ 
+			get { return _host != null; }
+		}
+		public bool IsConnected
+		{
+			get { return IsHost ? !_host.IsShutDown : _client != null ? !_client.IsShutDown : false; }
+		}
 
 		public int LevelNumber { get; set; }
 		public Point LevelSize { get; private set; }
@@ -145,21 +158,24 @@ namespace Xasteroids
 			if (_host != null)
 			{
 				_host.ShutDown();
+				_host.ObjectReceived -= HandleObject;
 				_host = null;
 			}
 			if (_client != null)
 			{
 				_client.ShutDown();
 				_client.Disconnected -= OnDisconnected;
+				_client.ObjectReceived -= HandleObject;
 			}
 			_client = new Client { ServerIPAddress = address };
 			/* Client will only have non-null values for ServerIPAddress
 			 * if it is connected.
 			 */
-			if (_client.ServerIPAddress!= null)
+			if (_client.ServerIPAddress != null)
 			{
 				ChangeToScreen(Screen.MultiplayerPreGameClient);
 				_client.Disconnected += OnDisconnected;
+				_client.ObjectReceived += HandleObject;
 			}
 		}
 
@@ -170,6 +186,37 @@ namespace Xasteroids
 				ChangeToScreen(Screen.MainMenu);
 			}
 			MessageBox.Show("Your connection with the host has been severed.");
+		}
+
+		private void HandleObject(IPAddress senderIPAddress, IConfigurable theObject)
+		{
+			var castObject = theObject as GameMessage;
+			if (castObject != null)
+			{
+				lock (ChatLock)
+				{
+					NewChatMessage = true;
+					ChatText.AppendLine(castObject.Content);
+					if (IsHost)
+					{
+						_host.SendObjectTCP(theObject);
+					}
+				}
+			}
+		}
+
+		public void SendChat(string message)
+		{
+			var gameMessage = new GameMessage();
+			gameMessage.Content = message;
+			if (IsHost)
+			{
+				_host.SendObjectTCP(gameMessage);
+			}
+			else
+			{
+				_client.SendObjectTcp(gameMessage);
+			}
 		}
 
 		public void ChangeToScreen(Screen whichScreen)
@@ -191,6 +238,7 @@ namespace Xasteroids
 						{
 							_host.ShutDown();
 						}
+						_host.ObjectReceived -= HandleObject;
 						_host = null;
 					}
 					// Clean up _client if we have left MultiplayerPreGameServer
@@ -200,6 +248,7 @@ namespace Xasteroids
 						{
 							_client.ShutDown();
 						}
+						_client.ObjectReceived -= HandleObject;
 						_client = null;
 					}
 					break;
@@ -237,6 +286,7 @@ namespace Xasteroids
 						_client = null;
 					}
 					_host = new Host { CurrentlyAcceptingPlayers = true };
+					_host.ObjectReceived += HandleObject;
 					_screenInterface = _multiplayerGameSetup;
 					break;
 				}

@@ -832,8 +832,11 @@ namespace Xasteroids
 		}
 	}
 
-	public class Asteroid
+	public class Asteroid : IConfigurable
 	{
+		//config exlcludes itself (naturally) and AsteroidSprite
+		public const int CONFIG_LENGTH = 18;
+
 		public bool ToBeRemoved { get; set; }
 		public float PositionX { get; set; }
 		public float PositionY { get; set; }
@@ -853,6 +856,135 @@ namespace Xasteroids
 		public virtual int Point { get; set; }
 		public BBSprite AsteroidSprite { get; set; }
 		public List<Bullet> ImpactedBullets { get; set; }  //SO penetrating bullets won't continue to hit the asteroid every frame
+		public string[] Configuration
+		{
+			get
+			{
+				string[] config = new string[CONFIG_LENGTH];
+				config[0] = ToBeRemoved.ToString();
+				config[1] = PositionX.ToString();
+				config[2] = PositionY.ToString();
+				config[3] = VelocityX.ToString();
+				config[4] = VelocityY.ToString();
+				config[5] = Angle.ToString();
+				config[6] = RotationSpeed.ToString();
+				config[7] = HP.ToString();
+				config[8] = Color.ToString();
+				config[9] = Radius.ToString();
+				config[10] = Mass.ToString();
+				config[11] = Size.ToString();
+				config[12] = Style.ToString();
+				config[13] = Phase.ToString();
+				config[14] = IsPhasing.ToString();
+				config[15] = PhaseSpeed.ToString();
+				config[16] = Point.ToString();
+				string bulletsString;
+				if (ImpactedBullets == null || ImpactedBullets.Count == 0)
+				{
+					bulletsString = "[]";
+				}
+				else
+				{
+					string[] asStrings = new string[ImpactedBullets.Count];
+					for (int j = 0; j < asStrings.Length; ++j)
+					{
+						string arrayString = "[" + string.Join(",", ImpactedBullets[j].Configuration) + "]";
+						asStrings[j] = arrayString;
+					}
+					bulletsString = "[" + string.Join(",", asStrings) + "]";
+				}
+				config[17] = bulletsString;
+		
+				return config;
+			}
+			set
+			{
+				if (value.Length < CONFIG_LENGTH)
+				{
+					return;
+				}
+
+				bool outBool;
+				if(bool.TryParse(value[0], out outBool))
+				{
+					ToBeRemoved = outBool;
+				}
+				float outFloat;
+				if (float.TryParse(value[1], out outFloat))
+				{
+					PositionX = outFloat;
+				}
+				if (float.TryParse(value[2], out outFloat))
+				{
+					PositionY = outFloat;
+				}
+				if (float.TryParse(value[3], out outFloat))
+				{
+					VelocityX = outFloat;
+				}
+				if (float.TryParse(value[4], out outFloat))
+				{
+					VelocityY = outFloat;
+				}
+				if (float.TryParse(value[5], out outFloat))
+				{
+					Angle = outFloat;
+				}
+				if (float.TryParse(value[6], out outFloat))
+				{
+					RotationSpeed = outFloat;
+				}
+				if (float.TryParse(value[7], out outFloat))
+				{
+					HP = outFloat;
+				}
+				Color = Color.FromName(value[8]);
+				int outInt;
+				if(int.TryParse(value[9], out outInt))
+				{
+					Radius = outInt;
+				}
+				if (int.TryParse(value[10], out outInt))
+				{
+					Mass = outInt;
+				}
+				if (int.TryParse(value[11], out outInt))
+				{
+					Size = outInt;
+				}
+				if (int.TryParse(value[12], out outInt))
+				{
+					Style = outInt;
+				}
+				if (float.TryParse(value[13], out outFloat))
+				{
+					Phase = outFloat;
+				}
+				if (bool.TryParse(value[14], out outBool))
+				{
+					IsPhasing = outBool;
+				}
+				if (int.TryParse(value[15], out outInt))
+				{
+					PhaseSpeed = outInt;
+				}
+				if (int.TryParse(value[16], out outInt))
+				{
+					Point = outInt;
+				}
+
+				string bulletsString = value[17];
+				string contents = bulletsString.Substring(1, bulletsString.Length - 2);
+				string[] asStrings = contents.Split(',');
+				ImpactedBullets = new List<Bullet>();
+				foreach (string arrayString in asStrings)
+				{
+					contents = arrayString.Substring(1, arrayString.Length - 2);
+					string[] bulletConfig = contents.Split(',');
+					ImpactedBullets.Add(new Bullet(bulletConfig));
+				}
+			}
+		}
 
 		public Asteroid(int width, int height, Random r)
 		{
@@ -892,6 +1024,12 @@ namespace Xasteroids
 			AsteroidSprite = SpriteManager.GetAsteroidSprite(Size, Style, r);
 			Phase = 255;
 			IsPhasing = true;
+		}
+
+		public Asteroid(string[] configuration)
+		{
+			Configuration = configuration;
+			AsteroidSprite = SpriteManager.GetAsteroidSprite(Size, Style, new Random());
 		}
 
 		public virtual void Update(int width, int height, float frameDeltaTime)

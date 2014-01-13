@@ -233,8 +233,10 @@ namespace Xasteroids
 		}
 	}
 
-	public class Bullet
+	public class Bullet : IConfigurable
 	{
+		public const int CONFIG_LENGTH = 10;
+
 		public float PositionX { get; set; }
 		public float PositionY { get; set; }
 		public float VelocityX { get; set; }
@@ -245,6 +247,70 @@ namespace Xasteroids
 		public Player Owner { get; set; } //So it don't hit the ship that fired it
 		public float Lifetime { get; set; } //Decrements until it reaches 0, then despawn
 		public bool IsShrapnel { get; set; }
+		//Does Player Contain much data not used by bullet?
+		public string[] Configuration { 
+			get
+			{
+				string[] config = new string[CONFIG_LENGTH];
+
+				config[0] = PositionX.ToString();
+				config[1] = PositionY.ToString();
+				config[2] = VelocityX.ToString();
+				config[3] = VelocityY.ToString();
+				config[4] = Damage.ToString();
+				config[5] = Scale.ToString();
+				config[6] = Color.ToString();
+				config[7] = Owner.ToString();	//Should do something about this guy
+				config[8] = Lifetime.ToString();
+				config[9] = IsShrapnel.ToString();
+
+				return config;
+			} 
+			set
+			{
+				if (value.Length < CONFIG_LENGTH)
+				{
+					return;
+				}
+
+				float outFloat;
+				if (float.TryParse(value[0], out outFloat))
+				{
+					PositionX = outFloat;
+				}
+				if (float.TryParse(value[1], out outFloat))
+				{
+					PositionY = outFloat;
+				}
+				if (float.TryParse(value[2], out outFloat))
+				{
+					VelocityX = outFloat;
+				}
+				if (float.TryParse(value[3], out outFloat))
+				{
+					VelocityY = outFloat;
+				}
+				if (float.TryParse(value[4], out outFloat))
+				{
+					Damage = outFloat;
+				}
+				if (float.TryParse(value[5], out outFloat))
+				{
+					Scale = outFloat;
+				}
+				Color = Color.FromName(value[6]);
+				//Owner part
+				if (float.TryParse(value[8], out outFloat))
+				{
+					Lifetime = outFloat;
+				}
+				bool outBool;
+				if (bool.TryParse(value[9], out outBool))
+				{
+					IsShrapnel = outBool;
+				}
+			}
+		}
 
 		public Bullet(Player owner, float degree)
 		{
@@ -275,6 +341,11 @@ namespace Xasteroids
 			Lifetime = 1;
 			Damage = 5;
 			IsShrapnel = true;
+		}
+
+		public Bullet(string[] configuration)
+		{
+			Configuration = configuration;
 		}
 
 		public void Update(float frameDeltaTime)

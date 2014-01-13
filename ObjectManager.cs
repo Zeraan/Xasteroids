@@ -93,9 +93,9 @@ namespace Xasteroids
 				if (!bullet.IsShrapnel)
 				{
 					AddExplosion(bullet.PositionX, bullet.PositionY, bullet.VelocityX, bullet.VelocityY, 1);
-					if (bullet.Owner.ShrapnelLevel > 0)
+					if (bullet.ShrapnelLevel > 0)
 					{
-						for (int i = 0; i < bullet.Owner.ShrapnelLevel; i++)
+						for (int i = 0; i < bullet.ShrapnelLevel; i++)
 						{
 							//This is a constructor for adding shrapnel
 							Bullets.Add(new Bullet(bullet, (float)((_gameMain.Random.Next(360) / 180.0f) * Math.PI)));
@@ -168,7 +168,7 @@ namespace Xasteroids
 		public int Radius { get; private set; }
 		public int Size { get; private set; }
 		public bool Boomed { get; private set; }
-		public Player Owner { get; private set; } //For nukes
+		public string OwnerName { get; private set; } //For nukes
 
 		public Shockwave(float xPos, float yPos, int size, Player owner)
 		{
@@ -177,7 +177,10 @@ namespace Xasteroids
 			PositionY = yPos;
 			Radius = 72 * size;
 			Size = size;
-			Owner = owner;
+			if (owner != null)
+			{
+				OwnerName = owner.Name;
+			}
 		}
 
 		public void Update(float frameDeltaTime)
@@ -242,22 +245,26 @@ namespace Xasteroids
 		public float Damage { get; set; }
 		public float Scale { get; set; }
 		public Color Color { get; set; }
-		public Player Owner { get; set; } //So it don't hit the ship that fired it
+		public string OwnerName { get; set; } //So it don't hit the ship that fired it
+		public int PenetratingLevel { get; set; }
+		public int ShrapnelLevel { get; set; }
 		public float Lifetime { get; set; } //Decrements until it reaches 0, then despawn
 		public bool IsShrapnel { get; set; }
 
 		public Bullet(Player owner, float degree)
 		{
 			//Derive data from the owner, since it's obvious that this owner fired the bullet, aka construction call
-			Owner = owner;
-			PositionX = Owner.PositionX;
-			PositionY = Owner.PositionY;
-			VelocityX = Owner.VelocityX + (float)(Math.Cos(degree) * (Owner.VelocityLevel * 100 + 200));
-			VelocityY = Owner.VelocityY + (float)(Math.Sin(degree) * (Owner.VelocityLevel * 100 + 200));
+			OwnerName = owner.Name;
+			PenetratingLevel = owner.PenetratingLevel;
+			ShrapnelLevel = owner.ShrapnelLevel;
+			PositionX = owner.PositionX;
+			PositionY = owner.PositionY;
+			VelocityX = owner.VelocityX + (float)(Math.Cos(degree) * (owner.VelocityLevel * 100 + 200));
+			VelocityY = owner.VelocityY + (float)(Math.Sin(degree) * (owner.VelocityLevel * 100 + 200));
 			Color = Color.White;
 			Scale = 1;
 			Lifetime = 1;
-			Damage = Owner.DamageLevel * 5;
+			Damage = owner.DamageLevel * 5;
 			IsShrapnel = false;
 		}
 
@@ -265,7 +272,9 @@ namespace Xasteroids
 		{
 			//This is a shrapnel
 			//add new bullets in random velocities
-			Owner = bullet.Owner;
+			OwnerName = bullet.OwnerName;
+			PenetratingLevel = bullet.PenetratingLevel;
+			ShrapnelLevel = bullet.ShrapnelLevel;
 			PositionX = bullet.PositionX;
 			PositionY = bullet.PositionY;
 			VelocityX = bullet.VelocityX + (float)(Math.Cos(degree) * 100);

@@ -276,6 +276,8 @@ namespace Xasteroids
 				}
 			}
 
+			public event Action<string, int> PlayerIsOwedMoney;
+
 			public void HandleBullets(Bullet bullet, float frameDeltaTime)
 			{
 				if (bullet.Damage <= 0)
@@ -351,9 +353,12 @@ namespace Xasteroids
 								//Only phasing asteroid left
 								value = 25;
 							}
-							bullet.Owner.Bank += value * asteroid.Size;
+							if (PlayerIsOwedMoney != null)
+							{
+								PlayerIsOwedMoney(bullet.OwnerName, value * asteroid.Size);
+							}
 						}
-						bullet.Damage -= damageDone * (1 - (bullet.Owner.PenetratingLevel * 0.10f));
+						bullet.Damage -= damageDone * (1 - (bullet.PenetratingLevel * 0.10f));
 					}
 				}
 			}
@@ -374,7 +379,7 @@ namespace Xasteroids
 					if ((float)Math.Sqrt(rx * rx + ry * ry) < (shockwave.Radius)) //Shockwave hits it
 					{
 						asteroid.HP -= shockwave.Size * 100;
-						if (asteroid.HP <= 0 && shockwave.Owner != null)
+						if (asteroid.HP <= 0 && shockwave.OwnerName != null)
 						{
 							//Give money to player who destroyed it
 							int value;
@@ -423,7 +428,10 @@ namespace Xasteroids
 								//Only phasing asteroid left
 								value = 25;
 							}
-							shockwave.Owner.Bank += value * asteroid.Size;
+							if (PlayerIsOwedMoney != null)
+							{
+								PlayerIsOwedMoney(shockwave.OwnerName, value * asteroid.Size);
+							}
 						}
 					}
 				}
@@ -453,6 +461,7 @@ namespace Xasteroids
 				for (int j = 0; j < _astCells[i].Length; j++)
 				{
 					_astCells[i][j] = new AstCell();
+					_astCells[i][j].PlayerIsOwedMoney += _gameMain.PayPlayer;
 				}
 			}
 			while (asteroidPoints > 0)

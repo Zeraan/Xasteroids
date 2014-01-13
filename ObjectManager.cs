@@ -160,8 +160,10 @@ namespace Xasteroids
 		}
 	}
 
-	public class Shockwave
+	public class Shockwave : IConfigurable
 	{
+		public const int CONFIG_LENGTH = 7;
+
 		public float PositionX { get; set; }
 		public float PositionY { get; set; }
 		public float TimeTilBoom { get; private set; }
@@ -169,6 +171,58 @@ namespace Xasteroids
 		public int Size { get; private set; }
 		public bool Boomed { get; private set; }
 		public string OwnerName { get; private set; } //For nukes
+
+		public string[] Configuration
+		{
+			get
+			{
+				string[] config = new string[CONFIG_LENGTH];
+				config[0] = PositionX.ToString();
+				config[1] = PositionY.ToString();
+				config[2] = TimeTilBoom.ToString();
+				config[3] = Radius.ToString();
+				config[4] = Size.ToString();
+				config[5] = Boomed.ToString();
+				config[6] = OwnerName.ToString();
+				return config;
+			}
+			set
+			{
+				if (value.Length < CONFIG_LENGTH)
+				{
+					return;
+				}
+
+				float outFloat;
+				if (float.TryParse(value[0], out outFloat))
+				{
+					PositionX = outFloat;
+				}
+				if (float.TryParse(value[1], out outFloat))
+				{
+					PositionY = outFloat;
+				}
+				if (float.TryParse(value[2], out outFloat))
+				{
+					TimeTilBoom = outFloat;
+				}
+				int outInt;
+				if (int.TryParse(value[3], out outInt))
+				{
+					TimeTilBoom = outFloat;
+				}
+				if (int.TryParse(value[4], out outInt))
+				{
+					Size = outInt;
+				}
+				bool outBool;
+				if (bool.TryParse(value[5], out outBool))
+				{
+					Boomed = outBool;
+				}
+				OwnerName = value[6];
+			}
+		}
 
 		public Shockwave(float xPos, float yPos, int size, Player owner)
 		{
@@ -181,6 +235,11 @@ namespace Xasteroids
 			{
 				OwnerName = owner.Name;
 			}
+		}
+
+		public Shockwave(string[] configuration)
+		{
+			Configuration = configuration;
 		}
 
 		public void Update(float frameDeltaTime)
@@ -199,6 +258,11 @@ namespace Xasteroids
 
 	public class Explosion
 	{
+		//Explosion would be one-time update, just pass in position, velocity, and LifeTime, and the client will handle the rest
+		//if it don't show up, no biggie
+		//it's just a visual effect
+		//oh, and Size as well
+
 		public float PositionX { get; set; }
 		public float PositionY { get; set; }
 		public float VelocityX { get; set; }
@@ -238,7 +302,7 @@ namespace Xasteroids
 
 	public class Bullet : IConfigurable
 	{
-		public const int CONFIG_LENGTH = 10;
+		public const int CONFIG_LENGTH = 12;
 
 		public float PositionX { get; set; }
 		public float PositionY { get; set; }
@@ -252,7 +316,6 @@ namespace Xasteroids
 		public int ShrapnelLevel { get; set; }
 		public float Lifetime { get; set; } //Decrements until it reaches 0, then despawn
 		public bool IsShrapnel { get; set; }
-		//Does Player Contain much data not used by bullet?
 		public string[] Configuration { 
 			get
 			{
@@ -264,10 +327,12 @@ namespace Xasteroids
 				config[3] = VelocityY.ToString();
 				config[4] = Damage.ToString();
 				config[5] = Scale.ToString();
-				config[6] = Color.ToString();
-				config[7] = Owner.ToString();	//Should do something about this guy
-				config[8] = Lifetime.ToString();
-				config[9] = IsShrapnel.ToString();
+				config[6] = Color.ToArgb().ToString();
+				config[7] = OwnerName;	//Should do something about this guy
+				config[8] = PenetratingLevel.ToString();
+				config[9] = ShrapnelLevel.ToString();
+				config[10] = Lifetime.ToString();
+				config[11] = IsShrapnel.ToString();
 
 				return config;
 			} 
@@ -303,14 +368,26 @@ namespace Xasteroids
 				{
 					Scale = outFloat;
 				}
-				Color = Color.FromName(value[6]);
-				//Owner part
-				if (float.TryParse(value[8], out outFloat))
+				int outInt;
+				if (int.TryParse(value[6], out outInt))
+				{
+					Color = Color.FromArgb(outInt);
+				}
+				OwnerName = value[7];
+				if (int.TryParse(value[8], out outInt))
+				{
+					PenetratingLevel = outInt;
+				}
+				if (int.TryParse(value[9], out outInt))
+				{
+					ShrapnelLevel = outInt;
+				}
+				if (float.TryParse(value[10], out outFloat))
 				{
 					Lifetime = outFloat;
 				}
 				bool outBool;
-				if (bool.TryParse(value[9], out outBool))
+				if (bool.TryParse(value[11], out outBool))
 				{
 					IsShrapnel = outBool;
 				}

@@ -195,8 +195,14 @@ namespace Xasteroids
 		}
 	}
 
-	public class Player
+	public class Player : IConfigurable
 	{
+		/* There is a lot in here, and as of this writing I
+		 * am only putting a limited amount into the config.
+		 */
+		public const int CONFIG_LENGTH = 7;
+		public const int EXTENDED_CONFIG_LENGTH = 12;
+
 		public string Name { get; set; }
 
 		//Energy Upgrades
@@ -277,12 +283,177 @@ namespace Xasteroids
 			}
 		}
 		public float[] ShipConvertedColor { get; private set; }
-		public BBSprite ShipSprite { get; set; }
-		public BBSprite ShieldSprite { get; set; }
+		private BBSprite _shipSprite;
+		public BBSprite ShipSprite 
+		{
+			get
+			{
+				if (_shipSprite == null)
+				{
+					_shipSprite = SpriteManager.GetShipSprite(ShipSize, ShipStyle, new Random());
+				}
+				return _shipSprite;
+			}
+			set
+			{
+				_shipSprite = value;
+			}
+		}
+
+		private BBSprite _shieldSprite;
+		public BBSprite ShieldSprite 
+		{ 
+			get
+			{
+				if (_shieldSprite == null)
+				{
+					_shieldSprite = SpriteManager.GetShieldSprite(ShipSize, new Random());
+				}
+				return _shieldSprite;
+			}
+			set { _shipSprite = value; }
+		}
 
 		public int Mass { get; set; }
 
 		public int Bank { get; set; }
+
+		public string[] Configuration
+		{
+			//Name, Color, Style, Size, Mass can be one-time
+			get
+			{
+				string[] config = new string[CONFIG_LENGTH];
+
+				config[0] = IsDead.ToString();
+				config[1] = PositionX.ToString();
+				config[2] = PositionY.ToString();
+				config[3] = VelocityX.ToString();
+				config[4] = VelocityY.ToString();
+				config[5] = ShieldAlpha.ToString();
+				config[6] = Bank.ToString();
+
+				return config;
+			}
+			set
+			{
+				if (value.Length < CONFIG_LENGTH)
+				{
+					return;
+				}
+
+				bool outBool;
+				if (bool.TryParse(value[0], out outBool))
+				{
+					IsDead = outBool;
+				}
+				float outFloat;
+				if (float.TryParse(value[1], out outFloat))
+				{
+					PositionX = outFloat;
+				}
+				if (float.TryParse(value[2], out outFloat))
+				{
+					PositionY = outFloat;
+				}
+				if (float.TryParse(value[3], out outFloat))
+				{
+					VelocityX = outFloat;
+				}
+				if (float.TryParse(value[4], out outFloat))
+				{
+					VelocityY = outFloat;
+				}
+				if (float.TryParse(value[5], out outFloat))
+				{
+					ShieldAlpha = outFloat;
+				}
+				int outInt;
+				if (int.TryParse(value[6], out outInt))
+				{
+					Bank = outInt;
+				}
+			}
+		}
+		public string[] ExtendedConfiguration
+		{
+			//Name, Color, Style, Size, Mass can be one-time
+			get
+			{
+				string[] config = new string[CONFIG_LENGTH];
+
+				config[0] = Name;
+				config[1] = IsDead.ToString();
+				config[2] = PositionX.ToString();
+				config[3] = PositionY.ToString();
+				config[4] = VelocityX.ToString();
+				config[5] = VelocityY.ToString();
+				config[6] = ShieldAlpha.ToString();
+				config[7] = ShipSize.ToString();
+				config[8] = ShipStyle.ToString();
+				config[9] = ShipColor.ToArgb().ToString();
+				config[10] = Mass.ToString();
+				config[11] = Bank.ToString();
+
+				return config;
+			}
+			set
+			{
+				if (value.Length < CONFIG_LENGTH)
+				{
+					return;
+				}
+
+				Name = value[0];
+				bool outBool;
+				if (bool.TryParse(value[1], out outBool))
+				{
+					IsDead = outBool;
+				}
+				float outFloat;
+				if (float.TryParse(value[2], out outFloat))
+				{
+					PositionX = outFloat;
+				}
+				if (float.TryParse(value[3], out outFloat))
+				{
+					PositionY = outFloat;
+				}
+				if (float.TryParse(value[4], out outFloat))
+				{
+					VelocityX = outFloat;
+				}
+				if (float.TryParse(value[5], out outFloat))
+				{
+					VelocityY = outFloat;
+				}
+				if (float.TryParse(value[6], out outFloat))
+				{
+					ShieldAlpha = outFloat;
+				}
+				int outInt;
+				if (int.TryParse(value[7], out outInt))
+				{
+					ShipSize = outInt;
+				}
+				if (int.TryParse(value[8], out outInt))
+				{
+					ShipStyle = outInt;
+				}
+				if (int.TryParse(value[9], out outInt))
+				{
+					ShipColor = Color.FromArgb(outInt);
+				}
+				if (int.TryParse(value[10], out outInt))
+				{
+					Mass = outInt;
+				}
+				if (int.TryParse(value[11], out outInt))
+				{
+					Bank = outInt;
+				}
+			}
+		}
 
 		public Player(int shipSize, int shipStyle, Color shipColor, BBSprite shipSprite, BBSprite shieldSprite)
 		{
@@ -316,6 +487,21 @@ namespace Xasteroids
 			PenetratingLevel = 0;
 			ShrapnelLevel = 0;
 			NumberOfNukes = 0;
+		}
+
+		public Player(string[] configuration)
+		{
+			if (configuration.Length == EXTENDED_CONFIG_LENGTH)
+			{
+				ExtendedConfiguration = configuration;
+			}
+			else
+			{
+				Configuration = configuration;
+				ShipSize = 1;
+				ShipStyle = 1;
+				ShipColor = Color.Red;
+			}
 		}
 
 		public void Update(float frameDeltaTime)

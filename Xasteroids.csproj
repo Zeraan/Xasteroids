@@ -92,8 +92,8 @@
     <Compile Include="Screens\WindowInterface.cs" />
     <Compile Include="SpriteManager.cs" />
     <Compile Include="Utility.cs" />
-    <Compile Include="WorldData.cs" />
-    <Compile Include="WorldDataUnitTests.cs" />
+    <Compile Include="CombatData.cs" />
+    <Compile Include="CombatDataUnitTests.cs" />
     <Compile Include="Xasteroids.cs">
       <SubType>Form</SubType>
     </Compile>

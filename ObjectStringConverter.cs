@@ -1,5 +1,4 @@
-﻿using ExtensionMethods;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -23,13 +22,37 @@ namespace Xasteroids
 		private static Regex _spaceBetweenObjectsRegex = new Regex(@"(?<=[^\\]\}).*?(?=[^\\]\{)", RegexOptions.Compiled);
 		public static Regex SpaceBetweenObjectsRegex { get { return _spaceBetweenObjectsRegex; } }
 
+		public static Regex SimpleValueRegex = new Regex(@"(" +
+																@"[^,\[]" +				//anything not a comma or a left bracket...
+																@"|((?<=\\)\[)" +		//or an escaped left bracket...
+																@"|((?<=\\),)" +		//or an escaped comma...
+															")+" +						//...one or more of them
+															@"|((?<=[^\\],)(?=,))",		//Or an empty string between two commas
+			RegexOptions.Compiled
+		);
+
+		public static Regex ConfigurationRegex = new Regex(@"(?<!\\)\[" +
+																"(" +
+																	@"[^\[\]]+" +
+																	"|" +
+																	@"(?'open'(?<!\\)\[)" +
+																	"|" +
+																	@"(?'-open'(?<!\\)\])" +
+																")*" +
+																"(?(open) (?!))" +
+															@"\]",
+			RegexOptions.IgnorePatternWhitespace | RegexOptions.Compiled
+		);
+
+		public static Regex MixedRegex = new Regex("(" + SimpleValueRegex.ToString() + ")|(" + ConfigurationRegex.ToString() + ")", RegexOptions.Compiled);
+
 		public string ObjectToString(IConfigurable obj)
 		{
 			string[] configuration = obj.Configuration;
-			for (int j = 0; j < configuration.Length; ++j)
-			{
-				configuration[j] = configuration[j].EscapeCommas().EscapeCurlyBrackets();
-			}
+			//for (int j = 0; j < configuration.Length; ++j)
+			//{
+			//	configuration[j] = configuration[j].EscapeCommas().EscapeCurlyBrackets();
+			//}
 			string arrayString = "[" + string.Join(",", configuration) + "]";
 			return "{" +
 						"Type:" + obj.GetType().FullName + "," +
@@ -47,10 +70,11 @@ namespace Xasteroids
 			Match theMatch = _objectRegex.Match(str);
 			string fullTypeName = theMatch.Groups[1].Value;
 			string configurationString = theMatch.Groups[2].Value;
-			string[] configurationArray = _unescapedCommaRegex.Split(configurationString);
+			MatchCollection valueMatches = MixedRegex.Matches(configurationString);
+			string[] configurationArray = new string[valueMatches.Count];
 			for (int j = 0; j < configurationArray.Length; ++j)
 			{
-				configurationArray[j] = configurationArray[j].UnEscapeCommas().UnEscapeEscapeCurlyBrackets();
+				configurationArray[j] = valueMatches[j].Value;
 			}
 			IConfigurable configurableGuy = null;
 			if (fullTypeName.Equals(typeof(NetworkMessage).FullName))
@@ -78,6 +102,48 @@ namespace Xasteroids
 			}
 			string configurationString = theMatch.Groups[2].Value;
 			return _unescapedCurlyBracketRegex.Match(configurationString).Success;
+		}
+
+		public static string[] ConfigurationFromStringOfConfigurations(string configurations)
+		{
+			MatchCollection matches = ConfigurationRegex.Matches(configurations);
+			string[] configuration = new string[matches.Count];
+			for (int j = 0; j < matches.Count; ++j)
+			{
+				configuration[j] = matches[j].Value;
+			}
+			return configuration;
+		}
+
+		public static string[] ConfigurationFromMixedString(string mixed)
+		{
+			MatchCollection matches = MixedRegex.Matches(mixed);
+			string[] configuration = new string[matches.Count];
+			for (int j = 0; j < matches.Count; ++j)
+			{
+				configuration[j] = matches[j].Value;
+			}
+			return configuration;
+		}
+
+		public static string IConfigurableListToArrayString<T>(IList<T> configurableCollection)
+			where T : IConfigurable
+		{
+			if (configurableCollection == null || configurableCollection.Count == 0)
+			{
+				return "[]";
+			}
+			else
+			{
+				string[] itemArrayStrings = new string[configurableCollection.Count];
+				for (int j = 0; j <configurableCollection.Count; ++j)
+				{
+					IConfigurable item = configurableCollection[j];
+					string itemArrayString = "[" + string.Join(",", item.Configuration) + "]";
+					itemArrayStrings[j] = itemArrayString;
+				}
+				return "[" + string.Join(",", itemArrayStrings) + "]";
+			}
 		}
 	}
 }

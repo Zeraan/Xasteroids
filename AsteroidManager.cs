@@ -843,6 +843,8 @@ namespace Xasteroids
 
 	public class Asteroid : IConfigurable
 	{
+		private BBSprite _asteroidSprite;
+
 		//config exlcludes itself (naturally) and AsteroidSprite
 		public const int CONFIG_LENGTH = 18;
 
@@ -863,7 +865,21 @@ namespace Xasteroids
 		public bool IsPhasing { get; set; }
 		public int PhaseSpeed { get; set; }
 		public virtual int Point { get; set; }
-		public BBSprite AsteroidSprite { get; set; }
+		public BBSprite AsteroidSprite 
+		{ 
+			get
+			{
+				if (_asteroidSprite == null)
+				{
+					_asteroidSprite = SpriteManager.GetAsteroidSprite(Size, Style, new Random());
+				}
+				return _asteroidSprite;
+			}
+			set
+			{
+				_asteroidSprite = value;
+			}
+		}
 		public List<Bullet> ImpactedBullets { get; set; }  //SO penetrating bullets won't continue to hit the asteroid every frame
 		public string[] Configuration
 		{
@@ -878,7 +894,7 @@ namespace Xasteroids
 				config[5] = Angle.ToString();
 				config[6] = RotationSpeed.ToString();
 				config[7] = HP.ToString();
-				config[8] = Color.ToString();
+				config[8] = Color.ToArgb().ToString();
 				config[9] = Radius.ToString();
 				config[10] = Mass.ToString();
 				config[11] = Size.ToString();
@@ -947,8 +963,11 @@ namespace Xasteroids
 				{
 					HP = outFloat;
 				}
-				Color = Color.FromName(value[8]);
 				int outInt;
+				if (int.TryParse(value[8], out outInt))
+				{
+					Color = Color.FromArgb(outInt);
+				}
 				if(int.TryParse(value[9], out outInt))
 				{
 					Radius = outInt;
@@ -982,16 +1001,19 @@ namespace Xasteroids
 					Point = outInt;
 				}
 
+				ImpactedBullets = new List<Bullet>();
 				string bulletsString = value[17];
 				string contents = bulletsString.Substring(1, bulletsString.Length - 2);
-				string[] asStrings = contents.Split(',');
-				ImpactedBullets = new List<Bullet>();
-				foreach (string arrayString in asStrings)
+				if (contents.Length != 0)
 				{
-					contents = arrayString.Substring(1, arrayString.Length - 2);
-					string[] bulletConfig = contents.Split(',');
-					ImpactedBullets.Add(new Bullet(bulletConfig));
-				}
+					string[] asStrings = contents.Split(',');
+					foreach (string arrayString in asStrings)
+					{
+						contents = arrayString.Substring(1, arrayString.Length - 2);
+						string[] bulletConfig = contents.Split(',');
+						ImpactedBullets.Add(new Bullet(bulletConfig));
+					}
+				}				
 			}
 		}
 
@@ -1030,7 +1052,6 @@ namespace Xasteroids
 			Radius = Size * 16;
 			Style = r.Next(3) + 1;
 			RotationSpeed = (r.Next(1800) / 10.0f) * (r.Next(2) > 0 ? -1 : 1);
-			AsteroidSprite = SpriteManager.GetAsteroidSprite(Size, Style, r);
 			Phase = 255;
 			IsPhasing = true;
 		}
@@ -1038,7 +1059,6 @@ namespace Xasteroids
 		public Asteroid(string[] configuration)
 		{
 			Configuration = configuration;
-			AsteroidSprite = SpriteManager.GetAsteroidSprite(Size, Style, new Random());
 		}
 
 		public virtual void Update(int width, int height, float frameDeltaTime)

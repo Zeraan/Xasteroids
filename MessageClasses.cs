@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using ExtensionMethods;
 
 namespace Xasteroids
 {
@@ -13,7 +10,7 @@ namespace Xasteroids
 			get
 			{
 				return new string[] {
-					Content
+					Content.EscapeCommas().EscapeSquareBrackets().EscapeCurlyBrackets()
 				};
 			}
 			set
@@ -22,7 +19,7 @@ namespace Xasteroids
 				{
 					return;
 				}
-				Content = value[0];
+				Content = value[0].UnEscapeCommas().UnEscapeSquareBrackets().UnEscapeCurlyBrackets();
 			}
 		}
 	}
@@ -35,7 +32,7 @@ namespace Xasteroids
 			get
 			{
 				return new string[] {
-					Content
+					Content.EscapeCommas().EscapeSquareBrackets().EscapeCurlyBrackets()
 				};
 			}
 			set
@@ -44,7 +41,7 @@ namespace Xasteroids
 				{
 					return;
 				}
-				Content = value[0];
+				Content = value[0].UnEscapeCommas().UnEscapeSquareBrackets().UnEscapeCurlyBrackets();
 			}
 		}
 	}

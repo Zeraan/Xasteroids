@@ -89,6 +89,11 @@ namespace Xasteroids.Screens
 
 		public void Update(int x, int y, float frameDeltaTime)
 		{
+			if (_gameMain.NewChatMessage)
+			{
+				_chatText.SetText(_gameMain.ChatText.ToString());
+				_chatText.ScrollToBottom();
+			}
 			_shipSelection.MouseHover(x, y, frameDeltaTime);
 			if (_isHost)
 			{
@@ -138,10 +143,7 @@ namespace Xasteroids.Screens
 		{
 			if (e.Key == KeyboardKeys.Enter || e.Key == KeyboardKeys.Return)
 			{
-				StringBuilder text = new StringBuilder(_chatText.Text);
-				text.AppendLine(_messageTextBox.Text);
-				//Post the message to chatbox
-				_chatText.SetText(text.ToString());
+				_gameMain.SendChat(_messageTextBox.Text);
 				_messageTextBox.SetText(string.Empty);
 			}
 			else

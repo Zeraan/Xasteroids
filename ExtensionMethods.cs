@@ -23,7 +23,7 @@ namespace ExtensionMethods
 			return str.Replace("}", @"\}");
 		}
 
-		public static string UnEscapeEscapeCurlyBrackets(this String str)
+		public static string UnEscapeCurlyBrackets(this String str)
 		{
 			str = str.Replace(@"\{", "{");
 			return str.Replace(@"\}", "}");

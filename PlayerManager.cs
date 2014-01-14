@@ -9,7 +9,6 @@ namespace Xasteroids
 		private GameMain _gameMain;
 		private List<Player> _players = new List<Player>();
 		public List<Player> Players { get { return _players; } }
-		public Player MainPlayer { get { return _players[0]; } } 
 
 		public PlayerManager(GameMain gameMain)
 		{
@@ -21,27 +20,19 @@ namespace Xasteroids
 			_players.Add(player);
 		}
 
-		public void ClearMainPlayer(Random r)
-		{
-			if (_players.Count == 0)
-			{
-				_players.Add(new Player(1, 1, Color.Red, SpriteManager.GetShipSprite(1, 1, r), SpriteManager.GetShieldSprite(1, r)));
-			}
-			MainPlayer.Bank = 1000;
-		}
-
 		public void ResetPlayerPositions()
 		{
 			//Puts the players in a circle in the middle of level
 			if (Players.Count == 1)
 			{
+				var player = Players[0];
 				//Smack dab in middle
-				MainPlayer.PositionX = _gameMain.LevelSize.X / 2;
-				MainPlayer.PositionY = _gameMain.LevelSize.Y / 2;
-				MainPlayer.VelocityX = 0;
-				MainPlayer.VelocityY = 0;
-				MainPlayer.Angle = 0;
-				MainPlayer.Energy = MainPlayer.MaxEnergy;
+				player.PositionX = _gameMain.LevelSize.X / 2;
+				player.PositionY = _gameMain.LevelSize.Y / 2;
+				player.VelocityX = 0;
+				player.VelocityY = 0;
+				player.Angle = 0;
+				player.Energy = player.MaxEnergy;
 			}
 			else
 			{

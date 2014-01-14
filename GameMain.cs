@@ -56,6 +56,18 @@ namespace Xasteroids
 		public bool NewChatMessage;
 		public StringBuilder ChatText;
 
+		private int _mainPlayerID;
+		public int MainPlayerID //Used by client to know which player instance to update
+		{
+			get { return _mainPlayerID; }
+			set
+			{
+				_mainPlayerID = value;
+				MainPlayer = PlayerManager.Players[MainPlayerID];
+			}
+		} 
+		public Player MainPlayer { get; private set; } 
+
 		public bool IsHost
 		{ 
 			get { return _host != null; }
@@ -149,7 +161,7 @@ namespace Xasteroids
 			_screenInterface.Update(MousePos.X, MousePos.Y, frameDeltaTime);
 			_screenInterface.DrawScreen();
 
-			if (_currentScreen != Screen.InGame || PlayerManager.MainPlayer.IsDead)
+			if (_currentScreen != Screen.InGame || MainPlayer.IsDead)
 			{
 				Cursor.Draw(MousePos.X, MousePos.Y);
 				Cursor.Update(frameDeltaTime, Random);
@@ -370,8 +382,8 @@ namespace Xasteroids
 			}
 			else
 			{
-				x = PlayerManager.MainPlayer.PositionX;
-				y = PlayerManager.MainPlayer.PositionY;
+				x = MainPlayer.PositionX;
+				y = MainPlayer.PositionY;
 			}
 
 			int screenWidth = ScreenSize.X / 2;
@@ -461,7 +473,7 @@ namespace Xasteroids
 					//No need to draw dead players
 					continue;
 				}
-				if (player == PlayerManager.MainPlayer)
+				if (player == MainPlayer)
 				{
 					//Always in center of screen, just draw it there
 					GorgonLibrary.Gorgon.CurrentShader = ShipShader;

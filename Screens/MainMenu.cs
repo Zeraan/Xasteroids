@@ -1,6 +1,5 @@
 ﻿using System.Drawing;
 using System.Net;
-using System.Windows.Forms;
 using GorgonLibrary.InputDevices;
 
 namespace Xasteroids.Screens
@@ -188,8 +187,17 @@ namespace Xasteroids.Screens
 			{
 				if (_singlePlayerButton.MouseUp(x, y))
 				{
-					_gameMain.PlayerManager.ClearMainPlayer(_gameMain.Random);
-					var player = _gameMain.PlayerManager.MainPlayer;
+					if (_gameMain.PlayerManager.Players.Count == 0)
+					{
+						_gameMain.PlayerManager.AddPlayer(new Player(1, 1, Color.Red, SpriteManager.GetShipSprite(1, 1, _gameMain.Random), SpriteManager.GetShieldSprite(1, _gameMain.Random)));
+					}
+					else
+					{
+						_gameMain.PlayerManager.Players[0] = new Player(1, 1, Color.Red, SpriteManager.GetShipSprite(1, 1, _gameMain.Random), SpriteManager.GetShieldSprite(1, _gameMain.Random));
+					}
+					_gameMain.MainPlayerID = 0;
+					var player = _gameMain.MainPlayer;
+					player.Bank = 1000;
 					_gameMain.ShipSelectionWindow.LoadShip(player.ShipSize, player.ShipStyle, player.ShipColor, player.Bank);
 					_gameMain.ShipSelectionWindow.OnSelectShip = OnSelectShip;
 					_showingShipSelection = true;
@@ -281,7 +289,7 @@ namespace Xasteroids.Screens
 
 		private void OnSelectShip(int size, int style, Color color, int shipCost)
 		{
-			var player = _gameMain.PlayerManager.MainPlayer;
+			var player = _gameMain.MainPlayer;
 			player.ShipSize = size;
 			player.ShipStyle = style;
 			player.ShipColor = color;

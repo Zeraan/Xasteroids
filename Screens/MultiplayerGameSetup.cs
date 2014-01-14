@@ -93,6 +93,7 @@ namespace Xasteroids.Screens
 			{
 				_chatText.SetText(_gameMain.ChatText.ToString());
 				_chatText.ScrollToBottom();
+				_gameMain.NewChatMessage = false;
 			}
 			_shipSelection.MouseHover(x, y, frameDeltaTime);
 			if (_isHost)

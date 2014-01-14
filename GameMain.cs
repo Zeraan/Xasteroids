@@ -52,7 +52,7 @@ namespace Xasteroids
 		private Host _host;
 		private Client _client;
 		public ShipSelectionWindow ShipSelectionWindow { get; private set; }
-		public object ChatLock;
+		public object ChatLock = new object();
 		public bool NewChatMessage;
 		public StringBuilder ChatText;
 
@@ -116,6 +116,9 @@ namespace Xasteroids
 
 			_screenInterface = _mainMenu;
 			_currentScreen = Screen.MainMenu;
+
+			ChatText = new StringBuilder();
+			NewChatMessage = false;
 
 			return true;
 		}
@@ -212,6 +215,8 @@ namespace Xasteroids
 			if (IsHost)
 			{
 				_host.SendObjectTCP(gameMessage);
+				ChatText.AppendLine(message);
+				NewChatMessage = true;
 			}
 			else
 			{

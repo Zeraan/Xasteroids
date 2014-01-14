@@ -54,10 +54,12 @@ namespace Xasteroids.Screens
 
 		private BBButton _readyButton;
 
+		#region Ship Selection Data
+		private bool _showingShipSelection;
+		#endregion
+
 		public bool Initialize(GameMain gameMain, out string reason)
 		{
-			
-
 			_gameMain = gameMain;
 
 			int x = _gameMain.ScreenSize.X / 2 - 400;
@@ -273,6 +275,8 @@ namespace Xasteroids.Screens
 				return false;
 			}
 
+			_showingShipSelection = false;
+
 			return true;
 		}
 
@@ -312,10 +316,20 @@ namespace Xasteroids.Screens
 			_messageTextBox.Draw();
 
 			_readyButton.Draw();
+
+			if (_showingShipSelection)
+			{
+				_gameMain.ShipSelectionWindow.Draw();
+			}
 		}
 
 		public void Update(int x, int y, float frameDeltaTime)
 		{
+			if (_showingShipSelection)
+			{
+				_gameMain.ShipSelectionWindow.MouseHover(x, y, frameDeltaTime);
+				return;
+			}
 			for (int i = 0; i < 3; i++)
 			{
 				_energyButtons[i].MouseHover(x, y, frameDeltaTime);
@@ -337,6 +351,11 @@ namespace Xasteroids.Screens
 
 		public void MouseDown(int x, int y)
 		{
+			if (_showingShipSelection)
+			{
+				_gameMain.ShipSelectionWindow.MouseDown(x, y);
+				return;
+			}
 			foreach (var button in _energyButtons)
 			{
 				button.MouseDown(x, y);
@@ -358,6 +377,11 @@ namespace Xasteroids.Screens
 
 		public void MouseUp(int x, int y)
 		{
+			if (_showingShipSelection)
+			{
+				_gameMain.ShipSelectionWindow.MouseUp(x, y);
+				return;
+			}
 			var player = _gameMain.MainPlayer;
 			if (_energyButtons[0].MouseUp(x, y))
 			{
@@ -513,6 +537,13 @@ namespace Xasteroids.Screens
 		public void RefreshLabels()
 		{
 			var player = _gameMain.MainPlayer;
+			if (player.IsDead)
+			{
+				//Show the selection window
+				_showingShipSelection = true;
+				_gameMain.ShipSelectionWindow.LoadShip(player.ShipSize, player.ShipStyle, player.ShipColor, player.Bank);
+				_gameMain.ShipSelectionWindow.OnSelectShip = OnSelectShip;
+			}
 			int cost = (player.RechargeLevel + 1) * RECHARGE_COST;
 
 			if (player.RechargeLevel == 40 + (player.ShipSize * 4))
@@ -918,6 +949,20 @@ namespace Xasteroids.Screens
 			string status = player.Name + " ($" + player.Bank + ") - Shopping";
 			//TODO- Add other players to status
 			_playerStatusTextBox.SetText(status);
+		}
+
+		private void OnSelectShip(int size, int style, Color color, int shipCost)
+		{
+			var player = _gameMain.MainPlayer;
+			player.ShipSize = size;
+			player.ShipStyle = style;
+			player.ShipColor = color;
+			player.Bank -= shipCost;
+			player.IsDead = false;
+
+			_showingShipSelection = false;
+			_gameMain.ShipSelectionWindow.OnSelectShip = null;
+			RefreshLabels();
 		}
 	}
 }

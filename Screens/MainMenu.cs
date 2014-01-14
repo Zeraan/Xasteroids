@@ -18,7 +18,6 @@ namespace Xasteroids.Screens
 		private BBSingleLineTextBox _playerNameTextBox;
 		private BBButton _cancelButton;
 
-		private bool _showingShipSelection;
 		private bool _showingMultiplayerOptions;
 
 		private BBLabel _debugText;
@@ -44,7 +43,6 @@ namespace Xasteroids.Screens
 			_debugText = new BBLabel();
 
 			_showingMultiplayerOptions = false;
-			_showingShipSelection = false;
 
 			int x = _gameMain.ScreenSize.X / 2 - 130;
 			int y = _gameMain.ScreenSize.Y / 2 + 50;
@@ -114,10 +112,6 @@ namespace Xasteroids.Screens
 				_hostOrConnectButton.Draw();
 				_cancelButton.Draw();
 			}
-			if (_showingShipSelection)
-			{
-				_gameMain.ShipSelectionWindow.Draw();
-			}
 			_debugText.Draw();
 		}
 
@@ -126,11 +120,6 @@ namespace Xasteroids.Screens
 			_gameMain.AsteroidManager.UpdatePhysics(null, null, null, frameDeltaTime, _gameMain.Random);
 			_gameMain.AsteroidManager.Update(frameDeltaTime);
 
-			if (_showingShipSelection)
-			{
-				_gameMain.ShipSelectionWindow.MouseHover(x, y, frameDeltaTime);
-				return;
-			}
 			_playerNameTextBox.Update(frameDeltaTime);
 			if (!_showingMultiplayerOptions)
 			{
@@ -150,11 +139,6 @@ namespace Xasteroids.Screens
 
 		public void MouseDown(int x, int y)
 		{
-			if (_showingShipSelection)
-			{
-				_gameMain.ShipSelectionWindow.MouseDown(x, y);
-				return;
-			}
 			_playerNameTextBox.MouseDown(x, y);
 			if (!_showingMultiplayerOptions)
 			{
@@ -172,16 +156,6 @@ namespace Xasteroids.Screens
 
 		public void MouseUp(int x, int y)
 		{
-			if (_showingShipSelection)
-			{
-				if (!_gameMain.ShipSelectionWindow.MouseUp(x, y))
-				{
-					_showingShipSelection = false;
-					_gameMain.ShipSelectionWindow.OnSelectShip = null;
-					_gameMain.PlayerManager.Players.Clear();
-				}
-				return;
-			}
 			_playerNameTextBox.MouseUp(x, y);
 			if (!_showingMultiplayerOptions)
 			{
@@ -189,18 +163,21 @@ namespace Xasteroids.Screens
 				{
 					if (_gameMain.PlayerManager.Players.Count == 0)
 					{
-						_gameMain.PlayerManager.AddPlayer(new Player(1, 1, Color.Red, SpriteManager.GetShipSprite(1, 1, _gameMain.Random), SpriteManager.GetShieldSprite(1, _gameMain.Random)));
+						_gameMain.PlayerManager.AddPlayer(new Player(1, 1, Color.Red));
 					}
 					else
 					{
-						_gameMain.PlayerManager.Players[0] = new Player(1, 1, Color.Red, SpriteManager.GetShipSprite(1, 1, _gameMain.Random), SpriteManager.GetShieldSprite(1, _gameMain.Random));
+						_gameMain.PlayerManager.Players[0] = new Player(1, 1, Color.Red);
 					}
 					_gameMain.MainPlayerID = 0;
 					var player = _gameMain.MainPlayer;
 					player.Bank = 1000;
-					_gameMain.ShipSelectionWindow.LoadShip(player.ShipSize, player.ShipStyle, player.ShipColor, player.Bank);
-					_gameMain.ShipSelectionWindow.OnSelectShip = OnSelectShip;
-					_showingShipSelection = true;
+					player.IsDead = true;
+					player.Name = _playerNameTextBox.Text;
+					_gameMain.ResetGame();
+					_gameMain.PlayerManager.ResetPlayerPositions();
+					//Start the game!
+					_gameMain.ChangeToScreen(Screen.Upgrade);
 				}
 				if (_multiPlayerButton.MouseUp(x, y))
 				{
@@ -285,28 +262,6 @@ namespace Xasteroids.Screens
 				}
 			}
 			return true;
-		}
-
-		private void OnSelectShip(int size, int style, Color color, int shipCost)
-		{
-			var player = _gameMain.MainPlayer;
-			player.ShipSize = size;
-			player.ShipStyle = style;
-			player.ShipColor = color;
-			player.Bank -= shipCost;
-			player.ShipSprite = SpriteManager.GetShipSprite(size, style, _gameMain.Random);
-			player.ShieldSprite = SpriteManager.GetShieldSprite(size, _gameMain.Random);
-			player.Name = _playerNameTextBox.Text;
-
-			_showingShipSelection = false;
-			_gameMain.ShipSelectionWindow.OnSelectShip = null;
-
-			_gameMain.ResetGame();
-
-			_gameMain.PlayerManager.ResetPlayerPositions();
-
-			//Start the game!
-			_gameMain.ChangeToScreen(Screen.Upgrade);
 		}
 	}
 }

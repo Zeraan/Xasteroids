@@ -24,8 +24,8 @@ namespace Xasteroids
 				new Asteroid(3000, 3000, _theRandom) { PositionY = -123.12f, VelocityY = 0.86f },
 			};
 			_somePlayers = new List<Player> {
-				new Player(20, 1, Color.Pink, null, null) { RechargeLevel = 3, CapacityLevel = 1, Name = "Pete" },
-				new Player(20, 1, Color.Orange, null, null) { IsDead = true, NumberOfNukes = 99, Name = "Little Pete" },
+				new Player(20, 1, Color.Pink) { RechargeLevel = 3, CapacityLevel = 1, Name = "Pete" },
+				new Player(20, 1, Color.Orange) { IsDead = true, NumberOfNukes = 99, Name = "Little Pete" },
 			};
 			_someBullets = new List<Bullet> {
 				new Bullet(_somePlayers[0], 23.5f),

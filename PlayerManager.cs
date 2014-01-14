@@ -250,7 +250,19 @@ namespace Xasteroids
 		public float RechargeRate { get { return RechargeLevel * 5;} }
 		public float ShieldAlpha { get; set; }
 
-		public bool IsDead { get; set; }
+		private bool _isDead;
+		public bool IsDead 
+		{ 
+			get { return _isDead; }
+			set { 
+					_isDead = value;
+					if (_isDead)
+					{
+						_shipSprite = null;
+						_shieldSprite = null;
+					}
+				}
+		}
 
 		public float CoolDownPeriod { get { return 0.5f - (CooldownLevel * 0.025f); } }
 		public float CoolDown { get; set; }
@@ -446,13 +458,11 @@ namespace Xasteroids
 			}
 		}
 
-		public Player(int shipSize, int shipStyle, Color shipColor, BBSprite shipSprite, BBSprite shieldSprite)
+		public Player(int shipSize, int shipStyle, Color shipColor)
 		{
 			ShipSize = shipSize;
 			ShipStyle = shipStyle;
 			ShipColor = shipColor;
-			ShipSprite = shipSprite;
-			ShieldSprite = shieldSprite;
 			Mass = ShipSize * 20;
 
 			Energy = MaxEnergy;

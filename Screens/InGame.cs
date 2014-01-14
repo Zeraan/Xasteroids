@@ -80,14 +80,14 @@ namespace Xasteroids.Screens
 			_gameMain.DrawObjects();
 			_shipStatsBackground.Draw(125);
 			_miniMapBackground.Draw(125);
-			var currentPlayer = _gameMain.PlayerManager.MainPlayer;
+			var currentPlayer = _gameMain.MainPlayer;
 			float percentage = currentPlayer.Energy / currentPlayer.MaxEnergy;
 			_horizontalEnergyBar.Draw(_energyX, 7, (380.0f / _horizontalEnergyBar.Width) * percentage, 2, Color.FromArgb(200, Color.LawnGreen));
 			_bankAmount.Draw();
 			_energyAmount.Draw();
 			//_debuggingText.Draw();
 			DrawMiniMap();
-			if (_gameMain.PlayerManager.MainPlayer.IsDead && _showingShipSelection && _delay <= 0)
+			if (_gameMain.MainPlayer.IsDead && _showingShipSelection && _delay <= 0)
 			{
 				_gameMain.ShipSelectionWindow.Draw();
 			}
@@ -119,7 +119,7 @@ namespace Xasteroids.Screens
 
 		public void Update(int x, int y, float frameDeltaTime)
 		{
-			var player = _gameMain.PlayerManager.MainPlayer;
+			var player = _gameMain.MainPlayer;
 			bool isDead = player.IsDead;
 			_gameMain.AsteroidManager.UpdatePhysics(_gameMain.PlayerManager.Players, _gameMain.ObjectManager.Bullets, _gameMain.ObjectManager.Shockwaves, frameDeltaTime, _gameMain.Random);
 			_gameMain.PlayerManager.UpdatePhysics(frameDeltaTime);
@@ -135,14 +135,14 @@ namespace Xasteroids.Screens
 				//No asteroids left, move to upgrade window
 				_gameMain.ChangeToScreen(Screen.Upgrade);
 			}
-			if (_gameMain.PlayerManager.MainPlayer.IsDead && !isDead)
+			if (_gameMain.MainPlayer.IsDead && !isDead)
 			{
 				_delay = 5;
 				_showingShipSelection = true;
 				//Player died, return to main menu if single player and insufficient funds to buy a new ship
 				//_gameMain.ChangeToScreen(Screen.MainMenu);
 			}
-			else if (_gameMain.PlayerManager.MainPlayer.IsDead && _showingShipSelection)
+			else if (_gameMain.MainPlayer.IsDead && _showingShipSelection)
 			{
 				if (_delay > 0)
 				{
@@ -231,7 +231,7 @@ namespace Xasteroids.Screens
 
 		private void OnSelectShip(int size, int style, Color color, int shipCost)
 		{
-			var player = _gameMain.PlayerManager.MainPlayer;
+			var player = _gameMain.MainPlayer;
 			player.ShipSize = size;
 			player.ShipStyle = style;
 			player.ShipColor = color;
@@ -255,7 +255,7 @@ namespace Xasteroids.Screens
 
 		public void MouseDown(int x, int y)
 		{
-			if (_gameMain.PlayerManager.MainPlayer.IsDead && _showingShipSelection && _delay <= 0)
+			if (_gameMain.MainPlayer.IsDead && _showingShipSelection && _delay <= 0)
 			{
 				_gameMain.ShipSelectionWindow.MouseDown(x, y);
 			}
@@ -263,7 +263,7 @@ namespace Xasteroids.Screens
 
 		public void MouseUp(int x, int y)
 		{
-			if (_gameMain.PlayerManager.MainPlayer.IsDead && _showingShipSelection && _delay <= 0)
+			if (_gameMain.MainPlayer.IsDead && _showingShipSelection && _delay <= 0)
 			{
 				if (!_gameMain.ShipSelectionWindow.MouseUp(x, y))
 				{

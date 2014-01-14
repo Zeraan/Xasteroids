@@ -358,7 +358,7 @@ namespace Xasteroids.Screens
 
 		public void MouseUp(int x, int y)
 		{
-			var player = _gameMain.PlayerManager.MainPlayer;
+			var player = _gameMain.MainPlayer;
 			if (_energyButtons[0].MouseUp(x, y))
 			{
 				int cost = (player.RechargeLevel + 1) * RECHARGE_COST;
@@ -512,7 +512,7 @@ namespace Xasteroids.Screens
 
 		public void RefreshLabels()
 		{
-			var player = _gameMain.PlayerManager.MainPlayer;
+			var player = _gameMain.MainPlayer;
 			int cost = (player.RechargeLevel + 1) * RECHARGE_COST;
 
 			if (player.RechargeLevel == 40 + (player.ShipSize * 4))

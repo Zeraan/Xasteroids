@@ -378,86 +378,7 @@ namespace Xasteroids
 				}
 			}
 		}
-		public string[] ExtendedConfiguration
-		{
-			//Name, Color, Style, Size, Mass can be one-time
-			get
-			{
-				string[] config = new string[CONFIG_LENGTH];
-
-				config[0] = Name;
-				config[1] = IsDead.ToString();
-				config[2] = PositionX.ToString();
-				config[3] = PositionY.ToString();
-				config[4] = VelocityX.ToString();
-				config[5] = VelocityY.ToString();
-				config[6] = ShieldAlpha.ToString();
-				config[7] = ShipSize.ToString();
-				config[8] = ShipStyle.ToString();
-				config[9] = ShipColor.ToArgb().ToString();
-				config[10] = Mass.ToString();
-				config[11] = Bank.ToString();
-
-				return config;
-			}
-			set
-			{
-				if (value.Length < CONFIG_LENGTH)
-				{
-					return;
-				}
-
-				Name = value[0];
-				bool outBool;
-				if (bool.TryParse(value[1], out outBool))
-				{
-					IsDead = outBool;
-				}
-				float outFloat;
-				if (float.TryParse(value[2], out outFloat))
-				{
-					PositionX = outFloat;
-				}
-				if (float.TryParse(value[3], out outFloat))
-				{
-					PositionY = outFloat;
-				}
-				if (float.TryParse(value[4], out outFloat))
-				{
-					VelocityX = outFloat;
-				}
-				if (float.TryParse(value[5], out outFloat))
-				{
-					VelocityY = outFloat;
-				}
-				if (float.TryParse(value[6], out outFloat))
-				{
-					ShieldAlpha = outFloat;
-				}
-				int outInt;
-				if (int.TryParse(value[7], out outInt))
-				{
-					ShipSize = outInt;
-				}
-				if (int.TryParse(value[8], out outInt))
-				{
-					ShipStyle = outInt;
-				}
-				if (int.TryParse(value[9], out outInt))
-				{
-					ShipColor = Color.FromArgb(outInt);
-				}
-				if (int.TryParse(value[10], out outInt))
-				{
-					Mass = outInt;
-				}
-				if (int.TryParse(value[11], out outInt))
-				{
-					Bank = outInt;
-				}
-			}
-		}
-
+		
 		public Player(int shipSize, int shipStyle, Color shipColor)
 		{
 			ShipSize = shipSize;
@@ -492,17 +413,10 @@ namespace Xasteroids
 
 		public Player(string[] configuration)
 		{
-			if (configuration.Length == EXTENDED_CONFIG_LENGTH)
-			{
-				ExtendedConfiguration = configuration;
-			}
-			else
-			{
-				Configuration = configuration;
-				ShipSize = 1;
-				ShipStyle = 1;
-				ShipColor = Color.Red;
-			}
+			Configuration = configuration;
+			ShipSize = 1;
+			ShipStyle = 1;
+			ShipColor = Color.Red;
 		}
 
 		public void Update(float frameDeltaTime)
@@ -531,6 +445,66 @@ namespace Xasteroids
 				if (CoolDown < 0)
 				{
 					CoolDown = 0;
+				}
+			}
+		}
+	}
+
+	public class Ship : IConfigurable
+	{
+		public const int CONFIG_LENGTH = 6;
+
+		public string OwnerName { get; set; }
+		public float ShieldAlpha { get; set; }
+		public int Size { get; set; }
+		public int Style { get; set; }
+		public Color Color { get; set; }
+		public int Mass { get; set; }
+
+		public string[] Configuration
+		{
+			get
+			{
+				string[] config = new string[CONFIG_LENGTH];
+
+				config[0] = OwnerName;
+				config[1] = ShieldAlpha.ToString();
+				config[2] = Size.ToString();
+				config[3] = Style.ToString();
+				config[4] = Color.ToArgb().ToString();
+				config[5] = Mass.ToString();
+
+				return config;
+			}
+			set
+			{
+				if (value.Length < CONFIG_LENGTH)
+				{
+					return;
+				}
+
+				OwnerName = value[0];
+				float outFloat;
+				if (float.TryParse(value[1], out outFloat))
+				{
+					ShieldAlpha = outFloat;
+				}
+				int outInt;
+				if (int.TryParse(value[2], out outInt))
+				{
+					Size = outInt;
+				}
+				if (int.TryParse(value[3], out outInt))
+				{
+					Style = outInt;
+				}
+				if (int.TryParse(value[4], out outInt))
+				{
+					Color = Color.FromArgb(outInt);
+				}
+				if (int.TryParse(value[5], out outInt))
+				{
+					Mass = outInt;
 				}
 			}
 		}

@@ -959,7 +959,7 @@ namespace Xasteroids.Screens
 			player.ShipColor = color;
 			player.Bank -= shipCost;
 			player.IsDead = false;
-
+			
 			_showingShipSelection = false;
 			_gameMain.ShipSelectionWindow.OnSelectShip = null;
 			RefreshLabels();

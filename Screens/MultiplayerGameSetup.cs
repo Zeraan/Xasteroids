@@ -78,7 +78,7 @@ namespace Xasteroids.Screens
 			_messageTextBox.Draw();
 			_playerListBackground.Draw();
 			_shipSelection.Draw();
-			if (_isHost)
+			if (_gameMain.IsHost)
 			{
 				_startGame.Draw();
 			}

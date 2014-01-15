@@ -22,6 +22,8 @@ namespace Xasteroids.Screens
 
 		private BBLabel _debugText;
 
+		public string PlayerName { get { return _playerNameTextBox.Text; } }
+
 		public bool Initialize(GameMain gameMain, out string reason)
 		{
 			_gameMain = gameMain;

@@ -34,6 +34,18 @@ namespace Xasteroids
 			_tcpListener.BeginAcceptTcpClient(OnAcceptTcpClient, _tcpListener);
 		}
 
+		public bool HasConnectionTo(IPAddress clientAddress)
+		{
+			foreach (var item in _clientsAndUdpEndPoints)
+			{
+				if (item.Value.Address.Equals(clientAddress))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
 		public void SendObjectTCP(IConfigurable obj)
 		{
 			string data = _objectStringConverter.ObjectToString(obj);
@@ -65,7 +77,21 @@ namespace Xasteroids
 			}
 		}
 
-		public void SendObjectTcpToClient(IConfigurable obj, TcpClient client)
+		public void SendObjectTcpToClient(IConfigurable obj, IPAddress clientAddress)
+		{
+			TcpClient client = null;
+			foreach (var item in _clientsAndUdpEndPoints)
+			{
+				if (item.Value.Address.Equals(clientAddress))
+				{
+					client = item.Key;
+					SendObjectTcpToClient(obj, client);
+					return;
+				}
+			}
+		}
+
+		private void SendObjectTcpToClient(IConfigurable obj, TcpClient client)
 		{
 			NetworkStream stream = client.GetStream();
 			string data = _objectStringConverter.ObjectToString(obj);
@@ -185,17 +211,6 @@ namespace Xasteroids
 
 			if (CurrentlyAcceptingPlayers || _ipAddressesWithGameAccess.Contains(ipAddress))
 			{
-				try
-				{
-					SendObjectTcpToClient(new NetworkMessage { Content = "OK" }, client);
-				}
-				catch
-				{
-					client.GetStream().Close();
-					client.Close();
-					return;
-				}
-
 				bool updatedClientsAndUdpEndPoints = false;
 				var keys = _clientsAndUdpEndPoints.Keys.ToArray();
 				var values = _clientsAndUdpEndPoints.Values.ToArray();
@@ -247,6 +262,17 @@ namespace Xasteroids
 		private void OnTcpDataReceived(IAsyncResult asyncResult)
 		{
 			TcpClient client = (TcpClient)asyncResult.AsyncState;
+			if (!client.Connected)
+			{
+				_clientsAndBytes.Remove(client);
+				IPAddress addressOfDisconnectd = _clientsAndUdpEndPoints[client].Address;
+				_clientsAndUdpEndPoints.Remove(client);
+				if (_sendersAndData.ContainsKey(addressOfDisconnectd))
+				{
+					_sendersAndData.Remove(addressOfDisconnectd);
+				}
+				return;
+			}
 			NetworkStream stream = client.GetStream();
 			byte[] bytes = _clientsAndBytes[client];		
 			int numberOfBytesRead = stream.EndRead(asyncResult);

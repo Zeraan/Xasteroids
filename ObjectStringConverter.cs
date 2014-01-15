@@ -49,10 +49,6 @@ namespace Xasteroids
 		public string ObjectToString(IConfigurable obj)
 		{
 			string[] configuration = obj.Configuration;
-			//for (int j = 0; j < configuration.Length; ++j)
-			//{
-			//	configuration[j] = configuration[j].EscapeCommas().EscapeCurlyBrackets();
-			//}
 			string arrayString = "[" + string.Join(",", configuration) + "]";
 			return "{" +
 						"Type:" + obj.GetType().FullName + "," +

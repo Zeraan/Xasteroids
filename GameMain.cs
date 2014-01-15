@@ -5,6 +5,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using GorgonLibrary.InputDevices;
 using Xasteroids.Screens;
@@ -115,6 +116,7 @@ namespace Xasteroids
 			AsteroidManager = new AsteroidManager(this);
 			ObjectManager = new ObjectManager(this);
 			ShipSelectionWindow = new ShipSelectionWindow();
+			ShipSelectionWindow.ShipSelected += OnShipSelected;
 			if (!ShipSelectionWindow.Initialize(this, out reason))
 			{
 				return false;
@@ -188,9 +190,23 @@ namespace Xasteroids
 			 */
 			if (_client.ServerIPAddress != null)
 			{
+				SendPlayerNameToHost();
 				ChangeToScreen(Screen.MultiplayerPreGameClient);
 				_client.Disconnected += OnDisconnected;
 				_client.ObjectReceived += HandleObject;
+			}
+		}
+
+		public void SendPlayerNameToHost()
+		{
+			_client.SendObjectTcp(new NetworkMessage { Content = "Name:" + _mainMenu.PlayerName });
+		}
+
+		public void OnShipSelected(Ship ship)
+		{
+			if (_client != null && _client.ServerIPAddress != null)
+			{
+				_client.SendObjectTcp(ship);
 			}
 		}
 
@@ -205,17 +221,107 @@ namespace Xasteroids
 
 		private void HandleObject(IPAddress senderIPAddress, IConfigurable theObject)
 		{
-			var castObject = theObject as GameMessage;
-			if (castObject != null)
+			if (theObject is GameMessage)
 			{
 				lock (ChatLock)
 				{
 					NewChatMessage = true;
-					ChatText.AppendLine(castObject.Content);
+					var gameMessage = (GameMessage)theObject;
+					ChatText.AppendLine(gameMessage.Content);
 					if (IsHost)
 					{
-						_host.SendObjectTCP(theObject);
+						_host.SendObjectTCP(gameMessage);
 					}
+				}
+				return;
+			}
+
+			if (theObject is NetworkMessage)
+			{
+				ReceiveNetworkMessage(senderIPAddress, (NetworkMessage)theObject);
+				return;
+			}
+
+			if (theObject is Ship)
+			{
+				var theShip = (Ship)theObject;
+				string ownerName = theShip.OwnerName;
+				foreach (var item in _clientAddressesAndMonikers)
+				{
+					if (item.Value[NAME].Equals(ownerName))
+					{
+						var thatPlayer = PlayerManager.Players[(int)item.Value[ID]];
+						if (thatPlayer == null)
+						{
+							thatPlayer = new Player(theShip.Size, theShip.Style, theShip.Color);
+						}
+						else
+						{
+							thatPlayer.ShipSize = theShip.Size;
+							thatPlayer.ShipStyle = theShip.Style;
+							thatPlayer.ShipColor = theShip.Color;
+						}
+						return;
+					}
+				}
+				return;
+			}
+		}
+
+		private Regex _nameRegex = new Regex(@"^Name:(.*)$", RegexOptions.Compiled);
+		private Regex _yourIDRegex = new Regex(@"^Your ID:(\d)$", RegexOptions.Compiled);
+
+		// The monikers are a name string and an int ID, in that order.
+		private const int NAME = 0;
+		private const int ID = 1;
+		private Dictionary<IPAddress, List<object>> _clientAddressesAndMonikers = new Dictionary<IPAddress, List<object>>();
+
+		public void ReceiveNetworkMessage(IPAddress senderAddress, NetworkMessage message)
+		{
+			Match match = _nameRegex.Match(message.Content);
+			if (match.Success)
+			{
+				if (_host == null)
+				{
+					//Only the host keeps track of clients and ids and etc
+					return;
+				}
+
+				string clientPlayerName = match.Groups[1].Value;
+				if (_clientAddressesAndMonikers.ContainsKey(senderAddress))
+				{
+					_clientAddressesAndMonikers[senderAddress][NAME] = clientPlayerName;
+				}
+				else
+				{
+					var monikers = new List<object> {
+						clientPlayerName,
+						null
+					};
+					_clientAddressesAndMonikers.Add(senderAddress, monikers);
+				}
+				return;
+			}
+
+			match = _yourIDRegex.Match(message.Content);
+			if (match.Success)
+			{
+				MainPlayerID = int.Parse(match.Groups[1].Value);
+			}
+		}
+
+		public void AssignPlayerIDs()
+		{
+			var themPlayers = PlayerManager.Players;
+			int id = 1;
+			foreach (var item in _clientAddressesAndMonikers)
+			{
+				var address = item.Key;
+				if (_host.HasConnectionTo(item.Key))
+				{
+					_clientAddressesAndMonikers[address][ID] = id;
+					_host.SendObjectTcpToClient(new NetworkMessage { Content = "Your ID:" + id.ToString() }, address);
+					++id;
 				}
 			}
 		}
@@ -257,6 +363,7 @@ namespace Xasteroids
 						}
 						_host.ObjectReceived -= HandleObject;
 						_host = null;
+						_clientAddressesAndMonikers.Clear();
 					}
 					// Clean up _client if we have left MultiplayerPreGameServer
 					if (_client != null)
@@ -337,6 +444,7 @@ namespace Xasteroids
 					}
 					_upgradeAndWaitScreen.RefreshLabels();
 					_screenInterface = _upgradeAndWaitScreen;
+					AssignPlayerIDs();
 					break;
 				}
 			}

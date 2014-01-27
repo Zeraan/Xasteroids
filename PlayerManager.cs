@@ -450,6 +450,37 @@ namespace Xasteroids
 		}
 	}
 
+	public class PlayerList : IConfigurable
+	{
+		public const int CONFIG_LENGTH = 1;
+
+		public string[] Players { get; set; }
+
+		public string[] Configuration
+		{
+			get
+			{
+				string[] config = new string[CONFIG_LENGTH];
+				string list = string.Empty;
+				
+				foreach (var player in Players)
+				{
+					list = list + player + "|";
+				}
+				config[0] = list;
+				return config;
+			}
+			set
+			{
+				if (value.Length < CONFIG_LENGTH)
+				{
+					return;
+				}
+				Players = value[0].Split(new[] {'|'});
+			}
+		}
+	}
+
 	public class Ship : IConfigurable
 	{
 		public const int CONFIG_LENGTH = 6;

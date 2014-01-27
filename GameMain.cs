@@ -92,6 +92,7 @@ namespace Xasteroids
 			Random = new Random();
 			MousePos = new Point();
 			ScreenSize = new Point(screenWidth, screenHeight);
+			PlayerList = new PlayerList();
 
 			ShipShader = GorgonLibrary.Graphics.FXShader.FromFile("ColorShader.fx", GorgonLibrary.Graphics.ShaderCompileOptions.OptimizationLevel3);
 

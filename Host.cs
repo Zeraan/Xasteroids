@@ -265,11 +265,15 @@ namespace Xasteroids
 			if (!client.Connected)
 			{
 				_clientsAndBytes.Remove(client);
-				IPAddress addressOfDisconnectd = _clientsAndUdpEndPoints[client].Address;
-				_clientsAndUdpEndPoints.Remove(client);
-				if (_sendersAndData.ContainsKey(addressOfDisconnectd))
+				if (!_clientsAndUdpEndPoints.ContainsKey(client))
 				{
-					_sendersAndData.Remove(addressOfDisconnectd);
+					return;
+				}
+				IPAddress addressOfDisconnected = _clientsAndUdpEndPoints[client].Address;
+				_clientsAndUdpEndPoints.Remove(client);
+				if (_sendersAndData.ContainsKey(addressOfDisconnected))
+				{
+					_sendersAndData.Remove(addressOfDisconnected);
 				}
 				return;
 			}

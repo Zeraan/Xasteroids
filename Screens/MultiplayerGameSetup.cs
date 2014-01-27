@@ -108,7 +108,7 @@ namespace Xasteroids.Screens
 		public void MouseDown(int x, int y)
 		{
 			_shipSelection.MouseDown(x, y);
-			if (_isHost)
+			if (_gameMain.IsHost)
 			{
 				_startGame.MouseDown(x, y);
 			}
@@ -122,9 +122,9 @@ namespace Xasteroids.Screens
 			{
 				//Display the ship selection window
 			}
-			if (_isHost && _startGame.MouseUp(x, y))
+			if (_startGame.MouseUp(x, y))
 			{
-				//Start game
+				_gameMain.ChangeToScreen(Screen.Upgrade);
 			}
 			if (_leaveLobby.MouseUp(x, y))
 			{

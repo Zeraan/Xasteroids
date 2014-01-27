@@ -536,6 +536,11 @@ namespace Xasteroids.Screens
 
 		public void RefreshLabels()
 		{
+			if (_gameMain.MainPlayer == null)
+			{
+				_gameMain.PlayerManager.AddPlayer(new Player(1, 1, Color.Red));
+				_gameMain.MainPlayerID = 0;
+			}
 			var player = _gameMain.MainPlayer;
 			if (player.IsDead)
 			{

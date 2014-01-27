@@ -12,7 +12,6 @@ namespace Xasteroids.Screens
 		private BBTextBox _chatText;
 		private BBSingleLineTextBox _messageTextBox;
 		private BBTextBox _playerList;
-		private BBStretchButton _shipSelection;
 		private BBStretchButton _startGame;
 		private BBStretchButton _leaveLobby;
 
@@ -27,7 +26,6 @@ namespace Xasteroids.Screens
 			_chatText = new BBTextBox();
 			_messageTextBox = new BBSingleLineTextBox();
 			_playerList = new BBTextBox();
-			_shipSelection = new BBStretchButton();
 			_startGame = new BBStretchButton();
 			_leaveLobby = new BBStretchButton();
 
@@ -46,15 +44,11 @@ namespace Xasteroids.Screens
 			{
 				return false;
 			}
-			if (!_playerListBackground.Initialize(chatWidth + 30, 20, 200, chatHeight - 245, StretchableImageType.ThinBorderBG, _gameMain.Random, out reason))
+			if (!_playerListBackground.Initialize(chatWidth + 30, 20, 200, chatHeight - 45, StretchableImageType.ThinBorderBG, _gameMain.Random, out reason))
 			{
 				return false;
 			}
 			if (!_playerList.Initialize(chatWidth + 35, 25, 190, chatHeight - 255, false, true, "PlayerListTextBox", _gameMain.Random, out reason))
-			{
-				return false;
-			}
-			if (!_shipSelection.Initialize(string.Empty, ButtonTextAlignment.CENTER, StretchableImageType.ThinBorderBG, StretchableImageType.ThinBorderFG, chatWidth + 30, chatHeight - 220, 200, 200, _gameMain.Random, out reason))
 			{
 				return false;
 			}
@@ -77,7 +71,6 @@ namespace Xasteroids.Screens
 			_chatBackground.Draw();
 			_messageTextBox.Draw();
 			_playerListBackground.Draw();
-			_shipSelection.Draw();
 			if (_gameMain.IsHost)
 			{
 				_startGame.Draw();
@@ -95,7 +88,16 @@ namespace Xasteroids.Screens
 				_chatText.ScrollToBottom();
 				_gameMain.NewChatMessage = false;
 			}
-			_shipSelection.MouseHover(x, y, frameDeltaTime);
+			if (_gameMain.NewPlayerListUpdate)
+			{
+				string playerListText = string.Empty;
+				foreach (var player in _gameMain.PlayerList.Players)
+				{
+					playerListText = playerListText + player + "\n\r";
+				}
+				_playerList.SetText(playerListText);
+				_gameMain.NewPlayerListUpdate = false;
+			}
 			if (_isHost)
 			{
 				_startGame.MouseHover(x, y, frameDeltaTime);

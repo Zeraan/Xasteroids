@@ -53,9 +53,14 @@ namespace Xasteroids
 		private Host _host;
 		private Client _client;
 		public ShipSelectionWindow ShipSelectionWindow { get; private set; }
+		
 		public object ChatLock = new object();
 		public bool NewChatMessage;
 		public StringBuilder ChatText;
+
+		public object PlayerListLock = new object();
+		public bool NewPlayerListUpdate;
+		public PlayerList PlayerList { get; private set; }
 
 		private int _mainPlayerID;
 		public int MainPlayerID //Used by client to know which player instance to update
@@ -236,6 +241,15 @@ namespace Xasteroids
 				return;
 			}
 
+			if (theObject is PlayerList)
+			{
+				lock (PlayerListLock)
+				{
+					NewPlayerListUpdate = true;
+					PlayerList = (PlayerList)theObject;
+				}
+			}
+
 			if (theObject is NetworkMessage)
 			{
 				ReceiveNetworkMessage(senderIPAddress, (NetworkMessage)theObject);
@@ -253,7 +267,8 @@ namespace Xasteroids
 						var thatPlayer = PlayerManager.Players[(int)item.Value[ID]];
 						if (thatPlayer == null)
 						{
-							thatPlayer = new Player(theShip.Size, theShip.Style, theShip.Color);
+							var player = new Player(theShip.Size, theShip.Style, theShip.Color);
+							PlayerManager.AddPlayer(player);
 						}
 						else
 						{
@@ -264,7 +279,6 @@ namespace Xasteroids
 						return;
 					}
 				}
-				return;
 			}
 		}
 
@@ -301,6 +315,14 @@ namespace Xasteroids
 					};
 					_clientAddressesAndMonikers.Add(senderAddress, monikers);
 				}
+				//Make a list of player names and send to clients
+				string list = string.Empty;
+				foreach (var moniker in _clientAddressesAndMonikers)
+				{
+					list = list + moniker.Value[NAME] + "|";
+				}
+				PlayerList.Configuration = new[] {list};
+				_host.SendObjectTCP(PlayerList);
 				return;
 			}
 

@@ -124,7 +124,7 @@ namespace Xasteroids.Screens
 			}
 			if (_isHost && _startGame.MouseUp(x, y))
 			{
-				//Start game
+				_gameMain.ChangeToScreen(Screen.Upgrade);
 			}
 			if (_leaveLobby.MouseUp(x, y))
 			{

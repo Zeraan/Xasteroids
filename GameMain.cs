@@ -270,6 +270,7 @@ namespace Xasteroids
 
 		private Regex _nameRegex = new Regex(@"^Name:(.*)$", RegexOptions.Compiled);
 		private Regex _yourIDRegex = new Regex(@"^Your ID:(\d)$", RegexOptions.Compiled);
+		private Regex _changeScreenRegex = new Regex(@"Change to (\w+) Screen\.", RegexOptions.Compiled);
 
 		// The monikers are a name string and an int ID, in that order.
 		private const int NAME = 0;
@@ -307,6 +308,17 @@ namespace Xasteroids
 			if (match.Success)
 			{
 				MainPlayerID = int.Parse(match.Groups[1].Value);
+				return;
+			}
+
+			match = _changeScreenRegex.Match(message.Content);
+			if (match.Success)
+			{
+				if (match.Groups[1].Value.Equals(Screen.Upgrade.ToString()))
+				{
+					ChangeToScreen(Screen.Upgrade);
+				}
+				return;
 			}
 		}
 
@@ -445,6 +457,10 @@ namespace Xasteroids
 					_upgradeAndWaitScreen.RefreshLabels();
 					_screenInterface = _upgradeAndWaitScreen;
 					AssignPlayerIDs();
+					if (IsHost)
+					{
+						_host.SendObjectTCP(new NetworkMessage { Content = "Change to " + Screen.Upgrade.ToString() + " Screen." });
+					}
 					break;
 				}
 			}

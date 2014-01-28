@@ -25,7 +25,7 @@ namespace Xasteroids.Screens
 			}
 			set
 			{
-				_messageTextBox.SetText(string.Join(@"\n", value));
+				_playerList.SetText(string.Join(@"\n", value));
 			}
 		}
 

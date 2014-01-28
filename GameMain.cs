@@ -69,6 +69,10 @@ namespace Xasteroids
 			set
 			{
 				_mainPlayerID = value;
+				while (PlayerManager.Players.Count <= MainPlayerID)
+				{
+					PlayerManager.AddPlayer(new Player(1, 1, Color.Red));
+				}
 				MainPlayer = PlayerManager.Players[MainPlayerID];
 			}
 		} 

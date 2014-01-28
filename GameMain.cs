@@ -69,10 +69,6 @@ namespace Xasteroids
 			set
 			{
 				_mainPlayerID = value;
-				while (PlayerManager.Players.Count <= MainPlayerID)
-				{
-					PlayerManager.AddPlayer(new Player(1, 1, Color.Red));
-				}
 				MainPlayer = PlayerManager.Players[MainPlayerID];
 			}
 		} 
@@ -393,10 +389,9 @@ namespace Xasteroids
 			if (match.Success)
 			{
 				int id = int.Parse(match.Groups[1].Value);
-				var thePlayers = PlayerManager.Players;
-				while (thePlayers.Count < id + 1)
+				while (PlayerManager.Players.Count < id + 1)
 				{
-					thePlayers.Add(null);
+					PlayerManager.AddPlayer(new Player(1, 1, Color.Red));
 				}
 				MainPlayerID = id;
 				return;

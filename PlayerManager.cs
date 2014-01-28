@@ -539,5 +539,52 @@ namespace Xasteroids
 				}
 			}
 		}
+
+		public Ship(string[] config)
+		{
+			Configuration = config;
+		}
+
+		public Ship()
+		{
+		}
+	}
+
+	public class ShipList : IConfigurable
+	{
+		public const int CONFIG_LENGTH = 1;
+
+		public List<Ship> Ships { get; set; }
+
+		public string[] Configuration
+		{
+			get
+			{
+				string[] config = new string[CONFIG_LENGTH];
+				config[0] = ObjectStringConverter.IConfigurableListToArrayString(Ships);
+				return config;
+			}
+			set
+			{
+				if (value.Length < CONFIG_LENGTH)
+				{
+					return;
+				}
+				Ships = new List<Ship>();
+				string shipsString = value[0];
+				string contents = shipsString.Substring(1, shipsString.Length - 2);
+				if (contents.Length != 0)
+				{
+					string[] shipConfigStrings = ObjectStringConverter.ConfigurationFromStringOfConfigurations(contents);
+					foreach (string shipConfigString in shipConfigStrings)
+					{
+						contents = shipConfigString.Substring(1, shipConfigString.Length - 2);
+						string[] config = ObjectStringConverter.ConfigurationFromMixedString(contents);
+						Ships.Add(new Ship(config));
+					}
+				}
+			}
+		}
+
 	}
 }

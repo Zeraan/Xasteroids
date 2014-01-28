@@ -82,7 +82,6 @@ namespace Xasteroids
 		{
 			get { return IsHost ? !_host.IsShutDown : _client != null ? !_client.IsShutDown : false; }
 		}
-
 		public int LevelNumber { get; set; }
 		public Point LevelSize { get; private set; }
 
@@ -208,11 +207,49 @@ namespace Xasteroids
 			_client.SendObjectTcp(new NetworkMessage { Content = "Name:" + _mainMenu.PlayerName });
 		}
 
+		public void OnPlayerReady(Player player)
+		{
+			//single player
+			if (_host == null || _client == null)
+			{
+				LevelNumber++;
+				SetupLevel();
+				PlayerManager.ResetPlayerPositions();
+				ChangeToScreen(Screen.InGame);
+				return;
+			}
+
+			if (_host != null)
+			{
+				List<Ship> ships = new List<Ship>();
+				foreach (Player p in PlayerManager.Players)
+				{
+					ships.Add(new Ship {
+						OwnerName = p.Name,
+						ShieldAlpha = p.ShieldAlpha,
+						Size = p.ShipSize,
+						Style = p.ShipStyle,
+						Color = p.ShipColor,
+						Mass = p.Mass
+					});
+				}
+				_host.SendObjectTCP(new ShipList { Ships = ships });
+				return;
+			}
+
+			if (_client != null && _client.ServerIPAddress != null)
+			{
+				_client.SendObjectTcp(new NetworkMessage { Content = "Ready" });
+				return;
+			}
+		}
+
 		public void OnShipSelected(Ship ship)
 		{
 			if (_client != null && _client.ServerIPAddress != null)
 			{
 				_client.SendObjectTcp(ship);
+				PlayerManager.Players[MainPlayerID] = new Player(ship.Style, ship.Size, ship.Color);
 			}
 		}
 
@@ -281,6 +318,26 @@ namespace Xasteroids
 					}
 				}
 			}
+
+			if (theObject is ShipList)
+			{
+				var ships = ((ShipList)theObject).Ships;
+				var thePlayers = PlayerManager.Players;
+				while (thePlayers.Count < ships.Count)
+				{
+					thePlayers.Add(null);
+				}
+				for (int j = 0; j < ships.Count; ++j)
+				{
+					if (j == MainPlayerID)
+					{
+						continue;
+					}
+					var theShip = ships[j];
+					thePlayers[j] = new Player(theShip.Size, theShip.Style, theShip.Color);
+				}
+				return;
+			}
 		}
 
 		private Regex _nameRegex = new Regex(@"^Name:(.*)$", RegexOptions.Compiled);
@@ -291,6 +348,7 @@ namespace Xasteroids
 		private const int NAME = 0;
 		private const int ID = 1;
 		private Dictionary<IPAddress, List<object>> _clientAddressesAndMonikers = new Dictionary<IPAddress, List<object>>();
+		public Dictionary<IPAddress, List<object>> ShoppingPlayers;
 
 		public void ReceiveNetworkMessage(IPAddress senderAddress, NetworkMessage message)
 		{
@@ -330,7 +388,13 @@ namespace Xasteroids
 			match = _yourIDRegex.Match(message.Content);
 			if (match.Success)
 			{
-				MainPlayerID = int.Parse(match.Groups[1].Value);
+				int id = int.Parse(match.Groups[1].Value);
+				var thePlayers = PlayerManager.Players;
+				while (thePlayers.Count < id + 1)
+				{
+					thePlayers.Add(null);
+				}
+				MainPlayerID = id;
 				return;
 			}
 
@@ -342,6 +406,15 @@ namespace Xasteroids
 					ChangeToScreen(Screen.Upgrade);
 				}
 				return;
+			}
+
+			if (_host != null && message.Content.Equals("Ready"))
+			{
+				ShoppingPlayers.Remove(senderAddress);
+				if (ShoppingPlayers.Count == 0)
+				{
+					_upgradeAndWaitScreen.EnableTheReadyButton();
+				}
 			}
 		}
 
@@ -477,11 +550,38 @@ namespace Xasteroids
 							ExitGame();
 						}
 					}
+					if (IsHost)
+					{
+						if (PlayerManager.Players.Count == 0)
+						{
+							PlayerManager.Players.Add(new Player(1, 1, Color.Red));
+						}
+						else if (PlayerManager.Players[MainPlayerID] == null)
+						{
+							PlayerManager.Players[MainPlayerID] = new Player(1, 1, Color.Red);
+						}
+						MainPlayerID = 0;
+					}
 					_upgradeAndWaitScreen.RefreshLabels();
 					_screenInterface = _upgradeAndWaitScreen;
 					AssignPlayerIDs();
 					if (IsHost)
 					{
+						if (ShoppingPlayers == null)
+						{
+							ShoppingPlayers = new Dictionary<IPAddress, List<Object>>();
+						}
+						foreach (var item in _clientAddressesAndMonikers)
+						{
+							if (item.Value[ID] != null)
+							{
+								ShoppingPlayers.Add(item.Key, item.Value);
+							}
+						}
+						if (ShoppingPlayers.Count > 0)
+						{
+							_upgradeAndWaitScreen.DisableTheReadyButton();
+						}
 						_host.SendObjectTCP(new NetworkMessage { Content = "Change to " + Screen.Upgrade.ToString() + " Screen." });
 					}
 					break;

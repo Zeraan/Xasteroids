@@ -121,6 +121,7 @@ namespace Xasteroids.Screens
 		{
 			if (_startGame.MouseUp(x, y))
 			{
+				_gameMain.SetupPlayersPreGame();
 				_gameMain.ChangeToScreen(Screen.Upgrade);
 			}
 			if (_leaveLobby.MouseUp(x, y))

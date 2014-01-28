@@ -17,7 +17,6 @@ namespace Xasteroids.Screens
 		private BBStretchableImage _miniMapBackground;
 		private RenderImage _miniMapTarget;
 		private BBSprite _dot;
-		private bool _showingShipSelection;
 		private float _delay;
 
 		public bool Initialize(GameMain gameMain, out string reason)
@@ -71,7 +70,6 @@ namespace Xasteroids.Screens
 				reason = "Star sprite doesn't exist.";
 				return false;
 			}
-			_showingShipSelection = false;
 			return true;
 		}
 
@@ -87,10 +85,6 @@ namespace Xasteroids.Screens
 			_energyAmount.Draw();
 			//_debuggingText.Draw();
 			DrawMiniMap();
-			if (_gameMain.MainPlayer.IsDead && _showingShipSelection && _delay <= 0)
-			{
-				_gameMain.ShipSelectionWindow.Draw();
-			}
 		}
 
 		private void DrawMiniMap()
@@ -138,32 +132,29 @@ namespace Xasteroids.Screens
 			if (_gameMain.MainPlayer.IsDead && !isDead)
 			{
 				_delay = 5;
-				_showingShipSelection = true;
 				//Player died, return to main menu if single player and insufficient funds to buy a new ship
 				//_gameMain.ChangeToScreen(Screen.MainMenu);
 			}
-			else if (_gameMain.MainPlayer.IsDead && _showingShipSelection)
+			else if (_gameMain.MainPlayer.IsDead)
 			{
 				if (_delay > 0)
 				{
 					_delay -= frameDeltaTime;
 					if (_delay <= 0)
 					{
-						if (player.Bank >= 520)
+						if (!_gameMain.IsMultiplayer)
 						{
-							_gameMain.ShipSelectionWindow.LoadShip(player.ShipSize, player.ShipStyle, player.ShipColor, player.Bank);
-							_gameMain.ShipSelectionWindow.OnSelectShip = OnSelectShip;
-						}
-						else
-						{
-							_gameMain.ChangeToScreen(Screen.MainMenu);
-							_showingShipSelection = false;
+							if (player.Bank >= 520)
+							{
+								_gameMain.LevelNumber--;
+								_gameMain.ChangeToScreen(Screen.Upgrade);
+							}
+							else
+							{
+								_gameMain.ChangeToScreen(Screen.MainMenu);
+							}
 						}
 					}
-				}
-				else
-				{
-					_gameMain.ShipSelectionWindow.MouseHover(x, y, frameDeltaTime);
 				}
 			}
 
@@ -229,51 +220,12 @@ namespace Xasteroids.Screens
 			_debuggingText.SetText(debugText);*/
 		}
 
-		private void OnSelectShip(int size, int style, Color color, int shipCost)
-		{
-			var player = _gameMain.MainPlayer;
-			player.ShipSize = size;
-			player.ShipStyle = style;
-			player.ShipColor = color;
-			player.Bank -= shipCost;
-			player.ShipSprite = SpriteManager.GetShipSprite(size, style, _gameMain.Random);
-			player.ShieldSprite = SpriteManager.GetShieldSprite(size, _gameMain.Random);
-			player.IsDead = false;
-
-			_showingShipSelection = false;
-			_gameMain.ShipSelectionWindow.OnSelectShip = null;
-			
-			//if (singleplayer)
-			{
-				_gameMain.PlayerManager.ResetPlayerPositions();
-
-				//Start the game!
-				_gameMain.ChangeToScreen(Screen.Upgrade);
-				_gameMain.LevelNumber--; //Need to re-do the level
-			}
-		}
-
 		public void MouseDown(int x, int y)
 		{
-			if (_gameMain.MainPlayer.IsDead && _showingShipSelection && _delay <= 0)
-			{
-				_gameMain.ShipSelectionWindow.MouseDown(x, y);
-			}
 		}
 
 		public void MouseUp(int x, int y)
 		{
-			if (_gameMain.MainPlayer.IsDead && _showingShipSelection && _delay <= 0)
-			{
-				if (!_gameMain.ShipSelectionWindow.MouseUp(x, y))
-				{
-					//Cancelled buying a ship
-					_showingShipSelection = false;
-					_gameMain.ShipSelectionWindow.OnSelectShip = null;
-					_gameMain.PlayerManager.Players.Clear();
-					_gameMain.ChangeToScreen(Screen.MainMenu);
-				}
-			}
 		}
 
 		public void MouseScroll(int direction, int x, int y)

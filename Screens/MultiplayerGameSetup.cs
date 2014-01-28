@@ -17,6 +17,18 @@ namespace Xasteroids.Screens
 
 		private bool _isHost;
 
+		public string[] Chatters
+		{
+			get
+			{
+				return _playerList.Text.Split('\n');
+			}
+			set
+			{
+				_messageTextBox.SetText(string.Join(@"\n", value));
+			}
+		}
+
 		public bool Initialize(GameMain gameMain, out string reason)
 		{
 			_gameMain = gameMain;

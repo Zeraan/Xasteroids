@@ -285,6 +285,7 @@ namespace Xasteroids
 				{
 					NewPlayerListUpdate = true;
 					PlayerList = (PlayerList)theObject;
+					_multiplayerGameSetup.Chatters = PlayerList.Players;
 				}
 			}
 
@@ -510,6 +511,7 @@ namespace Xasteroids
 							MessageBox.Show("Error in loading Multiplayer PreGame Screen.  Reason: " + reason);
 							ExitGame();
 						}
+						_multiplayerGameSetup.Chatters = new string[] { _mainMenu.PlayerName };
 					}
 					if (_client != null)
 					{

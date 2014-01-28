@@ -267,7 +267,16 @@ namespace Xasteroids
 		public float CoolDownPeriod { get { return 0.5f - (CooldownLevel * 0.025f); } }
 		public float CoolDown { get; set; }
 
-		public int ShipSize { get; set; }
+		private int _shipSize;
+		public int ShipSize
+		{
+			get { return _shipSize; }
+			set
+			{
+				_shipSize = value;
+				Mass = _shipSize * 20;
+			}
+		}
 		public int ShipStyle { get; set; }
 		private Color _shipColor;
 		public Color ShipColor
@@ -384,7 +393,6 @@ namespace Xasteroids
 			ShipSize = shipSize;
 			ShipStyle = shipStyle;
 			ShipColor = shipColor;
-			Mass = ShipSize * 20;
 
 			Energy = MaxEnergy;
 
@@ -486,11 +494,11 @@ namespace Xasteroids
 		public const int CONFIG_LENGTH = 6;
 
 		public string OwnerName { get; set; }
-		public float ShieldAlpha { get; set; }
 		public int Size { get; set; }
 		public int Style { get; set; }
 		public Color Color { get; set; }
-		public int Mass { get; set; }
+		public int Bank { get; set; }
+		public bool IsDead { get; set; }
 
 		public string[] Configuration
 		{
@@ -499,11 +507,11 @@ namespace Xasteroids
 				string[] config = new string[CONFIG_LENGTH];
 
 				config[0] = OwnerName;
-				config[1] = ShieldAlpha.ToString();
-				config[2] = Size.ToString();
-				config[3] = Style.ToString();
-				config[4] = Color.ToArgb().ToString();
-				config[5] = Mass.ToString();
+				config[1] = Size.ToString();
+				config[2] = Style.ToString();
+				config[3] = Color.ToArgb().ToString();
+				config[4] = Bank.ToString();
+				config[5] = IsDead.ToString();
 
 				return config;
 			}
@@ -515,27 +523,27 @@ namespace Xasteroids
 				}
 
 				OwnerName = value[0];
-				float outFloat;
-				if (float.TryParse(value[1], out outFloat))
-				{
-					ShieldAlpha = outFloat;
-				}
 				int outInt;
-				if (int.TryParse(value[2], out outInt))
+				if (int.TryParse(value[1], out outInt))
 				{
 					Size = outInt;
 				}
-				if (int.TryParse(value[3], out outInt))
+				if (int.TryParse(value[2], out outInt))
 				{
 					Style = outInt;
 				}
-				if (int.TryParse(value[4], out outInt))
+				if (int.TryParse(value[3], out outInt))
 				{
 					Color = Color.FromArgb(outInt);
 				}
-				if (int.TryParse(value[5], out outInt))
+				if (int.TryParse(value[4], out outInt))
 				{
-					Mass = outInt;
+					Bank = outInt;
+				}
+				bool outBool;
+				if (bool.TryParse(value[5], out outBool))
+				{
+					IsDead = outBool;
 				}
 			}
 		}

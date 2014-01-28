@@ -121,7 +121,6 @@ namespace Xasteroids
 			AsteroidManager = new AsteroidManager(this);
 			ObjectManager = new ObjectManager(this);
 			ShipSelectionWindow = new ShipSelectionWindow();
-			ShipSelectionWindow.ShipSelected += OnShipSelected;
 			if (!ShipSelectionWindow.Initialize(this, out reason))
 			{
 				return false;
@@ -210,7 +209,7 @@ namespace Xasteroids
 		public void OnPlayerReady(Player player)
 		{
 			//single player
-			if (_host == null || _client == null)
+			if (_host == null && _client == null)
 			{
 				LevelNumber++;
 				SetupLevel();
@@ -226,11 +225,11 @@ namespace Xasteroids
 				{
 					ships.Add(new Ship {
 						OwnerName = p.Name,
-						ShieldAlpha = p.ShieldAlpha,
 						Size = p.ShipSize,
 						Style = p.ShipStyle,
 						Color = p.ShipColor,
-						Mass = p.Mass
+						Bank = p.Bank,
+						IsDead = p.IsDead
 					});
 				}
 				_host.SendObjectTCP(new ShipList { Ships = ships });
@@ -239,17 +238,9 @@ namespace Xasteroids
 
 			if (_client != null && _client.ServerIPAddress != null)
 			{
+				_client.SendObjectTcp(new Ship { Size = MainPlayer.ShipSize, Style = MainPlayer.ShipStyle, Color = MainPlayer.ShipColor, Bank = MainPlayer.Bank, IsDead = MainPlayer.IsDead});
 				_client.SendObjectTcp(new NetworkMessage { Content = "Ready" });
 				return;
-			}
-		}
-
-		public void OnShipSelected(Ship ship)
-		{
-			if (_client != null && _client.ServerIPAddress != null)
-			{
-				_client.SendObjectTcp(ship);
-				PlayerManager.Players[MainPlayerID] = new Player(ship.Style, ship.Size, ship.Color);
 			}
 		}
 
@@ -555,9 +546,9 @@ namespace Xasteroids
 						{
 							PlayerManager.Players.Add(new Player(1, 1, Color.Red));
 						}
-						else if (PlayerManager.Players[MainPlayerID] == null)
+						else if (PlayerManager.Players[0] == null)
 						{
-							PlayerManager.Players[MainPlayerID] = new Player(1, 1, Color.Red);
+							PlayerManager.Players[0] = new Player(1, 1, Color.Red);
 						}
 						MainPlayerID = 0;
 					}

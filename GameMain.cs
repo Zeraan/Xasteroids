@@ -218,14 +218,19 @@ namespace Xasteroids
 				List<Ship> ships = new List<Ship>();
 				foreach (Player p in PlayerManager.Players)
 				{
+					p.ShipSize = 1;
+					p.ShipStyle = 1;
+					p.ShipColor = Color.Red;
+					p.Bank = 1000;
+					p.IsDead = true;
 					ships.Add(new Ship
 							{
 								OwnerName = p.Name,
-								Size = 1,
-								Style = 1,
-								Color = Color.Red,
+								Size = p.ShipSize,
+								Style = p.ShipStyle,
+								Color = p.ShipColor,
 								Bank = 1000,
-								IsDead = true
+								IsDead = p.IsDead
 							});
 				}
 				_host.SendObjectTCP(new ShipList { Ships = ships });

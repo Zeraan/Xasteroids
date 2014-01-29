@@ -382,7 +382,7 @@ namespace Xasteroids.Screens
 
 		public void EnableTheReadyButton()
 		{
-			_readyButton.Active = false;
+			_readyButton.Active = true;
 		}
 
 		public void MouseUp(int x, int y)
@@ -542,6 +542,7 @@ namespace Xasteroids.Screens
 
 		public void RefreshLabels()
 		{
+			_readyButton.Active = true;
 			var player = _gameMain.MainPlayer;
 			if (player.IsDead)
 			{

@@ -279,6 +279,7 @@ namespace Xasteroids
 			{
 				_client.SendObjectTcp(new Ship { Size = MainPlayer.ShipSize, Style = MainPlayer.ShipStyle, Color = MainPlayer.ShipColor, Bank = MainPlayer.Bank, IsDead = MainPlayer.IsDead});
 				_client.SendObjectTcp(new NetworkMessage { Content = "Ready" });
+				_upgradeAndWaitScreen.DisableTheReadyButton();
 				return;
 			}
 		}

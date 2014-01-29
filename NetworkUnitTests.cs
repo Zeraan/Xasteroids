@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Xasteroids
 {
@@ -70,6 +71,22 @@ namespace Xasteroids
 			host.ReceiveData(_someAddress, mixedString);
 			Assert.That(validObjects[0] == null);
 			Assert.That(validObjects[1] == null);
+		}
+
+		[Test]
+		public void ObjectStringConverter_SimpleValueRegexTest()
+		{
+			string myData = ",47,,";
+			MatchCollection matches = ObjectStringConverter.SimpleValueRegex.Matches(myData);
+			Assert.That(matches.Count == 4);
+		}
+
+		[Test]
+		public void ObjectStringConverter_MixedRegexTest()
+		{
+			string myData = ",47,,";
+			MatchCollection matches = ObjectStringConverter.MixedRegex.Matches(myData);
+			Assert.That(matches.Count == 4);
 		}
 	}
 }

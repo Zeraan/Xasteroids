@@ -75,17 +75,45 @@ namespace Xasteroids
 			IConfigurable configurableGuy = null;
 			if (fullTypeName.Equals(typeof(NetworkMessage).FullName))
 			{
-				configurableGuy = new NetworkMessage();
+				configurableGuy = new NetworkMessage { Configuration = configurationArray };
 			}
 			else if (fullTypeName.Equals(typeof(GameMessage).FullName))
 			{
-				configurableGuy = new GameMessage();
+				configurableGuy = new GameMessage { Configuration = configurationArray };
+			}
+			else if (fullTypeName.Equals(typeof(Asteroid).FullName))
+			{
+				configurableGuy = new Asteroid(configurationArray);
+			}
+			else if (fullTypeName.Equals(typeof(Bullet).FullName))
+			{
+				configurableGuy = new Bullet(configurationArray);
+			}
+			else if (fullTypeName.Equals(typeof(CombatData).FullName))
+			{
+				configurableGuy = new CombatData { Configuration = configurationArray };
+			}
+			else if (fullTypeName.Equals(typeof(Player).FullName))
+			{
+				configurableGuy = new Player(configurationArray);
+			}
+			else if (fullTypeName.Equals(typeof(PlayerList).FullName))
+			{
+				configurableGuy = new PlayerList { Configuration = configurationArray };
+			}
+			else if (fullTypeName.Equals(typeof(Ship).FullName))
+			{
+				configurableGuy = new Ship(configurationArray);
+			}
+			else if (fullTypeName.Equals(typeof(ShipList).FullName))
+			{
+				configurableGuy = new ShipList { Configuration = configurationArray };
+			}
+			else if (fullTypeName.Equals(typeof(Shockwave).FullName))
+			{
+				configurableGuy = new Shockwave(configurationArray);
 			}
 
-			if (null != configurableGuy)
-			{
-				configurableGuy.Configuration = configurationArray;
-			}
 			return configurableGuy;
 		}
 

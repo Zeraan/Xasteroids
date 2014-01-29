@@ -15,8 +15,6 @@ namespace Xasteroids.Screens
 		private BBStretchButton _startGame;
 		private BBStretchButton _leaveLobby;
 
-		private bool _isHost;
-
 		public string[] Chatters
 		{
 			get
@@ -73,7 +71,6 @@ namespace Xasteroids.Screens
 				return false;
 			}
 			_messageTextBox.Select();
-			_isHost = false;
 
 			return true;
 		}
@@ -110,7 +107,7 @@ namespace Xasteroids.Screens
 				_playerList.SetText(playerListText);
 				_gameMain.NewPlayerListUpdate = false;
 			}
-			if (_isHost)
+			if (_gameMain.IsHost)
 			{
 				_startGame.MouseHover(x, y, frameDeltaTime);
 			}
@@ -161,13 +158,6 @@ namespace Xasteroids.Screens
 			{
 				_messageTextBox.KeyDown(e);
 			}
-		}
-
-		public void SetHost(bool isHosting)
-		{
-			_isHost = isHosting;
-			_chatText.SetText(string.Empty);
-			_messageTextBox.SetText(string.Empty);
 		}
 	}
 }

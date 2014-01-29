@@ -292,7 +292,6 @@ namespace Xasteroids
 			{
 				lock (ChatLock)
 				{
-					NewChatMessage = true;
 					var gameMessage = (GameMessage)theObject;
 					ChatText.AppendLine(gameMessage.Content);
 					if (IsHost)
@@ -300,6 +299,7 @@ namespace Xasteroids
 						_host.SendObjectTCP(gameMessage);
 					}
 				}
+				NewChatMessage = true;
 				return;
 			}
 
@@ -307,10 +307,11 @@ namespace Xasteroids
 			{
 				lock (PlayerListLock)
 				{
-					NewPlayerListUpdate = true;
 					PlayerList = (PlayerList)theObject;
 					_multiplayerGameSetup.Chatters = PlayerList.Players;
 				}
+				NewPlayerListUpdate = true;
+				return;
 			}
 
 			if (theObject is NetworkMessage)

@@ -9,12 +9,12 @@ namespace Xasteroids
 		private GameMain _gameMain;
 
 		//This class is for handling bullets, nukes, and other various objects
-		public List<Bullet> Bullets { get; private set; }
+		public List<Bullet> Bullets { get; set; }
 		public BBSprite BulletSprite { get; private set; }
 		public BBSprite ShockwaveSprite { get; private set; }
 
 		public List<Explosion> Explosions { get; private set; }
-		public List<Shockwave> Shockwaves { get; private set; } 
+		public List<Shockwave> Shockwaves { get; set; } 
 
 		public ObjectManager(GameMain gameMain)
 		{

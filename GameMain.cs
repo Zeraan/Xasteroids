@@ -245,10 +245,10 @@ namespace Xasteroids
 
 		public void OnPlayerReady(Player player)
 		{
+			LevelNumber++;
 			//single player
 			if (_host == null && _client == null)
 			{
-				LevelNumber++;
 				SetupLevel();
 				PlayerManager.ResetPlayerPositions();
 				ChangeToScreen(Screen.InGame);
@@ -269,7 +269,10 @@ namespace Xasteroids
 						IsDead = p.IsDead
 					});
 				}
+				SetupLevel();
+				PlayerManager.ResetPlayerPositions();
 				_host.SendObjectTCP(new ShipList { Ships = ships });
+				SendCombatData();
 				_host.SendObjectTCP(new NetworkMessage { Content = "Change to " + Screen.InGame.ToString() + " Screen." });
 				ChangeToScreen(Screen.InGame);
 				return;
@@ -282,6 +285,16 @@ namespace Xasteroids
 				_upgradeAndWaitScreen.DisableTheReadyButton();
 				return;
 			}
+		}
+
+		private void SendCombatData()
+		{
+			var combatData = new CombatData();
+			combatData.Asteroids = AsteroidManager.Asteroids;
+			combatData.Players = PlayerManager.Players;
+			combatData.Bullets = ObjectManager.Bullets;
+			combatData.Shockwaves = ObjectManager.Shockwaves;
+			_host.SendObjectTCP(combatData);
 		}
 
 		private void OnDisconnected()
@@ -375,6 +388,22 @@ namespace Xasteroids
 					thePlayers[j].ShipSprite = SpriteManager.GetShipSprite(theShip.Size, theShip.Style, Random);
 				}
 				return;
+			}
+
+			if (theObject is CombatData)
+			{
+				var combatData = (CombatData)theObject;
+				for (int i = 0; i < combatData.Players.Count; i++)
+				{
+					if (i == MainPlayerID)
+					{
+						continue; //Don't update yourself
+					}
+					PlayerManager.Players[i] = combatData.Players[i];
+				}
+				ObjectManager.Bullets = combatData.Bullets;
+				ObjectManager.Shockwaves = combatData.Shockwaves;
+				AsteroidManager.Asteroids = combatData.Asteroids;
 			}
 		}
 

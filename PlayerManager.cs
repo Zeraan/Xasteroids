@@ -34,9 +34,22 @@ namespace Xasteroids
 				player.Angle = 0;
 				player.Energy = player.MaxEnergy;
 			}
-			else
+			else if (Players.Count > 1)
 			{
 				//Have the ships be in a circle, facing outward
+				int x = _gameMain.LevelSize.X / 2;
+				int y = _gameMain.LevelSize.Y / 2;
+				double angleIncrements = (Math.PI * 2) / Players.Count;
+				for (int i = 0; i < Players.Count; i++)
+				{
+					var player = Players[i];
+					player.PositionX = (float)(x + (160 * Math.Cos(angleIncrements * i - (Math.PI / 2))));
+					player.PositionX = (float)(y + (160 * Math.Sin(angleIncrements * i - (Math.PI / 2))));
+					player.VelocityX = 0;
+					player.VelocityY = 0;
+					player.Angle = (float)((angleIncrements * i * 180) / Math.PI);
+					player.Energy = player.MaxEnergy;
+				}
 			}
 		}
 

@@ -440,7 +440,7 @@ namespace Xasteroids
 
 		private GameMain _gameMain;
 
-		public List<Asteroid> Asteroids { get; private set; }
+		public List<Asteroid> Asteroids { get; set; }
 		private AstCell[][] _astCells;
 
 		public AsteroidManager(GameMain gameMain)

@@ -347,16 +347,17 @@ namespace Xasteroids
 				var thePlayers = PlayerManager.Players;
 				while (thePlayers.Count < ships.Count)
 				{
-					thePlayers.Add(null);
+					thePlayers.Add(new Player(1, 1, Color.Red));
 				}
 				for (int j = 0; j < ships.Count; ++j)
 				{
-					if (j == MainPlayerID)
-					{
-						continue;
-					}
 					var theShip = ships[j];
-					thePlayers[j] = new Player(theShip.Size, theShip.Style, theShip.Color);
+					thePlayers[j].Name = theShip.OwnerName;
+					thePlayers[j].ShipSize = theShip.Size;
+					thePlayers[j].ShipStyle = theShip.Style;
+					thePlayers[j].ShipColor = theShip.Color;
+					thePlayers[j].IsDead = theShip.IsDead;
+					thePlayers[j].Bank = theShip.Bank;
 				}
 				return;
 			}

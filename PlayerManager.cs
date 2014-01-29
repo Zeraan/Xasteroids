@@ -44,7 +44,7 @@ namespace Xasteroids
 				{
 					var player = Players[i];
 					player.PositionX = (float)(x + (160 * Math.Cos(angleIncrements * i - (Math.PI / 2))));
-					player.PositionX = (float)(y + (160 * Math.Sin(angleIncrements * i - (Math.PI / 2))));
+					player.PositionY = (float)(y + (160 * Math.Sin(angleIncrements * i - (Math.PI / 2))));
 					player.VelocityX = 0;
 					player.VelocityY = 0;
 					player.Angle = (float)((angleIncrements * i * 180) / Math.PI);

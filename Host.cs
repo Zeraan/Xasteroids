@@ -68,7 +68,10 @@ namespace Xasteroids
 				catch
 				{
 					tcpClient.Close();
-					_clientsAndBytes.Remove(tcpClient);
+					lock (_clientsAndBytes)
+					{
+						_clientsAndBytes.Remove(tcpClient);
+					}
 					if (_clientsAndUdpEndPoints.ContainsKey(tcpClient))
 					{
 						_clientsAndUdpEndPoints.Remove(tcpClient);
@@ -111,13 +114,16 @@ namespace Xasteroids
 
 		public void ShutDown()
 		{
-			foreach (var kvp in _clientsAndBytes)
+			lock (_clientsAndBytes)
 			{
-				TcpClient client = kvp.Key;
-				client.GetStream().Close();
-				client.Close();
+				foreach (var kvp in _clientsAndBytes)
+				{
+					TcpClient client = kvp.Key;
+					client.GetStream().Close();
+					client.Close();
+				}
+				_clientsAndBytes.Clear();
 			}
-			_clientsAndBytes.Clear();
 			_udpClient.Close();
 			_clientsAndUdpEndPoints.Clear();
 			_ipAddressesWithGameAccess.Clear();
@@ -146,7 +152,10 @@ namespace Xasteroids
 			}
 			byte[] bytes = new byte[1024];
 			NetworkStream stream = client.GetStream();
-			_clientsAndBytes.Add(client, bytes);
+			lock (_clientsAndBytes)
+			{
+				_clientsAndBytes.Add(client, bytes);
+			}
 			stream.BeginRead(bytes, 0, bytes.Length, OnInitialTcpDataReceived, client);
 		}
 
@@ -155,16 +164,22 @@ namespace Xasteroids
 			TcpClient tcpClient = (TcpClient)asyncResult.AsyncState;
 			NetworkStream stream = tcpClient.GetStream();
 			stream.EndWrite(asyncResult);
+			/* We are closing the connection this way because conditions are such
+			 * that we are not admitting to client to the game.
+			*/
 			if (_clientsToClose.Contains(tcpClient))
 			{
 				tcpClient.GetStream().Close();
+				if (ClientDisconnected != null)
+				{
+					/* At this point in our program's execution we do not have
+					 * the IPAddress of the client we are breaking connection with.
+					*/
+					ClientDisconnected(null);
+				}
 				tcpClient.Close();
 				_clientsToClose.Remove(tcpClient);
-				_clientsAndBytes.Remove(tcpClient);
-				if (_clientsAndUdpEndPoints.ContainsKey(tcpClient))
-				{
-					_clientsAndUdpEndPoints.Remove(tcpClient);
-				}
+				RemoveClient(tcpClient);
 			}
 		}
 
@@ -264,7 +279,10 @@ namespace Xasteroids
 			TcpClient client = (TcpClient)asyncResult.AsyncState;
 			if (!client.Connected)
 			{
-				_clientsAndBytes.Remove(client);
+				lock (_clientsAndBytes)
+				{
+					_clientsAndBytes.Remove(client);
+				}
 				if (!_clientsAndUdpEndPoints.ContainsKey(client))
 				{
 					return;
@@ -278,17 +296,33 @@ namespace Xasteroids
 				return;
 			}
 			NetworkStream stream = client.GetStream();
-			byte[] bytes = _clientsAndBytes[client];		
-			int numberOfBytesRead = stream.EndRead(asyncResult);
+			byte[] bytes = _clientsAndBytes[client];
+			int numberOfBytesRead = 0;
+			try
+			{
+				numberOfBytesRead = stream.EndRead(asyncResult);
+			}
+			catch (IOException ioException)
+			{
+				if (Regex.Match(ioException.Message, "An existing connection was forcibly closed by the remote host.").Success)
+				{
+					if (ClientDisconnected != null)
+					{
+						var address = _clientsAndUdpEndPoints[client].Address;
+						ClientDisconnected(address);
+					}
+					RemoveClient(client);
+					return;
+				}
+			}
 			if (numberOfBytesRead == 0)
 			{
-				_clientsAndBytes.Remove(client);
-				IPAddress addressOfDisconnectd = _clientsAndUdpEndPoints[client].Address;
-				_clientsAndUdpEndPoints.Remove(client);
-				if (_sendersAndData.ContainsKey(addressOfDisconnectd))
+				if (ClientDisconnected != null)
 				{
-					_sendersAndData.Remove(addressOfDisconnectd);
+					var address = _clientsAndUdpEndPoints[client].Address;
+					ClientDisconnected(address);
 				}
+				RemoveClient(client);
 				return;
 			}
 			string data = System.Text.Encoding.ASCII.GetString(bytes, 0, numberOfBytesRead);
@@ -302,6 +336,7 @@ namespace Xasteroids
 		}
 
 		public event Action<IPAddress, IConfigurable> ObjectReceived;
+		public event Action<IPAddress> ClientDisconnected;
 
 		public Dictionary<IPAddress, string> _sendersAndData = new Dictionary<IPAddress, string>();
 
@@ -425,5 +460,19 @@ namespace Xasteroids
 		}
 
 		private ObjectStringConverter _objectStringConverter = new ObjectStringConverter();
+
+		private void RemoveClient(TcpClient client)
+		{
+			lock (_clientsAndBytes)
+			{
+				_clientsAndBytes.Remove(client);
+			}
+			IPAddress addressOfDisconnectd = _clientsAndUdpEndPoints[client].Address;
+			_clientsAndUdpEndPoints.Remove(client);
+			if (_sendersAndData.ContainsKey(addressOfDisconnectd))
+			{
+				_sendersAndData.Remove(addressOfDisconnectd);
+			}
+		}
 	}
 }

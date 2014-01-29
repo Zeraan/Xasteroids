@@ -78,6 +78,10 @@ namespace Xasteroids
 		{ 
 			get { return _host != null; }
 		}
+		public bool IsMultiplayer
+		{
+			get { return _host != null || _client != null; }
+		}
 		public bool IsConnected
 		{
 			get { return IsHost ? !_host.IsShutDown : _client != null ? !_client.IsShutDown : false; }
@@ -206,6 +210,30 @@ namespace Xasteroids
 			_client.SendObjectTcp(new NetworkMessage { Content = "Name:" + _mainMenu.PlayerName });
 		}
 
+		public void SetupPlayersPreGame()
+		{
+			//A bit of sanity check
+			if (_host != null)
+			{
+				List<Ship> ships = new List<Ship>();
+				foreach (Player p in PlayerManager.Players)
+				{
+					ships.Add(new Ship
+							{
+								OwnerName = p.Name,
+								Size = 1,
+								Style = 1,
+								Color = Color.Red,
+								Bank = 1000,
+								IsDead = true
+							});
+				}
+				_host.SendObjectTCP(new ShipList { Ships = ships });
+				ResetGame();
+				PlayerManager.ResetPlayerPositions();
+			}
+		}
+
 		public void OnPlayerReady(Player player)
 		{
 			//single player
@@ -305,6 +333,8 @@ namespace Xasteroids
 							thatPlayer.ShipSize = theShip.Size;
 							thatPlayer.ShipStyle = theShip.Style;
 							thatPlayer.ShipColor = theShip.Color;
+							thatPlayer.IsDead = theShip.IsDead;
+							thatPlayer.Bank = theShip.Bank;
 						}
 						return;
 					}
@@ -412,7 +442,6 @@ namespace Xasteroids
 
 		public void AssignPlayerIDs()
 		{
-			var themPlayers = PlayerManager.Players;
 			int id = 1;
 			foreach (var item in _clientAddressesAndMonikers)
 			{

@@ -348,6 +348,7 @@ namespace Xasteroids
 							thatPlayer.ShipColor = theShip.Color;
 							thatPlayer.IsDead = theShip.IsDead;
 							thatPlayer.Bank = theShip.Bank;
+							thatPlayer.ShipSprite = SpriteManager.GetShipSprite(theShip.Size, theShip.Style, Random);
 						}
 						return;
 					}
@@ -371,6 +372,7 @@ namespace Xasteroids
 					thePlayers[j].ShipColor = theShip.Color;
 					thePlayers[j].IsDead = theShip.IsDead;
 					thePlayers[j].Bank = theShip.Bank;
+					thePlayers[j].ShipSprite = SpriteManager.GetShipSprite(theShip.Size, theShip.Style, Random);
 				}
 				return;
 			}

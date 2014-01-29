@@ -398,7 +398,7 @@ namespace Xasteroids
 					_clientAddressesAndMonikers.Add(senderAddress, monikers);
 				}
 				//Make a list of player names and send to clients
-				string list = string.Empty;
+				string list = _mainMenu.PlayerName;
 				foreach (var moniker in _clientAddressesAndMonikers)
 				{
 					list = list + moniker.Value[NAME] + "|";

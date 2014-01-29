@@ -221,7 +221,7 @@ namespace Xasteroids
 					themPlayers.Clear();
 				}
 
-				themPlayers.Add(new Player(1, 1, Color.Red) { Bank = 1000, IsDead = true });
+				themPlayers.Add(new Player(1, 1, Color.Red) { Name = _mainMenu.PlayerName, Bank = 1000, IsDead = true });
 				AddClientsToPlayers();
 				List<Ship> ships = new List<Ship>();
 				foreach (Player p in PlayerManager.Players)
@@ -467,10 +467,9 @@ namespace Xasteroids
 
 			foreach (var item in _clientAddressesAndMonikers)
 			{
-				var address = item.Key;
 				if (_host.HasConnectionTo(item.Key))
 				{
-					themPlayers.Add(new Player(1, 1, Color.Red) { Bank = 1000, IsDead = true }); 
+					themPlayers.Add(new Player(1, 1, Color.Red) { Name = (string)item.Value[NAME], Bank = 1000, IsDead = true }); 
 				}
 			}
 		}

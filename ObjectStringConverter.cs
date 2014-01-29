@@ -27,7 +27,9 @@ namespace Xasteroids
 																@"|((?<=\\)\[)" +		//or an escaped left bracket...
 																@"|((?<=\\),)" +		//or an escaped comma...
 															")+" +						//...one or more of them
-															@"|((?<=[^\\],)(?=,))",		//Or an empty string between two commas
+															@"|((?<=[^\\],)(?=,))" +	//or an empty string between two commas
+															@"|(^(?=,))" +				//or an empty string at the beginning
+															@"|((?<=,)$)",				//or an empty string at the end
 			RegexOptions.Compiled
 		);
 

@@ -215,14 +215,17 @@ namespace Xasteroids
 			//A bit of sanity check
 			if (_host != null)
 			{
+				var themPlayers = PlayerManager.Players;
+				if (themPlayers.Count > 0)
+				{
+					themPlayers.Clear();
+				}
+
+				themPlayers.Add(new Player(1, 1, Color.Red) { Bank = 1000, IsDead = true });
+				AddClientsToPlayers();
 				List<Ship> ships = new List<Ship>();
 				foreach (Player p in PlayerManager.Players)
 				{
-					p.ShipSize = 1;
-					p.ShipStyle = 1;
-					p.ShipColor = Color.Red;
-					p.Bank = 1000;
-					p.IsDead = true;
 					ships.Add(new Ship
 							{
 								OwnerName = p.Name,
@@ -234,6 +237,7 @@ namespace Xasteroids
 							});
 				}
 				_host.SendObjectTCP(new ShipList { Ships = ships });
+				AssignPlayerIDs();
 				ResetGame();
 				PlayerManager.ResetPlayerPositions();
 			}
@@ -266,6 +270,8 @@ namespace Xasteroids
 					});
 				}
 				_host.SendObjectTCP(new ShipList { Ships = ships });
+				_host.SendObjectTCP(new NetworkMessage { Content = "Change to " + Screen.InGame.ToString() + " Screen." });
+				ChangeToScreen(Screen.InGame);
 				return;
 			}
 
@@ -433,8 +439,13 @@ namespace Xasteroids
 				if (match.Groups[1].Value.Equals(Screen.Upgrade.ToString()))
 				{
 					ChangeToScreen(Screen.Upgrade);
+					return;
 				}
-				return;
+				if (match.Groups[1].Value.Equals(Screen.InGame.ToString()))
+				{
+					ChangeToScreen(Screen.InGame);
+					return;
+				}
 			}
 
 			if (_host != null && message.Content.Equals("Ready"))
@@ -443,6 +454,20 @@ namespace Xasteroids
 				if (ShoppingPlayers.Count == 0)
 				{
 					_upgradeAndWaitScreen.EnableTheReadyButton();
+				}
+			}
+		}
+
+		private void AddClientsToPlayers()
+		{
+			var themPlayers = PlayerManager.Players;
+
+			foreach (var item in _clientAddressesAndMonikers)
+			{
+				var address = item.Key;
+				if (_host.HasConnectionTo(item.Key))
+				{
+					themPlayers.Add(new Player(1, 1, Color.Red) { Bank = 1000, IsDead = true }); 
 				}
 			}
 		}

@@ -1,5 +1,6 @@
 ﻿﻿using System.Drawing;
-using GorgonLibrary.InputDevices;
+﻿using System.Text;
+﻿using GorgonLibrary.InputDevices;
 
 namespace Xasteroids.Screens
 {
@@ -953,9 +954,17 @@ namespace Xasteroids.Screens
 			}
 
 			//Refresh the player status text box
-			string status = player.Name + " ($" + player.Bank + ") - Shopping";
-			//TODO- Add other players to status
-			_playerStatusTextBox.SetText(status);
+			RefreshPlayers();
+		}
+
+		private void RefreshPlayers()
+		{
+			StringBuilder status = new StringBuilder();
+			foreach (var player in _gameMain.PlayerManager.Players)
+			{
+				status.AppendLine(player.Name + " ($" + player.Bank + ") - Shopping");
+			}
+			_playerStatusTextBox.SetText(status.ToString());
 		}
 
 		private void OnSelectShip(int size, int style, Color color, int shipCost)

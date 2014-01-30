@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using GorgonLibrary;
 using GorgonLibrary.Graphics;
 using GorgonLibrary.InputDevices;
 
@@ -2614,6 +2615,8 @@ namespace Xasteroids
 
 		#region Properties
 		public string Text { get; private set; }
+		public float CharacterWidth { get { return _textSprite.Width / Text.Length; } }
+		public Vector2D Position { get { return _textSprite.Position; } }
 		#endregion
 
 		#region Constructor
@@ -2738,10 +2741,25 @@ namespace Xasteroids
 		private bool pressed;
 		private bool blink;
 		private float timer;
+		private float highlightWidth = 0.0f;
+		private float highlightHeight = 0.0f;
+		private string selectedText = string.Empty;
 		#endregion
 
 		#region Properties
 		public string Text { get; private set; }
+		public string SelectedText
+		{
+			get { return selectedText; }
+			private set
+			{
+				selectedText = value;
+				highlightWidth = selectedText.Length * text.CharacterWidth;
+				highlightHeight = text.GetHeight();
+			}
+		}
+		public int SelectedTextIndex { get; private set; }
+		public Color HighlightColor { get; set; }
 		#endregion
 
 		#region Constructors
@@ -2751,6 +2769,10 @@ namespace Xasteroids
 			yPos = y;
 			this.width = width;
 			this.height = height;
+			HighlightColor = Color.FromArgb(125, 0, 125, 125);
+
+			//Allows us to have transparency on our highlight rectangle
+			Gorgon.Screen.BlendingMode = BlendingModes.Modulated;
 
 			background = new BBStretchableImage();
 			if (!background.Initialize(x, y, width, height, StretchableImageType.TextBox, r, out reason))
@@ -2842,10 +2864,53 @@ namespace Xasteroids
 			text.MoveTo(x + 6, y + 7);
 		}
 
+		public void DeleteSelectedText()
+		{
+			if (Text.Length == SelectedText.Length)
+			{
+				SelectedText = string.Empty;
+				SetText(string.Empty);
+				return;
+			}
+
+			string beforeSelected = Text.Substring(0, SelectedTextIndex);
+			int selectedTextIndexOfLast = SelectedTextIndex + (SelectedText.Length - 1);
+			string afterSelected = Text.Substring(selectedTextIndexOfLast + 1, Text.Length - 1 - selectedTextIndexOfLast);
+			SelectedText = string.Empty;
+			SetText(beforeSelected + afterSelected);
+		}
+
+		public void ReplaceSelectedText(string replacement)
+		{
+			if (Text.Length == SelectedText.Length)
+			{
+				SelectedText = string.Empty;
+				SetText(replacement);
+				return;
+			}
+
+			string beforeSelected = Text.Substring(0, SelectedTextIndex);
+			int selectedTextIndexOfLast = SelectedTextIndex + (SelectedText.Length - 1);
+			string afterSelected = Text.Substring(selectedTextIndexOfLast + 1, Text.Length - 1 - selectedTextIndexOfLast);
+			SelectedText = string.Empty;
+			SetText(beforeSelected + replacement + afterSelected);
+		}
+
 		public void Draw()
 		{
 			background.Draw();
+			if (SelectedText.Length > 0)
+			{
+				float x = text.Position.X + ( SelectedTextIndex * text.CharacterWidth );
+				float y = text.Position.Y;
+				DrawHighlight(x, y);
+			}
 			text.Draw();
+		}
+
+		private void DrawHighlight(float x, float y)
+		{
+			Gorgon.Screen.FilledRectangle(x, y, highlightWidth, highlightHeight, HighlightColor);
 		}
 
 		public void SetText(string text)
@@ -2886,10 +2951,26 @@ namespace Xasteroids
 				}
 				else if (e.Key == KeyboardKeys.Back)
 				{
-					if (Text.Length > 0)
+					if (SelectedText.Length > 0)
+					{
+						DeleteSelectedText();
+					}
+					else if (Text.Length > 0)
 					{
 						Text = Text.Substring(0, Text.Length - 1);
 					}
+				}
+				else if (e.Key == KeyboardKeys.Delete)
+				{
+					if (SelectedText.Length > 0)
+					{
+						DeleteSelectedText();
+					}
+				}
+				else if (e.Key == KeyboardKeys.A && e.ModifierKeys == KeyboardKeys.Control)
+				{
+					SelectedText = Text;
+					SelectedTextIndex = 0;
 				}
 				else if (char.IsLetterOrDigit(e.CharacterMapping.Character) ||
 					char.IsLetterOrDigit(e.CharacterMapping.Shifted) ||
@@ -2899,6 +2980,12 @@ namespace Xasteroids
 					char.IsPunctuation(e.CharacterMapping.Shifted) ||
 					char.IsWhiteSpace(e.CharacterMapping.Character))
 				{
+					if (SelectedText.Length > 0)
+					{
+						ReplaceSelectedText(e.Shift ? e.CharacterMapping.Shifted.ToString() : e.CharacterMapping.Character.ToString());
+						return true;
+					}
+
 					string prevText = Text;
 					Text = Text + (e.Shift ? e.CharacterMapping.Shifted : e.CharacterMapping.Character);
 					text.SetText(Text);

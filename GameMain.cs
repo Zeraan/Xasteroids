@@ -129,6 +129,7 @@ namespace Xasteroids
 			{
 				return false;
 			}
+			ShipSelectionWindow.ShipSelected += OnShipSelected;
 
 			_mainMenu = new MainMenu();
 			if (!_mainMenu.Initialize(this, out reason))
@@ -240,6 +241,24 @@ namespace Xasteroids
 				AssignPlayerIDs();
 				ResetGame();
 				PlayerManager.ResetPlayerPositions();
+			}
+		}
+
+		private void OnShipSelected(object shipData)
+		{
+			_upgradeAndWaitScreen.IsShowingShipSelection = false;
+			if (_client != null && _client.ServerIPAddress != null)
+			{
+				_client.SendObjectTcp(MainPlayer);
+			}
+		}
+
+		//called when the local player purchases an upgrade
+		public void OnUpgradePurchased()
+		{
+			if (_client != null && _client.ServerIPAddress != null)
+			{
+				_client.SendObjectTcp(MainPlayer);
 			}
 		}
 
@@ -462,6 +481,8 @@ namespace Xasteroids
 					PlayerManager.AddPlayer(new Player(1, 1, Color.Red));
 				}
 				MainPlayerID = id;
+				MainPlayer.Bank = 1000;
+				MainPlayer.IsDead = true;
 				return;
 			}
 

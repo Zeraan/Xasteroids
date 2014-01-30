@@ -204,7 +204,7 @@ namespace Xasteroids
 		/* There is a lot in here, and as of this writing I
 		 * am only putting a limited amount into the config.
 		 */
-		public const int CONFIG_LENGTH = 7;
+		public const int CONFIG_LENGTH = 33;
 		public const int EXTENDED_CONFIG_LENGTH = 12;
 
 		public string Name { get; set; }
@@ -258,7 +258,7 @@ namespace Xasteroids
 			}
 		}
 		public float RotationSpeed { get { return ((100.0f + (15 * RotationLevel)) / ShipSize); } } //90 degress per sec
-		public int MaxEnergy { get { return CapacityLevel * 50 + ShipSize * 50; } }
+		public int   MaxEnergy { get { return CapacityLevel * 50 + ShipSize * 50; } }
 		public float Energy { get; set; }
 		public float RechargeRate { get { return RechargeLevel * 5;} }
 		public float ShieldAlpha { get; set; }
@@ -349,14 +349,53 @@ namespace Xasteroids
 			get
 			{
 				string[] config = new string[CONFIG_LENGTH];
+				
+				config[0] = Name;
 
-				config[0] = IsDead.ToString();
-				config[1] = PositionX.ToString();
-				config[2] = PositionY.ToString();
-				config[3] = VelocityX.ToString();
-				config[4] = VelocityY.ToString();
-				config[5] = ShieldAlpha.ToString();
-				config[6] = Bank.ToString();
+				config[1] = RechargeLevel.ToString();
+				config[2] = CapacityLevel.ToString();
+
+				config[3] = AccelerationLevel.ToString();
+				config[4] = RotationLevel.ToString();
+				config[5] = ReverseLevel.ToString();
+				config[6] = BoostingLevel.ToString();
+
+				config[7] = ShreddingLevel.ToString();
+				config[8] = HardnessLevel.ToString();
+				config[9] = InertialLevel.ToString();
+				config[10] = PhasingLevel.ToString();
+
+				config[11] = CooldownLevel.ToString();
+				config[12] = ConsumptionLevel.ToString();
+				config[13] = DamageLevel.ToString();
+				config[14] = NumberOfMounts.ToString();
+				config[15] = VelocityLevel.ToString();
+				config[16] = PenetratingLevel.ToString();
+				config[17] = ShrapnelLevel.ToString();
+				config[18] = NumberOfNukes.ToString();
+
+				config[19] = PositionX.ToString();
+				config[20] = PositionY.ToString();
+				config[21] = VelocityX.ToString();
+				config[22] = VelocityY.ToString();
+
+				config[23] = Angle.ToString();
+
+
+				config[24] = Energy.ToString();
+
+				config[25] = ShieldAlpha.ToString();
+
+				config[26] = IsDead.ToString();
+				config[27] = CoolDownPeriod.ToString();
+
+
+				config[28] = ShipSize.ToString();
+				config[29] = ShipStyle.ToString();
+				config[30] = ShipColor.ToArgb().ToString();
+
+				config[31] = Mass.ToString();
+				config[32] = Bank.ToString();
 
 				return config;
 			}
@@ -367,34 +406,143 @@ namespace Xasteroids
 					return;
 				}
 
-				bool outBool;
-				if (bool.TryParse(value[0], out outBool))
+				Name = value[0];
+
+				int outInt;
+				if (int.TryParse(value[1], out outInt))
 				{
-					IsDead = outBool;
+					RechargeLevel = outInt;
 				}
+				if (int.TryParse(value[2], out outInt))
+				{
+					CapacityLevel = outInt;
+				}
+				if (int.TryParse(value[3], out outInt))
+				{
+					AccelerationLevel = outInt;
+				}
+				if (int.TryParse(value[4], out outInt))
+				{
+					RotationLevel = outInt;
+				}
+				if (int.TryParse(value[5], out outInt))
+				{
+					ReverseLevel = outInt;
+				}
+				if (int.TryParse(value[6], out outInt))
+				{
+					BoostingLevel = outInt;
+				}
+				if (int.TryParse(value[7], out outInt))
+				{
+					ShreddingLevel = outInt;
+				}
+				if (int.TryParse(value[8], out outInt))
+				{
+					HardnessLevel = outInt;
+				}
+				if (int.TryParse(value[9], out outInt))
+				{
+					InertialLevel = outInt;
+				}
+				if (int.TryParse(value[10], out outInt))
+				{
+					PhasingLevel = outInt;
+				}
+				if (int.TryParse(value[11], out outInt))
+				{
+					CooldownLevel = outInt;
+				}
+				if (int.TryParse(value[12], out outInt))
+				{
+					ConsumptionLevel = outInt;
+				}
+				if (int.TryParse(value[13], out outInt))
+				{
+					DamageLevel = outInt;
+				}
+				if (int.TryParse(value[14], out outInt))
+				{
+					NumberOfMounts = outInt;
+				}
+				if (int.TryParse(value[15], out outInt))
+				{
+					VelocityLevel = outInt;
+				}
+				if (int.TryParse(value[16], out outInt))
+				{
+					PenetratingLevel = outInt;
+				}
+				if (int.TryParse(value[17], out outInt))
+				{
+					ShrapnelLevel = outInt;
+				}
+				if (int.TryParse(value[18], out outInt))
+				{
+					NumberOfNukes = outInt;
+				}
+
 				float outFloat;
-				if (float.TryParse(value[1], out outFloat))
+				if (float.TryParse(value[19], out outFloat))
 				{
 					PositionX = outFloat;
 				}
-				if (float.TryParse(value[2], out outFloat))
+				if (float.TryParse(value[20], out outFloat))
 				{
 					PositionY = outFloat;
 				}
-				if (float.TryParse(value[3], out outFloat))
+				if (float.TryParse(value[21], out outFloat))
 				{
 					VelocityX = outFloat;
 				}
-				if (float.TryParse(value[4], out outFloat))
+				if (float.TryParse(value[22], out outFloat))
 				{
 					VelocityY = outFloat;
 				}
-				if (float.TryParse(value[5], out outFloat))
+
+				if (float.TryParse(value[23], out outFloat))
+				{
+					Angle = outFloat;
+				}
+
+
+				if (float.TryParse(value[24], out outFloat))
+				{
+					Energy = outFloat;
+				}
+
+				if (float.TryParse(value[25], out outFloat))
 				{
 					ShieldAlpha = outFloat;
 				}
-				int outInt;
-				if (int.TryParse(value[6], out outInt))
+
+				bool outBool;
+				if (bool.TryParse(value[26], out outBool))
+				{
+					IsDead = outBool;
+				}
+
+				if (float.TryParse(value[27], out outFloat))
+				{
+					CoolDown = outFloat;
+				}
+				if (int.TryParse(value[28], out outInt))
+				{
+					ShipSize = outInt;
+				}
+				if (int.TryParse(value[29], out outInt))
+				{
+					ShipStyle = outInt;
+				}
+				if (int.TryParse(value[30], out outInt))
+				{
+					ShipColor = Color.FromArgb(outInt);
+				}
+				if (int.TryParse(value[31], out outInt))
+				{
+					Mass = outInt;
+				}
+				if (int.TryParse(value[32], out outInt))
 				{
 					Bank = outInt;
 				}
@@ -435,9 +583,6 @@ namespace Xasteroids
 		public Player(string[] configuration)
 		{
 			Configuration = configuration;
-			ShipSize = 1;
-			ShipStyle = 1;
-			ShipColor = Color.Red;
 		}
 
 		public void Update(float frameDeltaTime)

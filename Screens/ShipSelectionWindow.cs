@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 
 namespace Xasteroids.Screens
@@ -25,7 +26,7 @@ namespace Xasteroids.Screens
 		private BBSprite _shipSprite;
 		private float[] _convertedColors;
 
-		public Action<int, int, Color, int> OnSelectShip;
+		public event Action<object> ShipSelected;
 
 		public bool Initialize(GameMain gameMain, out string reason)
 		{
@@ -244,9 +245,15 @@ namespace Xasteroids.Screens
 			}
 			if (_selectShipButton.MouseUp(x, y))
 			{
-				if (OnSelectShip != null)
+				var player = _gameMain.MainPlayer;
+				player.ShipSize = _size;
+				player.ShipStyle = _style;
+				player.ShipColor = Color.FromArgb(_colorSliders[0].TopIndex, _colorSliders[1].TopIndex, _colorSliders[2].TopIndex);
+				player.Bank -= ShipCost;
+				player.IsDead = false;
+				if (ShipSelected != null)
 				{
-					OnSelectShip(_size, _style, Color.FromArgb(_colorSliders[0].TopIndex, _colorSliders[1].TopIndex, _colorSliders[2].TopIndex), (_size * 120 + 400));
+					ShipSelected(new List<object> { player.ShipSize, player.ShipStyle, player.ShipColor });
 				}
 			}
 			return base.MouseUp(x, y);
@@ -265,9 +272,12 @@ namespace Xasteroids.Screens
 			_colorLabels[1].SetText(string.Format("{0} Green Value", _colorSliders[1].TopIndex));
 			_colorLabels[2].SetText(string.Format("{0} Blue Value", _colorSliders[2].TopIndex));
 		}
+
+		public int ShipCost { get { return _size * 120 + 400; } }
+
 		private void RefreshShipCost()
 		{
-			int cost = _size * 120 + 400;
+			int cost = ShipCost;
 			_shipCostLabel.SetText(string.Format("Ship Cost: ${0}", cost));
 			if (cost <= _bank)
 			{

@@ -57,6 +57,18 @@ namespace Xasteroids.Screens
 
 		#region Ship Selection Data
 		private bool _showingShipSelection;
+		public bool IsShowingShipSelection
+		{
+			get { return _showingShipSelection; }
+			set
+			{
+				_showingShipSelection = value;
+				if (!_showingShipSelection)
+				{
+					RefreshLabels();
+				}
+			}
+		}
 		#endregion
 
 		public bool Initialize(GameMain gameMain, out string reason)
@@ -399,6 +411,7 @@ namespace Xasteroids.Screens
 				int cost = (player.RechargeLevel + 1) * RECHARGE_COST;
 				player.RechargeLevel++;
 				player.Bank -= cost;
+				_gameMain.OnUpgradePurchased();
 				RefreshLabels();
 			}
 			if (_energyButtons[1].MouseUp(x, y))
@@ -406,6 +419,7 @@ namespace Xasteroids.Screens
 				int cost = (player.CapacityLevel + 1) * CAPACITY_COST;
 				player.CapacityLevel++;
 				player.Bank -= cost;
+				_gameMain.OnUpgradePurchased();
 				RefreshLabels();
 			}
 			if (_energyButtons[2].MouseUp(x, y))
@@ -420,6 +434,7 @@ namespace Xasteroids.Screens
 				int cost = (player.AccelerationLevel + 1) * ACCELERATION_COST;
 				player.AccelerationLevel++;
 				player.Bank -= cost;
+				_gameMain.OnUpgradePurchased();
 				RefreshLabels();
 			}
 			if (_engineButtons[1].MouseUp(x, y))
@@ -427,6 +442,7 @@ namespace Xasteroids.Screens
 				int cost = (player.RotationLevel + 1) * ROTATION_COST;
 				player.RotationLevel++;
 				player.Bank -= cost;
+				_gameMain.OnUpgradePurchased();
 				RefreshLabels();
 			}
 			if (_engineButtons[2].MouseUp(x, y))
@@ -434,6 +450,7 @@ namespace Xasteroids.Screens
 				int cost = (player.ReverseLevel + 1) * REVERSE_COST;
 				player.ReverseLevel++;
 				player.Bank -= cost;
+				_gameMain.OnUpgradePurchased();
 				RefreshLabels();
 			}
 			if (_engineButtons[3].MouseUp(x, y))
@@ -441,6 +458,7 @@ namespace Xasteroids.Screens
 				int cost = (player.BoostingLevel + 1) * BOOST_COST;
 				player.BoostingLevel++;
 				player.Bank -= cost;
+				_gameMain.OnUpgradePurchased();
 				RefreshLabels();
 			}
 			if (_weaponButtons[0].MouseUp(x, y))
@@ -448,6 +466,7 @@ namespace Xasteroids.Screens
 				int cost = (player.CooldownLevel + 1) * COOLDOWN_COST;
 				player.CooldownLevel++;
 				player.Bank -= cost;
+				_gameMain.OnUpgradePurchased();
 				RefreshLabels();
 			}
 			if (_weaponButtons[1].MouseUp(x, y))
@@ -455,6 +474,7 @@ namespace Xasteroids.Screens
 				int cost = (player.ConsumptionLevel + 1) * CONSUMPTION_COST;
 				player.ConsumptionLevel++;
 				player.Bank -= cost;
+				_gameMain.OnUpgradePurchased();
 				RefreshLabels();
 			}
 			if (_weaponButtons[2].MouseUp(x, y))
@@ -462,6 +482,7 @@ namespace Xasteroids.Screens
 				int cost = (player.DamageLevel + 1) * DAMAGE_COST;
 				player.DamageLevel++;
 				player.Bank -= cost;
+				_gameMain.OnUpgradePurchased();
 				RefreshLabels();
 			}
 			if (_weaponButtons[3].MouseUp(x, y))
@@ -469,6 +490,7 @@ namespace Xasteroids.Screens
 				int cost = (player.VelocityLevel + 1) * VELOCITY_COST;
 				player.VelocityLevel++;
 				player.Bank -= cost;
+				_gameMain.OnUpgradePurchased();
 				RefreshLabels();
 			}
 			if (_weaponButtons[4].MouseUp(x, y))
@@ -476,6 +498,7 @@ namespace Xasteroids.Screens
 				int cost = (player.PenetratingLevel + 1) * PENETRATING_COST;
 				player.PenetratingLevel++;
 				player.Bank -= cost;
+				_gameMain.OnUpgradePurchased();
 				RefreshLabels();
 			}
 			if (_weaponButtons[5].MouseUp(x, y))
@@ -483,6 +506,7 @@ namespace Xasteroids.Screens
 				int cost = (player.NumberOfMounts + 1) * MOUNTS_COST;
 				player.NumberOfMounts++;
 				player.Bank -= cost;
+				_gameMain.OnUpgradePurchased();
 				RefreshLabels();
 			}
 			if (_weaponButtons[6].MouseUp(x, y))
@@ -490,12 +514,14 @@ namespace Xasteroids.Screens
 				int cost = (player.ShrapnelLevel + 1) * SHRAPNEL_COST;
 				player.ShrapnelLevel++;
 				player.Bank -= cost;
+				_gameMain.OnUpgradePurchased();
 				RefreshLabels();
 			}
 			if (_weaponButtons[7].MouseUp(x, y))
 			{
 				player.NumberOfNukes++;
 				player.Bank -= NUKE_COST;
+				_gameMain.OnUpgradePurchased();
 				RefreshLabels();
 			}
 			if (_shieldButtons[0].MouseUp(x, y))
@@ -503,6 +529,7 @@ namespace Xasteroids.Screens
 				int cost = (player.ShreddingLevel + 1) * SHREDDING_COST;
 				player.ShreddingLevel++;
 				player.Bank -= cost;
+				_gameMain.OnUpgradePurchased();
 				RefreshLabels();
 			}
 			if (_shieldButtons[1].MouseUp(x, y))
@@ -510,6 +537,7 @@ namespace Xasteroids.Screens
 				int cost = (player.HardnessLevel + 1) * HARDNESS_COST;
 				player.HardnessLevel++;
 				player.Bank -= cost;
+				_gameMain.OnUpgradePurchased();
 				RefreshLabels();
 			}
 			if (_shieldButtons[2].MouseUp(x, y))
@@ -517,12 +545,14 @@ namespace Xasteroids.Screens
 				int cost = (player.InertialLevel + 1) * INERTIAL_COST;
 				player.InertialLevel++;
 				player.Bank -= cost;
+				_gameMain.OnUpgradePurchased();
 				RefreshLabels();
 			}
 			if (_shieldButtons[3].MouseUp(x, y))
 			{
 				player.PhasingLevel++;
 				player.Bank -= PHASING_COST;
+				_gameMain.OnUpgradePurchased();
 				RefreshLabels();
 			}
 			if (_readyButton.MouseUp(x, y))
@@ -550,7 +580,6 @@ namespace Xasteroids.Screens
 				//Show the selection window
 				_showingShipSelection = true;
 				_gameMain.ShipSelectionWindow.LoadShip(player.ShipSize, player.ShipStyle, player.ShipColor, player.Bank);
-				_gameMain.ShipSelectionWindow.OnSelectShip = OnSelectShip;
 			}
 			int cost = (player.RechargeLevel + 1) * RECHARGE_COST;
 
@@ -965,20 +994,6 @@ namespace Xasteroids.Screens
 				status.AppendLine(player.Name + " ($" + player.Bank + ") - Shopping");
 			}
 			_playerStatusTextBox.SetText(status.ToString());
-		}
-
-		private void OnSelectShip(int size, int style, Color color, int shipCost)
-		{
-			var player = _gameMain.MainPlayer;
-			player.ShipSize = size;
-			player.ShipStyle = style;
-			player.ShipColor = color;
-			player.Bank -= shipCost;
-			player.IsDead = false;
-			
-			_showingShipSelection = false;
-			_gameMain.ShipSelectionWindow.OnSelectShip = null;
-			RefreshLabels();
 		}
 	}
 }

@@ -2995,6 +2995,22 @@ namespace Xasteroids
 						Text = prevText;
 					}
 				}
+				else if (e.Key == KeyboardKeys.Decimal)
+				{
+					if (SelectedText.Length > 0)
+					{
+						ReplaceSelectedText(".");
+						return true;
+					}
+					string prevText = Text;
+					Text = Text + ".";
+					text.SetText(Text);
+					if (text.GetWidth() > width - 8)
+					{
+						text.SetText(prevText);
+						Text = prevText;
+					}
+				}
 				return true;
 			}
 			return false;

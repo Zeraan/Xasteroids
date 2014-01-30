@@ -15,6 +15,7 @@ namespace Xasteroids
 		List<Player> _somePlayers;
 		List<Bullet> _someBullets;
 		List<Shockwave> _someShockwaves;
+		Point _aPoint;
 
 		[SetUp]
 		public void Setup()
@@ -35,12 +36,13 @@ namespace Xasteroids
 				new Shockwave(55, 56, 57, _somePlayers[0]),
 				new Shockwave(22, 23, 42, _somePlayers[1]),
 			};
+			_aPoint = new Point(100, 200);
 		}
 
 		[Test]
 		public void WorldData_ConfigurationTest()
 		{
-			CombatData someWorldData = new CombatData { Asteroids = _someAsteroids, Bullets = _someBullets, Players = _somePlayers, Shockwaves = _someShockwaves };
+			CombatData someWorldData = new CombatData { Asteroids = _someAsteroids, Bullets = _someBullets, Players = _somePlayers, Shockwaves = _someShockwaves, LevelSize = _aPoint};
 			string[] someWorldConfig = someWorldData.Configuration;
 			CombatData fromSomeConfig = new CombatData { Configuration = someWorldConfig };
 
@@ -67,6 +69,10 @@ namespace Xasteroids
 			Assert.That(fromConfigShockwaves[0].PositionY == _someShockwaves[0].PositionY);
 			Assert.That(fromConfigShockwaves[1].OwnerName == _someShockwaves[1].OwnerName);
 			Assert.That(fromConfigShockwaves[1].Size == _someShockwaves[1].Size);
+
+			var fromConfigLevelSize = fromSomeConfig.LevelSize;
+			Assert.That(fromConfigLevelSize.X == _aPoint.X);
+			Assert.That(fromConfigLevelSize.Y == _aPoint.Y);
 		}
 	}
 }

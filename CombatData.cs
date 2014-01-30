@@ -9,11 +9,12 @@ namespace Xasteroids
 	class CombatData : IConfigurable
 	{
 		//Same as number of public properties (excluding configuration)
-		public const int CONFIG_LENGTH = 4;
+		public const int CONFIG_LENGTH = 5;
 		public List<Asteroid> Asteroids { get; set; }
 		public List<Bullet> Bullets { get; set; }
 		public List<Player> Players { get; set; }
 		public List<Shockwave> Shockwaves { get; set; }
+		public Point LevelSize { get; set; }
 
 		public string[] Configuration 
 		{
@@ -25,6 +26,7 @@ namespace Xasteroids
 				config[1] = ObjectStringConverter.IConfigurableListToArrayString(Bullets);
 				config[2] = ObjectStringConverter.IConfigurableListToArrayString(Players);
 				config[3] = ObjectStringConverter.IConfigurableListToArrayString(Shockwaves);
+				config[4] = "[" + LevelSize.X + "," + LevelSize.Y + "]";
 
 				return config;
 			}
@@ -89,6 +91,17 @@ namespace Xasteroids
 						string[] config = ObjectStringConverter.ConfigurationFromMixedString(contents);
 						Shockwaves.Add(new Shockwave(config));
 					}
+				}
+
+				string[] sizes = value[4].Split(new[] {','});
+				int x, y;
+				if (sizes.Length == 2 && int.TryParse(sizes[0].Substring(1, sizes[0].Length - 1), out x) && int.TryParse(sizes[1].Substring(0, sizes[0].Length - 1), out y))
+				{
+					LevelSize = new Point(x, y);
+				}
+				else
+				{
+					LevelSize = new Point(-1, -1);
 				}
 			}
 		}

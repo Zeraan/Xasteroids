@@ -203,7 +203,7 @@ namespace Xasteroids
 			}
 			else if (_host != null)
 			{
-				SendCombatData();
+				SendCombatData(false);
 			}
 		}
 
@@ -311,7 +311,7 @@ namespace Xasteroids
 				SetupLevel();
 				PlayerManager.ResetPlayerPositions();
 				_host.SendObjectTCP(new ShipList { Ships = ships });
-				SendCombatData();
+				SendCombatData(true);
 				_host.SendObjectTCP(new NetworkMessage { Content = "Change to " + Screen.InGame.ToString() + " Screen." });
 				ChangeToScreen(Screen.InGame);
 				return;
@@ -325,13 +325,14 @@ namespace Xasteroids
 			}
 		}
 
-		private void SendCombatData()
+		private void SendCombatData(bool overrideClient)
 		{
 			var combatData = new CombatData();
 			combatData.ShipList = GetShipListFromPlayers(PlayerManager.Players);
 			combatData.Bullets = ObjectManager.Bullets;
 			combatData.Shockwaves = ObjectManager.Shockwaves;
 			combatData.LevelSize = LevelSize;
+			combatData.OverrideClient = overrideClient;
 			_host.SendObjectTCP(combatData);
 		}
 
@@ -451,18 +452,17 @@ namespace Xasteroids
 				var combatData = (CombatData)theObject;
 				for (int i = 0; i < combatData.ShipList.Ships.Count; i++)
 				{
-					if (i == MainPlayerID)
+					if (i != MainPlayerID || combatData.OverrideClient)
 					{
-						continue; //Don't update yourself
+						var player = PlayerManager.Players[i];
+						var ship = combatData.ShipList.Ships[i];
+						player.IsDead = ship.IsDead;
+						player.PositionX = ship.PositionX;
+						player.PositionY = ship.PositionY;
+						player.VelocityX = ship.VelocityX;
+						player.VelocityY = ship.VelocityY;
+						player.Angle = ship.Angle;
 					}
-					var player = PlayerManager.Players[i];
-					var ship = combatData.ShipList.Ships[i];
-					player.IsDead = ship.IsDead;
-					player.PositionX = ship.PositionX;
-					player.PositionY = ship.PositionY;
-					player.VelocityX = ship.VelocityX;
-					player.VelocityY = ship.VelocityY;
-					player.Angle = ship.Angle;
 				}
 				ObjectManager.Bullets = combatData.Bullets;
 				ObjectManager.Shockwaves = combatData.Shockwaves;

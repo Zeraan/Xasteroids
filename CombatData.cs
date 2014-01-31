@@ -5,11 +5,12 @@ namespace Xasteroids
 	class CombatData : IConfigurable
 	{
 		//Same as number of public properties (excluding configuration)
-		public const int CONFIG_LENGTH = 4;
+		public const int CONFIG_LENGTH = 5;
 		public List<Bullet> Bullets { get; set; }
 		public ShipList ShipList { get; set; }
 		public List<Shockwave> Shockwaves { get; set; }
 		public Point LevelSize { get; set; }
+		public bool OverrideClient { get; set; }
 
 		public string[] Configuration 
 		{
@@ -21,6 +22,7 @@ namespace Xasteroids
 				config[1] = "[" + string.Join(",", ShipList.Configuration )+ "]";
 				config[2] = ObjectStringConverter.IConfigurableListToArrayString(Shockwaves);
 				config[3] = "[" + LevelSize.X + "," + LevelSize.Y + "]";
+				config[4] = OverrideClient.ToString();
 
 				return config;
 			}
@@ -78,6 +80,8 @@ namespace Xasteroids
 				{
 					LevelSize = new Point(-1, -1);
 				}
+
+				OverrideClient = bool.Parse(value[4]);
 			}
 		}
 	}

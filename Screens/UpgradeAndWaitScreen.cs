@@ -287,6 +287,7 @@ namespace Xasteroids.Screens
 			{
 				return false;
 			}
+			_messageTextBox.Select();
 
 			_showingShipSelection = false;
 
@@ -338,6 +339,12 @@ namespace Xasteroids.Screens
 
 		public void Update(int x, int y, float frameDeltaTime)
 		{
+			if (_gameMain.NewChatMessage)
+			{
+				_chatTextBox.SetText(_gameMain.ChatText.ToString());
+				_chatTextBox.ScrollToBottom();
+				_gameMain.NewChatMessage = false;
+			}
 			if (_showingShipSelection)
 			{
 				_gameMain.ShipSelectionWindow.MouseHover(x, y, frameDeltaTime);
@@ -360,6 +367,8 @@ namespace Xasteroids.Screens
 				_shieldButtons[i].MouseHover(x, y, frameDeltaTime);
 			}
 			_readyButton.MouseHover(x, y, frameDeltaTime);
+			_messageTextBox.Update(frameDeltaTime);
+			_chatTextBox.MouseHover(x, y, frameDeltaTime);
 		}
 
 		public void MouseDown(int x, int y)
@@ -386,6 +395,7 @@ namespace Xasteroids.Screens
 				button.MouseDown(x, y);
 			}
 			_readyButton.MouseDown(x, y);
+			_chatTextBox.MouseDown(x, y);
 		}
 
 		public void DisableTheReadyButton()
@@ -559,6 +569,7 @@ namespace Xasteroids.Screens
 			{
 				_gameMain.OnPlayerReady(player);
 			}
+			_chatTextBox.MouseUp(x, y);
 		}
 
 		public void MouseScroll(int direction, int x, int y)
@@ -568,7 +579,15 @@ namespace Xasteroids.Screens
 
 		public void KeyDown(KeyboardInputEventArgs e)
 		{
-			
+			if (e.Key == KeyboardKeys.Enter || e.Key == KeyboardKeys.Return)
+			{
+				_gameMain.SendChat(_messageTextBox.Text);
+				_messageTextBox.SetText(string.Empty);
+			}
+			else
+			{
+				_messageTextBox.KeyDown(e);
+			}
 		}
 
 		public void RefreshLabels()

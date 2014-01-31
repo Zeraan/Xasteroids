@@ -425,6 +425,19 @@ namespace Xasteroids
 				return;
 			}
 
+			if (theObject is Ship)
+			{
+				Ship ship = (Ship)theObject;
+				int ownerID = (int)_clientAddressesAndMonikers[senderIPAddress][ID];
+				Player player = PlayerManager.Players[ownerID];
+				player.IsDead = ship.IsDead;
+				player.PositionX = ship.PositionX;
+				player.PositionY = ship.PositionY;
+				player.VelocityX = ship.VelocityX;
+				player.VelocityY = ship.VelocityY;
+				player.Angle     = ship.Angle;
+			}
+
 			if (theObject is ShipList)
 			{
 				var ships = ((ShipList)theObject).Ships;

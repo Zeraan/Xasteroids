@@ -1328,4 +1328,42 @@ namespace Xasteroids
 			HP = Size * 40;
 		}
 	}
+
+	public class AsteroidsList : IConfigurable
+	{
+		public List<Asteroid> Asteroids { get; set; }
+
+		public const int CONFIG_LENGTH = 1;
+		public string[] Configuration
+		{
+			get
+			{
+				string[] config = new string[CONFIG_LENGTH];
+				config[0] = ObjectStringConverter.IConfigurableListToArrayString(Asteroids);
+				return config;
+			}
+
+			set
+			{
+				if (value.Length < CONFIG_LENGTH)
+				{
+					return;
+				}
+
+				Asteroids = new List<Asteroid>();
+				string asteroidsString = value[0];
+				string contents = asteroidsString.Substring(1, asteroidsString.Length - 2);
+				if (contents.Length != 0)
+				{
+					string[] asteroidConfigStrings = ObjectStringConverter.ConfigurationFromStringOfConfigurations(contents);
+					foreach (string asteroidConfigString in asteroidConfigStrings)
+					{
+						contents = asteroidConfigString.Substring(1, asteroidConfigString.Length - 2);
+						string[] config = ObjectStringConverter.ConfigurationFromMixedString(contents);
+						Asteroids.Add(new Asteroid(config));
+					}
+				}
+			}
+		}
+	}
 }

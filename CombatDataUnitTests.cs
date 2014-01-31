@@ -51,15 +51,9 @@ namespace Xasteroids
 		[Test]
 		public void WorldData_ConfigurationTest()
 		{
-			CombatData someWorldData = new CombatData { Asteroids = _someAsteroids, Bullets = _someBullets, ShipList = _someShipList, Shockwaves = _someShockwaves, LevelSize = _aPoint};
+			CombatData someWorldData = new CombatData { Bullets = _someBullets, ShipList = _someShipList, Shockwaves = _someShockwaves, LevelSize = _aPoint};
 			string[] someWorldConfig = someWorldData.Configuration;
 			CombatData fromSomeConfig = new CombatData { Configuration = someWorldConfig };
-
-			var fromConfigAsteroids = fromSomeConfig.Asteroids;
-			Assert.That(fromConfigAsteroids[0].PositionX == _someAsteroids[0].PositionX);
-			Assert.That(fromConfigAsteroids[0].VelocityX == _someAsteroids[0].VelocityX);
-			Assert.That(fromConfigAsteroids[1].PositionY == _someAsteroids[1].PositionY);
-			Assert.That(fromConfigAsteroids[1].VelocityY == _someAsteroids[1].VelocityY);
 
 			var fromConfigBullets = fromSomeConfig.Bullets;
 			Assert.That(fromConfigBullets[0].OwnerName == _someBullets[0].OwnerName);

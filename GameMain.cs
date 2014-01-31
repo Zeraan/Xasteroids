@@ -52,7 +52,8 @@ namespace Xasteroids
 		private BBSprite Cursor;
 		private Host _host;
 		private Client _client;
-		private Timer _pushDataTimer = new Timer { Interval = 200 };
+		private Timer _200msPushDataTimer = new Timer { Interval = 200 };
+		private Timer _5000msPushDataTimer = new Timer { Interval = 5000 };
 		public ShipSelectionWindow ShipSelectionWindow { get; private set; }
 		
 		public object ChatLock = new object();
@@ -178,6 +179,11 @@ namespace Xasteroids
 				Cursor.Draw(MousePos.X, MousePos.Y);
 				Cursor.Update(frameDeltaTime, Random);
 			}
+		}
+
+		private void OnPushAsteroids(object sender, EventArgs e)
+		{
+			_host.SendObjectTCP( new AsteroidsList { Asteroids = AsteroidManager.Asteroids } );
 		}
 
 		private void OnPushData(object sender, EventArgs e)
@@ -322,7 +328,6 @@ namespace Xasteroids
 		private void SendCombatData()
 		{
 			var combatData = new CombatData();
-			combatData.Asteroids = AsteroidManager.Asteroids;
 			combatData.ShipList = GetShipListFromPlayers(PlayerManager.Players);
 			combatData.Bullets = ObjectManager.Bullets;
 			combatData.Shockwaves = ObjectManager.Shockwaves;
@@ -362,8 +367,11 @@ namespace Xasteroids
 		{
 			if (_client != null || _host != null)
 			{
-				_pushDataTimer.Stop();
-				_pushDataTimer.Tick -= OnPushData;
+				_200msPushDataTimer.Stop();
+				_200msPushDataTimer.Tick -= OnPushData;
+
+				_5000msPushDataTimer.Stop();
+				_5000msPushDataTimer.Tick -= OnPushAsteroids;
 			}
 		}
 
@@ -433,6 +441,11 @@ namespace Xasteroids
 				return;
 			}
 
+			if (theObject is AsteroidsList)
+			{
+				AsteroidManager.Asteroids = ((AsteroidsList)theObject).Asteroids;
+			}
+
 			if (theObject is CombatData)
 			{
 				var combatData = (CombatData)theObject;
@@ -453,7 +466,6 @@ namespace Xasteroids
 				}
 				ObjectManager.Bullets = combatData.Bullets;
 				ObjectManager.Shockwaves = combatData.Shockwaves;
-				AsteroidManager.Asteroids = combatData.Asteroids;
 				LevelSize = combatData.LevelSize;
 				return;
 			}
@@ -703,8 +715,13 @@ namespace Xasteroids
 					_screenInterface = _inGame;
 					if (_host != null || _client != null)
 					{
-						_pushDataTimer.Tick += OnPushData;
-						_pushDataTimer.Start();
+						_200msPushDataTimer.Tick += OnPushData;
+						_200msPushDataTimer.Start();
+						if (_host != null)
+						{
+							_5000msPushDataTimer.Tick += OnPushAsteroids;
+							_5000msPushDataTimer.Start();
+						}
 					}
 					break;
 				}

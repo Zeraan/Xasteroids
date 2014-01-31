@@ -5,8 +5,7 @@ namespace Xasteroids
 	class CombatData : IConfigurable
 	{
 		//Same as number of public properties (excluding configuration)
-		public const int CONFIG_LENGTH = 5;
-		public List<Asteroid> Asteroids { get; set; }
+		public const int CONFIG_LENGTH = 4;
 		public List<Bullet> Bullets { get; set; }
 		public ShipList ShipList { get; set; }
 		public List<Shockwave> Shockwaves { get; set; }
@@ -18,11 +17,10 @@ namespace Xasteroids
 			{
 				string[] config = new string[CONFIG_LENGTH];
 				
-				config[0] = ObjectStringConverter.IConfigurableListToArrayString(Asteroids);
-				config[1] = ObjectStringConverter.IConfigurableListToArrayString(Bullets);
-				config[2] = "[" + string.Join(",", ShipList.Configuration )+ "]";
-				config[3] = ObjectStringConverter.IConfigurableListToArrayString(Shockwaves);
-				config[4] = "[" + LevelSize.X + "," + LevelSize.Y + "]";
+				config[0] = ObjectStringConverter.IConfigurableListToArrayString(Bullets);
+				config[1] = "[" + string.Join(",", ShipList.Configuration )+ "]";
+				config[2] = ObjectStringConverter.IConfigurableListToArrayString(Shockwaves);
+				config[3] = "[" + LevelSize.X + "," + LevelSize.Y + "]";
 
 				return config;
 			}
@@ -33,23 +31,9 @@ namespace Xasteroids
 					return;
 				}
 
-				Asteroids = new List<Asteroid>();
-				string asteroidsString = value[0];
-				string contents = asteroidsString.Substring(1, asteroidsString.Length - 2);
-				if (contents.Length != 0)
-				{
-					string[] asteroidConfigStrings = ObjectStringConverter.ConfigurationFromStringOfConfigurations(contents);
-					foreach (string asteroidConfigString in asteroidConfigStrings)
-					{
-						contents = asteroidConfigString.Substring(1, asteroidConfigString.Length - 2);
-						string[] config = ObjectStringConverter.ConfigurationFromMixedString(contents);
-						Asteroids.Add(new Asteroid(config));
-					}
-				}
-
 				Bullets = new List<Bullet>();
-				string bulletString = value[1];
-				contents = bulletString.Substring(1, bulletString.Length - 2);
+				string bulletString = value[0];
+				string contents = bulletString.Substring(1, bulletString.Length - 2);
 				if (contents.Length != 0)
 				{
 					string[] bulletConfigStrings = ObjectStringConverter.ConfigurationFromStringOfConfigurations(contents);
@@ -62,7 +46,7 @@ namespace Xasteroids
 				}
 
 				ShipList = new ShipList();
-				string shipListConfigString = value[2];
+				string shipListConfigString = value[1];
 				contents = shipListConfigString.Substring(1, shipListConfigString.Length - 2);
 				if (contents.Length != 0)
 				{
@@ -71,7 +55,7 @@ namespace Xasteroids
 				}
 
 				Shockwaves = new List<Shockwave>();
-				string shockwaveString = value[3];
+				string shockwaveString = value[2];
 				contents = shockwaveString.Substring(1, shockwaveString.Length - 2);
 				if (contents.Length != 0)
 				{
@@ -84,7 +68,7 @@ namespace Xasteroids
 					}
 				}
 
-				string[] sizes = value[4].Split(new[] {','});
+				string[] sizes = value[3].Split(new[] {','});
 				int x, y;
 				if (sizes.Length == 2 && int.TryParse(sizes[0].Substring(1, sizes[0].Length - 1), out x) && int.TryParse(sizes[1].Substring(0, sizes[0].Length - 1), out y))
 				{

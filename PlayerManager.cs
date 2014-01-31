@@ -120,7 +120,7 @@ namespace Xasteroids
 					float dx2 = x2 - x1;
 					float dy2 = y2 - y1;
 
-					float r1 = (float)Math.Sqrt(dx * dx + dy * dy); //Get the distance between centers of asteroids
+					float r1 = (float)Math.Sqrt(dx * dx + dy * dy); //Get the distance between centers of players
 					float r2 = (float)Math.Sqrt(dx2 * dx2 + dy2 * dy2);
 
 					if (r1 < (Players[i].ShipSize * 16 + Players[j].ShipSize * 16) && r1 < r2) //Collision!
@@ -156,11 +156,14 @@ namespace Xasteroids
 							_gameMain.ObjectManager.AddShockwave(Players[j].PositionX, Players[j].PositionY, Players[j].ShipSize, null);
 						}
 
-						//Assign the final value to asteroids
+						//Assign the final value to players
 						Players[i].VelocityX = v1x;
 						Players[i].VelocityY = v1y;
 						Players[j].VelocityX = v2x;
 						Players[j].VelocityY = v2y;
+
+						Players[i].ShieldAlpha = 1;
+						Players[j].ShieldAlpha = 1;
 					}
 				}
 			}

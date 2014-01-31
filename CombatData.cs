@@ -114,11 +114,11 @@ namespace Xasteroids
 			{
 				string[] config = new string[CONFIG_LENGTH];
 
-				config[0] = "[" + PlayerID + "]";
-				config[1] = "[" + PositionX + "]";
-				config[2] = "[" + PositionY + "]";
-				config[3] = "[" + Angle + "]";
-				config[4] = "[" + Energy + "]";
+				config[0] = PlayerID.ToString();
+				config[1] = PositionX.ToString();
+				config[2] = PositionY.ToString();
+				config[3] = Angle.ToString();
+				config[4] = Energy.ToString();
 
 				return config;
 			}

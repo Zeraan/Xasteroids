@@ -15,18 +15,6 @@ namespace Xasteroids.Screens
 		private BBStretchButton _startGame;
 		private BBStretchButton _leaveLobby;
 
-		public string[] Chatters
-		{
-			get
-			{
-				return _playerList.Text.Split('\n');
-			}
-			set
-			{
-				_playerList.SetText(string.Join("\n", value));
-			}
-		}
-
 		public bool Initialize(GameMain gameMain, out string reason)
 		{
 			_gameMain = gameMain;
@@ -102,7 +90,7 @@ namespace Xasteroids.Screens
 				string playerListText = string.Empty;
 				foreach (var player in _gameMain.PlayerList.Players)
 				{
-					playerListText = playerListText + player + "\n\r";
+					playerListText = playerListText + player + "\n";
 				}
 				_playerList.SetText(playerListText);
 				_gameMain.NewPlayerListUpdate = false;

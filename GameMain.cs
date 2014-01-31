@@ -346,7 +346,7 @@ namespace Xasteroids
 				ships.Add( new Ship {
 					OwnerName = player.Name,
 					IsDead 	  = player.IsDead,
-					PositionX = player.PositionY,
+					PositionX = player.PositionX,
 					PositionY = player.PositionY,
 					VelocityX = player.VelocityX,
 					VelocityY = player.VelocityY,

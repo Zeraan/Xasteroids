@@ -174,7 +174,7 @@ namespace Xasteroids
 			_screenInterface.Update(MousePos.X, MousePos.Y, frameDeltaTime);
 			_screenInterface.DrawScreen();
 
-			if (_currentScreen != Screen.InGame || MainPlayer.IsDead)
+			if (_currentScreen != Screen.InGame || MainPlayer == null || MainPlayer.IsDead)
 			{
 				Cursor.Draw(MousePos.X, MousePos.Y);
 				Cursor.Update(frameDeltaTime, Random);

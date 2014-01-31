@@ -12,7 +12,7 @@ namespace Xasteroids
 		public const int CONFIG_LENGTH = 5;
 		public List<Asteroid> Asteroids { get; set; }
 		public List<Bullet> Bullets { get; set; }
-		public List<Player> Players { get; set; }
+		public ShipList ShipList { get; set; }
 		public List<Shockwave> Shockwaves { get; set; }
 		public Point LevelSize { get; set; }
 
@@ -24,7 +24,7 @@ namespace Xasteroids
 				
 				config[0] = ObjectStringConverter.IConfigurableListToArrayString(Asteroids);
 				config[1] = ObjectStringConverter.IConfigurableListToArrayString(Bullets);
-				config[2] = ObjectStringConverter.IConfigurableListToArrayString(Players);
+				config[2] = "[" + string.Join(",", ShipList.Configuration )+ "]";
 				config[3] = ObjectStringConverter.IConfigurableListToArrayString(Shockwaves);
 				config[4] = "[" + LevelSize.X + "," + LevelSize.Y + "]";
 
@@ -65,18 +65,13 @@ namespace Xasteroids
 					}
 				}
 
-				Players = new List<Player>();
-				string playerString = value[2];
-				contents = playerString.Substring(1, playerString.Length - 2);
+				ShipList = new ShipList();
+				string shipListConfigString = value[2];
+				contents = shipListConfigString.Substring(1, shipListConfigString.Length - 2);
 				if (contents.Length != 0)
 				{
-					string[] playerConfigStrings = ObjectStringConverter.ConfigurationFromStringOfConfigurations(contents);
-					foreach (string playerConfigString in playerConfigStrings)
-					{
-						contents = playerConfigString.Substring(1, playerConfigString.Length - 2);
-						string[] config = ObjectStringConverter.ConfigurationFromMixedString(contents);
-						Players.Add(new Player(config));
-					}
+					string[] shipListConfig = ObjectStringConverter.ConfigurationFromStringOfConfigurations(contents);
+					ShipList.Configuration = shipListConfig;
 				}
 
 				Shockwaves = new List<Shockwave>();

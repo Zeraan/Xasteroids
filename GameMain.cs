@@ -230,10 +230,6 @@ namespace Xasteroids
 					ships.Add(new Ship
 							{
 								OwnerName = p.Name,
-								Size = p.ShipSize,
-								Style = p.ShipStyle,
-								Color = p.ShipColor,
-								Bank = 1000,
 								IsDead = p.IsDead
 							});
 				}
@@ -281,10 +277,6 @@ namespace Xasteroids
 				{
 					ships.Add(new Ship {
 						OwnerName = p.Name,
-						Size = p.ShipSize,
-						Style = p.ShipStyle,
-						Color = p.ShipColor,
-						Bank = p.Bank,
 						IsDead = p.IsDead
 					});
 				}
@@ -299,7 +291,6 @@ namespace Xasteroids
 
 			if (_client != null && _client.ServerIPAddress != null)
 			{
-				_client.SendObjectTcp(new Ship { Size = MainPlayer.ShipSize, Style = MainPlayer.ShipStyle, Color = MainPlayer.ShipColor, Bank = MainPlayer.Bank, IsDead = MainPlayer.IsDead});
 				_client.SendObjectTcp(new NetworkMessage { Content = "Ready" });
 				_upgradeAndWaitScreen.DisableTheReadyButton();
 				return;
@@ -310,11 +301,30 @@ namespace Xasteroids
 		{
 			var combatData = new CombatData();
 			combatData.Asteroids = AsteroidManager.Asteroids;
-			combatData.Players = PlayerManager.Players;
+			combatData.ShipList = GetShipListFromPlayers(PlayerManager.Players);
 			combatData.Bullets = ObjectManager.Bullets;
 			combatData.Shockwaves = ObjectManager.Shockwaves;
 			combatData.LevelSize = LevelSize;
 			_host.SendObjectTCP(combatData);
+		}
+
+		private ShipList GetShipListFromPlayers(IEnumerable<Player> players)
+		{
+			ShipList shipList = new ShipList { Ships = new List<Ship>() };
+			var ships = shipList.Ships;
+			foreach(Player player in players)
+			{
+				ships.Add( new Ship {
+					OwnerName = player.Name,
+					IsDead 	  = player.IsDead,
+					PositionX = player.PositionY,
+					PositionY = player.PositionY,
+					VelocityX = player.VelocityX,
+					VelocityY = player.VelocityY,
+					Angle     = player.Angle
+				});
+			}
+			return shipList;
 		}
 
 		private void OnDisconnected()
@@ -360,29 +370,16 @@ namespace Xasteroids
 				return;
 			}
 
-			if (theObject is Ship)
+			if (theObject is Player)
 			{
-				var theShip = (Ship)theObject;
-				string ownerName = theShip.OwnerName;
+				var thePlayer = (Player)theObject;
+				string name = thePlayer.Name;
 				foreach (var item in _clientAddressesAndMonikers)
 				{
-					if (item.Value[NAME].Equals(ownerName))
+					if (item.Value[NAME].Equals(name))
 					{
-						var thatPlayer = PlayerManager.Players[(int)item.Value[ID]];
-						if (thatPlayer == null)
-						{
-							var player = new Player(theShip.Size, theShip.Style, theShip.Color);
-							PlayerManager.AddPlayer(player);
-						}
-						else
-						{
-							thatPlayer.ShipSize = theShip.Size;
-							thatPlayer.ShipStyle = theShip.Style;
-							thatPlayer.ShipColor = theShip.Color;
-							thatPlayer.IsDead = theShip.IsDead;
-							thatPlayer.Bank = theShip.Bank;
-							thatPlayer.ShipSprite = SpriteManager.GetShipSprite(theShip.Size, theShip.Style, Random);
-						}
+						PlayerManager.Players[(int)item.Value[ID]] = thePlayer;
+						thePlayer.ShipSprite = SpriteManager.GetShipSprite(thePlayer.ShipSize, thePlayer.ShipStyle, Random);
 						return;
 					}
 				}
@@ -400,12 +397,7 @@ namespace Xasteroids
 				{
 					var theShip = ships[j];
 					thePlayers[j].Name = theShip.OwnerName;
-					thePlayers[j].ShipSize = theShip.Size;
-					thePlayers[j].ShipStyle = theShip.Style;
-					thePlayers[j].ShipColor = theShip.Color;
 					thePlayers[j].IsDead = theShip.IsDead;
-					thePlayers[j].Bank = theShip.Bank;
-					thePlayers[j].ShipSprite = SpriteManager.GetShipSprite(theShip.Size, theShip.Style, Random);
 				}
 				return;
 			}
@@ -413,13 +405,20 @@ namespace Xasteroids
 			if (theObject is CombatData)
 			{
 				var combatData = (CombatData)theObject;
-				for (int i = 0; i < combatData.Players.Count; i++)
+				for (int i = 0; i < combatData.ShipList.Ships.Count; i++)
 				{
 					if (i == MainPlayerID)
 					{
 						continue; //Don't update yourself
 					}
-					PlayerManager.Players[i] = combatData.Players[i];
+					var player = PlayerManager.Players[i];
+					var ship = combatData.ShipList.Ships[i];
+					player.IsDead = ship.IsDead;
+					player.PositionX = ship.PositionX;
+					player.PositionY = ship.PositionY;
+					player.VelocityX = ship.VelocityX;
+					player.VelocityY = ship.VelocityY;
+					player.Angle = ship.Angle;
 				}
 				ObjectManager.Bullets = combatData.Bullets;
 				ObjectManager.Shockwaves = combatData.Shockwaves;

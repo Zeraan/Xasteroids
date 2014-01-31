@@ -649,28 +649,44 @@ namespace Xasteroids
 
 	public class Ship : IConfigurable
 	{
-		public const int CONFIG_LENGTH = 6;
+		public const int CONFIG_LENGTH = 7;
 
 		public string OwnerName { get; set; }
-		public int Size { get; set; }
-		public int Style { get; set; }
-		public Color Color { get; set; }
-		public int Bank { get; set; }
 		public bool IsDead { get; set; }
+		public float PositionX { get; set; }
+		public float PositionY { get; set; }
+		public float VelocityX { get; set; }
+		public float VelocityY { get; set; }
+		private float _angle;
+		public float Angle
+		{
+			get { return _angle; }
+			set
+			{
+				_angle = value;
+				while (_angle < 0)
+				{
+					_angle += 360;
+				}
+				while (_angle >= 360)
+				{
+					_angle -= 360;
+				}
+			}
+		}
 
 		public string[] Configuration
 		{
 			get
 			{
 				string[] config = new string[CONFIG_LENGTH];
-
 				config[0] = OwnerName;
-				config[1] = Size.ToString();
-				config[2] = Style.ToString();
-				config[3] = Color.ToArgb().ToString();
-				config[4] = Bank.ToString();
-				config[5] = IsDead.ToString();
-
+				config[1] = IsDead.ToString();
+				config[2] = PositionX.ToString();
+				config[3] = PositionY.ToString();
+				config[4] = VelocityX.ToString();
+				config[5] = VelocityY.ToString();
+				config[6] = Angle.ToString();
 				return config;
 			}
 			set
@@ -681,27 +697,33 @@ namespace Xasteroids
 				}
 
 				OwnerName = value[0];
-				int outInt;
-				if (int.TryParse(value[1], out outInt))
-				{
-					Size = outInt;
-				}
-				if (int.TryParse(value[2], out outInt))
-				{
-					Style = outInt;
-				}
-				if (int.TryParse(value[3], out outInt))
-				{
-					Color = Color.FromArgb(outInt);
-				}
-				if (int.TryParse(value[4], out outInt))
-				{
-					Bank = outInt;
-				}
+
 				bool outBool;
-				if (bool.TryParse(value[5], out outBool))
+				if (bool.TryParse(value[1], out outBool))
 				{
 					IsDead = outBool;
+				}
+
+				float outFloat;
+				if (float.TryParse(value[2], out outFloat))
+				{
+					PositionX = outFloat;
+				}
+				if (float.TryParse(value[3], out outFloat))
+				{
+					PositionY = outFloat;
+				}
+				if (float.TryParse(value[4], out outFloat))
+				{
+					VelocityX = outFloat;
+				}
+				if (float.TryParse(value[5], out outFloat))
+				{
+					VelocityY = outFloat;
+				}
+				if (float.TryParse(value[6], out outFloat))
+				{
+					Angle = outFloat;
 				}
 			}
 		}

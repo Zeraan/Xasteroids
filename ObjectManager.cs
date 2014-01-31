@@ -183,7 +183,7 @@ namespace Xasteroids
 				config[3] = Radius.ToString();
 				config[4] = Size.ToString();
 				config[5] = Boomed.ToString();
-				config[6] = OwnerName.ToString();
+				config[6] = OwnerName == null ? string.Empty : OwnerName.ToString();
 				return config;
 			}
 			set
@@ -220,7 +220,7 @@ namespace Xasteroids
 				{
 					Boomed = outBool;
 				}
-				OwnerName = value[6];
+				OwnerName = string.IsNullOrEmpty(value[6]) ? null : value[6];
 			}
 		}
 

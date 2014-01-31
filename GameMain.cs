@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Timers;
 using System.Windows.Forms;
 using GorgonLibrary.InputDevices;
 using Xasteroids.Screens;
@@ -52,8 +53,8 @@ namespace Xasteroids
 		private BBSprite Cursor;
 		private Host _host;
 		private Client _client;
-		private Timer _200msPushDataTimer = new Timer { Interval = 100 };
-		private Timer _5000msPushDataTimer = new Timer { Interval = 2000 };
+		private System.Timers.Timer _200msPushDataTimer = new System.Timers.Timer { Interval = 100 };
+		private System.Timers.Timer _5000msPushDataTimer = new System.Timers.Timer { Interval = 2000 };
 		public ShipSelectionWindow ShipSelectionWindow { get; private set; }
 		
 		public object ChatLock = new object();
@@ -369,10 +370,10 @@ namespace Xasteroids
 			if (_client != null || _host != null)
 			{
 				_200msPushDataTimer.Stop();
-				_200msPushDataTimer.Tick -= OnPushData;
+				_200msPushDataTimer.Elapsed -= OnPushData;
 
 				_5000msPushDataTimer.Stop();
-				_5000msPushDataTimer.Tick -= OnPushAsteroids;
+				_5000msPushDataTimer.Elapsed -= OnPushAsteroids;
 			}
 		}
 
@@ -730,12 +731,12 @@ namespace Xasteroids
 					_screenInterface = _inGame;
 					if (_host != null || _client != null)
 					{
-						_200msPushDataTimer.Tick += OnPushData;
+						_200msPushDataTimer.Elapsed += OnPushData;
 						_200msPushDataTimer.Start();
 						if (_host != null)
 						{
 							OnPushAsteroids(null, null);
-							_5000msPushDataTimer.Tick += OnPushAsteroids;
+							_5000msPushDataTimer.Elapsed += OnPushAsteroids;
 							_5000msPushDataTimer.Start();
 						}
 					}

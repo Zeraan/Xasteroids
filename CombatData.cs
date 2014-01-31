@@ -87,10 +87,12 @@ namespace Xasteroids
 		public int PlayerID;
 		public float PositionX;
 		public float PositionY;
+		public float VelocityX;
+		public float VelocityY;
 		public float Angle;
 		public float Energy; //Remaining energy for the player
 
-		public const int CONFIG_LENGTH = 5;
+		public const int CONFIG_LENGTH = 7;
 
 		public string[] Configuration
 		{
@@ -101,8 +103,10 @@ namespace Xasteroids
 				config[0] = PlayerID.ToString();
 				config[1] = PositionX.ToString();
 				config[2] = PositionY.ToString();
-				config[3] = Angle.ToString();
-				config[4] = Energy.ToString();
+				config[3] = VelocityX.ToString();
+				config[4] = VelocityY.ToString();
+				config[5] = Angle.ToString();
+				config[6] = Energy.ToString();
 
 				return config;
 			}
@@ -116,8 +120,10 @@ namespace Xasteroids
 				PlayerID = int.Parse(value[0]);
 				PositionX = float.Parse(value[1]);
 				PositionY = float.Parse(value[2]);
-				Angle = float.Parse(value[3]);
-				Energy = float.Parse(value[4]);
+				VelocityX = float.Parse(value[3]);
+				VelocityY = float.Parse(value[4]);
+				Angle = float.Parse(value[5]);
+				Energy = float.Parse(value[6]);
 			}
 		}
 	}

@@ -482,6 +482,8 @@ namespace Xasteroids
 				player.Angle = playerFired.Angle;
 				player.PositionX = playerFired.PositionX;
 				player.PositionY = playerFired.PositionY;
+				player.VelocityX = playerFired.VelocityX;
+				player.VelocityY = playerFired.VelocityY;
 				player.Energy = playerFired.Energy;
 				ObjectManager.AddBullet(player);
 				return;

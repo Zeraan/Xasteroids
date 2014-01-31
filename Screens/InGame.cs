@@ -221,6 +221,8 @@ namespace Xasteroids.Screens
 						playerFired.Angle = player.Angle;
 						playerFired.PositionX = player.PositionX;
 						playerFired.PositionY = player.PositionY;
+						playerFired.VelocityX = player.VelocityX;
+						playerFired.VelocityY = player.VelocityY;
 						playerFired.Energy = player.Energy;
 						playerFired.PlayerID = _gameMain.MainPlayerID;
 						_gameMain.SendFired(playerFired);

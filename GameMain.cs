@@ -389,7 +389,6 @@ namespace Xasteroids
 				lock (PlayerListLock)
 				{
 					PlayerList = (PlayerList)theObject;
-					_multiplayerGameSetup.Chatters = PlayerList.Players;
 				}
 				NewPlayerListUpdate = true;
 				return;
@@ -518,7 +517,7 @@ namespace Xasteroids
 					list = list + "|" + moniker.Value[NAME];
 				}
 				PlayerList.Configuration = new[] {list};
-				_multiplayerGameSetup.Chatters = PlayerList.Players;
+				NewPlayerListUpdate = true;
 				_host.SendObjectTCP(PlayerList);
 				return;
 			}
@@ -601,11 +600,11 @@ namespace Xasteroids
 		public void SendChat(string message)
 		{
 			var gameMessage = new GameMessage();
-			gameMessage.Content = message;
+			gameMessage.Content = _mainMenu.PlayerName + ": " + message;
 			if (IsHost)
 			{
 				_host.SendObjectTCP(gameMessage);
-				ChatText.AppendLine(message);
+				ChatText.AppendLine(gameMessage.Content);
 				NewChatMessage = true;
 			}
 			else
@@ -684,7 +683,8 @@ namespace Xasteroids
 					_host = new Host { CurrentlyAcceptingPlayers = true };
 					_host.ObjectReceived += HandleObject;
 					_screenInterface = _multiplayerGameSetup;
-					_multiplayerGameSetup.Chatters = new string[] { _mainMenu.PlayerName };
+					PlayerList.Players = new [] { _mainMenu.PlayerName };
+					NewPlayerListUpdate = true;
 					break;
 				}
 				case Screen.InGame:

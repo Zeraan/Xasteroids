@@ -52,7 +52,7 @@ namespace Xasteroids
 		private BBSprite Cursor;
 		private Host _host;
 		private Client _client;
-		private Timer _200msPushDataTimer = new Timer { Interval = 200 };
+		private Timer _200msPushDataTimer = new Timer { Interval = 100 };
 		private Timer _5000msPushDataTimer = new Timer { Interval = 5000 };
 		public ShipSelectionWindow ShipSelectionWindow { get; private set; }
 		

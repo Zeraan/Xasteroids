@@ -313,6 +313,7 @@ namespace Xasteroids
 			combatData.Players = PlayerManager.Players;
 			combatData.Bullets = ObjectManager.Bullets;
 			combatData.Shockwaves = ObjectManager.Shockwaves;
+			combatData.LevelSize = LevelSize;
 			_host.SendObjectTCP(combatData);
 		}
 
@@ -423,6 +424,7 @@ namespace Xasteroids
 				ObjectManager.Bullets = combatData.Bullets;
 				ObjectManager.Shockwaves = combatData.Shockwaves;
 				AsteroidManager.Asteroids = combatData.Asteroids;
+				LevelSize = combatData.LevelSize;
 			}
 		}
 

@@ -87,6 +87,10 @@ namespace Xasteroids
 			{
 				configurableGuy = new Asteroid(configurationArray);
 			}
+			else if (fullTypeName.Equals(typeof(AsteroidsList).FullName))
+			{
+				configurableGuy = new AsteroidsList { Configuration = configurationArray };
+			}
 			else if (fullTypeName.Equals(typeof(Bullet).FullName))
 			{
 				configurableGuy = new Bullet(configurationArray);

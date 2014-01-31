@@ -719,6 +719,7 @@ namespace Xasteroids
 						_200msPushDataTimer.Start();
 						if (_host != null)
 						{
+							OnPushAsteroids(null, null);
 							_5000msPushDataTimer.Tick += OnPushAsteroids;
 							_5000msPushDataTimer.Start();
 						}

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
+﻿using System.Collections.Generic;
 
 namespace Xasteroids
 {
@@ -98,6 +94,46 @@ namespace Xasteroids
 				{
 					LevelSize = new Point(-1, -1);
 				}
+			}
+		}
+	}
+
+	public class PlayerFired : IConfigurable
+	{
+		public int PlayerID;
+		public float PositionX;
+		public float PositionY;
+		public float Angle;
+		public float Energy; //Remaining energy for the player
+
+		public const int CONFIG_LENGTH = 5;
+
+		public string[] Configuration
+		{
+			get
+			{
+				string[] config = new string[CONFIG_LENGTH];
+
+				config[0] = "[" + PlayerID + "]";
+				config[1] = "[" + PositionX + "]";
+				config[2] = "[" + PositionY + "]";
+				config[3] = "[" + Angle + "]";
+				config[4] = "[" + Energy + "]";
+
+				return config;
+			}
+			set
+			{
+				if (value.Length < CONFIG_LENGTH)
+				{
+					return;
+				}
+
+				PlayerID = int.Parse(value[0]);
+				PositionX = float.Parse(value[1]);
+				PositionY = float.Parse(value[2]);
+				Angle = float.Parse(value[3]);
+				Energy = float.Parse(value[4]);
 			}
 		}
 	}

@@ -215,6 +215,16 @@ namespace Xasteroids.Screens
 					_gameMain.ObjectManager.AddBullet(player);
 					player.Energy -= (20 * player.DamageLevel) * (player.NumberOfMounts + 1) * (1 - (player.ConsumptionLevel * 0.05f));
 					player.CoolDown += player.CoolDownPeriod;
+					if (_gameMain.IsMultiplayer && !_gameMain.IsHost)
+					{
+						var playerFired = new PlayerFired();
+						playerFired.Angle = player.Angle;
+						playerFired.PositionX = player.PositionX;
+						playerFired.PositionY = player.PositionY;
+						playerFired.Energy = player.Energy;
+						playerFired.PlayerID = _gameMain.MainPlayerID;
+						_gameMain.SendFired(playerFired);
+					}
 				}
 			}
 

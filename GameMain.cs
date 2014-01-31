@@ -383,6 +383,7 @@ namespace Xasteroids
 						return;
 					}
 				}
+				return;
 			}
 
 			if (theObject is ShipList)
@@ -424,6 +425,24 @@ namespace Xasteroids
 				ObjectManager.Shockwaves = combatData.Shockwaves;
 				AsteroidManager.Asteroids = combatData.Asteroids;
 				LevelSize = combatData.LevelSize;
+				return;
+			}
+
+			if (theObject is PlayerFired)
+			{
+				if (_host == null) //Clients don't care about this
+				{
+					return;
+				}
+				var playerFired = (PlayerFired)theObject;
+				var player = PlayerManager.Players[playerFired.PlayerID];
+				//Make sure to update player to correct position and angle
+				player.Angle = playerFired.Angle;
+				player.PositionX = playerFired.PositionX;
+				player.PositionY = playerFired.PositionY;
+				player.Energy = playerFired.Energy;
+				ObjectManager.AddBullet(player);
+				return;
 			}
 		}
 
@@ -537,6 +556,14 @@ namespace Xasteroids
 					_host.SendObjectTcpToClient(new NetworkMessage { Content = "Your ID:" + id.ToString() }, address);
 					++id;
 				}
+			}
+		}
+
+		public void SendFired(PlayerFired playerFired)
+		{
+			if (_client != null)
+			{
+				_client.SendObjectTcp(playerFired);
 			}
 		}
 

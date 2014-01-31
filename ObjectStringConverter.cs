@@ -115,6 +115,10 @@ namespace Xasteroids
 			{
 				configurableGuy = new Shockwave(configurationArray);
 			}
+			else if (fullTypeName.Equals(typeof(PlayerFired).FullName))
+			{
+				configurableGuy = new PlayerFired { Configuration = configurationArray };
+			}
 
 			return configurableGuy;
 		}

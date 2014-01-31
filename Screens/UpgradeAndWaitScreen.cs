@@ -592,7 +592,6 @@ namespace Xasteroids.Screens
 
 		public void RefreshLabels()
 		{
-			_readyButton.Active = true;
 			var player = _gameMain.MainPlayer;
 			if (player.IsDead)
 			{

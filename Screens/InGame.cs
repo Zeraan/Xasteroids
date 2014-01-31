@@ -104,7 +104,12 @@ namespace Xasteroids.Screens
 			}
 			foreach (var player in _gameMain.PlayerManager.Players)
 			{
-				_dot.Draw(player.PositionX / _gameMain.LevelSize.X * 230, player.PositionY / _gameMain.LevelSize.Y * 230, player.ShipSize / 5f, player.ShipSize / 5f, player.ShipColor);
+				if (player.IsDead)
+				{
+					//Don't draw dead players
+					continue;
+				}
+				_dot.Draw(player.PositionX / _gameMain.LevelSize.X * 230, player.PositionY / _gameMain.LevelSize.Y * 230, 0.4f, 0.4f, player.ShipColor);
 			}
 			GorgonLibrary.Gorgon.CurrentRenderTarget = old;
 			//Blit the render to screen

@@ -52,6 +52,7 @@ namespace Xasteroids
 		private BBSprite Cursor;
 		private Host _host;
 		private Client _client;
+		private Timer _pushDataTimer = new Timer { Interval = 200 };
 		public ShipSelectionWindow ShipSelectionWindow { get; private set; }
 		
 		public object ChatLock = new object();
@@ -176,6 +177,27 @@ namespace Xasteroids
 			{
 				Cursor.Draw(MousePos.X, MousePos.Y);
 				Cursor.Update(frameDeltaTime, Random);
+			}
+		}
+
+		private void OnPushData(object sender, EventArgs e)
+		{
+			if (_client != null && _client.IPAddress != null)
+			{
+				Player mainPlayer = MainPlayer;
+				_client.SendObjectTcp( new Ship {
+					OwnerName = mainPlayer.Name,
+					IsDead = mainPlayer.IsDead,
+					PositionX = mainPlayer.PositionX,
+					PositionY = mainPlayer.PositionY,
+					VelocityX = mainPlayer.VelocityX,
+					VelocityY = mainPlayer.VelocityY,
+					Angle = mainPlayer.Angle
+				});
+			}
+			else if (_host != null)
+			{
+				SendCombatData();
 			}
 		}
 
@@ -334,6 +356,15 @@ namespace Xasteroids
 				ChangeToScreen(Screen.MainMenu);
 			}
 			MessageBox.Show("Your connection with the host has been severed.");
+		}
+
+		public void OnGameOver()
+		{
+			if (_client != null || _host != null)
+			{
+				_pushDataTimer.Stop();
+				_pushDataTimer.Tick -= OnPushData;
+			}
 		}
 
 		private void HandleObject(IPAddress senderIPAddress, IConfigurable theObject)
@@ -670,6 +701,11 @@ namespace Xasteroids
 					}
 					ObjectManager.Clear();
 					_screenInterface = _inGame;
+					if (_host != null || _client != null)
+					{
+						_pushDataTimer.Tick += OnPushData;
+						_pushDataTimer.Start();
+					}
 					break;
 				}
 				case Screen.Upgrade:

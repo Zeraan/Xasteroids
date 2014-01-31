@@ -1006,12 +1006,12 @@ namespace Xasteroids
 				string contents = bulletsString.Substring(1, bulletsString.Length - 2);
 				if (contents.Length != 0)
 				{
-					string[] asStrings = contents.Split(',');
-					foreach (string arrayString in asStrings)
+					string[] bulletConfigStrings = ObjectStringConverter.ConfigurationFromStringOfConfigurations(contents);
+					foreach (string bulletConfigString in bulletConfigStrings)
 					{
-						contents = arrayString.Substring(1, arrayString.Length - 2);
-						string[] bulletConfig = contents.Split(',');
-						ImpactedBullets.Add(new Bullet(bulletConfig));
+						contents = bulletConfigString.Substring(1, bulletConfigString.Length - 2);
+						string[] config = ObjectStringConverter.ConfigurationFromMixedString(contents);
+						ImpactedBullets.Add(new Bullet(config));
 					}
 				}				
 			}

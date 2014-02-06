@@ -54,7 +54,7 @@ namespace Xasteroids
 		private Host _host;
 		private Client _client;
 		private System.Timers.Timer _200msPushDataTimer = new System.Timers.Timer { Interval = 100 };
-		private System.Timers.Timer _5000msPushDataTimer = new System.Timers.Timer { Interval = 2000 };
+		private System.Timers.Timer _2000msPushDataTimer = new System.Timers.Timer { Interval = 2000 };
 		public ShipSelectionWindow ShipSelectionWindow { get; private set; }
 		
 		public object ChatLock = new object();
@@ -75,7 +75,21 @@ namespace Xasteroids
 				MainPlayer = PlayerManager.Players[MainPlayerID];
 			}
 		} 
-		public Player MainPlayer { get; private set; } 
+		public Player MainPlayer { get; private set; }
+	    public bool AllPlayersDead
+	    {
+	        get
+	        {
+	            foreach (var player in PlayerManager.Players)
+	            {
+	                if (!player.IsDead)
+	                {
+	                    return false;
+	                }
+	            }
+	            return true;
+	        }
+	    }
 
 		public bool IsHost
 		{ 
@@ -372,8 +386,8 @@ namespace Xasteroids
 				_200msPushDataTimer.Stop();
 				_200msPushDataTimer.Elapsed -= OnPushData;
 
-				_5000msPushDataTimer.Stop();
-				_5000msPushDataTimer.Elapsed -= OnPushAsteroids;
+				_2000msPushDataTimer.Stop();
+				_2000msPushDataTimer.Elapsed -= OnPushAsteroids;
 			}
 		}
 
@@ -736,8 +750,8 @@ namespace Xasteroids
 						if (_host != null)
 						{
 							OnPushAsteroids(null, null);
-							_5000msPushDataTimer.Elapsed += OnPushAsteroids;
-							_5000msPushDataTimer.Start();
+							_2000msPushDataTimer.Elapsed += OnPushAsteroids;
+							_2000msPushDataTimer.Start();
 						}
 					}
 					break;

@@ -359,6 +359,12 @@ namespace Xasteroids
 							}
 						}
 						bullet.Damage -= damageDone * (1 - (bullet.PenetratingLevel * 0.10f));
+                        if (bullet.Damage <= 0)
+                        {
+                            //Match the asteroid's speed it hit
+                            bullet.VelocityX = asteroid.VelocityX;
+                            bullet.VelocityY = asteroid.VelocityY;
+                        }
 					}
 				}
 			}
@@ -723,7 +729,7 @@ namespace Xasteroids
 						_gameMain.ObjectManager.AddExplosion(asteroid.PositionX, asteroid.PositionY, asteroid.VelocityX, asteroid.VelocityY, 4);
 						asteroid.ToBeRemoved = true;
 					}
-					else
+					else if (!_gameMain.IsMultiplayer || _gameMain.IsHost)
 					{
 						newAsteroids.AddRange(SpawnAsteroids(asteroid));
 						_gameMain.ObjectManager.AddExplosion(asteroid.PositionX, asteroid.PositionY, asteroid.VelocityX, asteroid.VelocityY, 4);

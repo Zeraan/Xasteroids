@@ -13,7 +13,6 @@ namespace Xasteroids
 		List<Player> _somePlayers;
 
 		Random _theRandom = new Random();
-		List<Asteroid> _someAsteroids;
 		ShipList _someShipList;
 		List<Bullet> _someBullets;
 		List<Shockwave> _someShockwaves;
@@ -27,10 +26,6 @@ namespace Xasteroids
 				new Player(20, 1, Color.Orange) { IsDead = true, NumberOfNukes = 99, Name = "Little Pete" },
 			};
 
-			_someAsteroids = new List<Asteroid> {
-				new Asteroid(2000, 2000, _theRandom) { PositionX = 77.0f, VelocityX = -22.9f },
-				new Asteroid(3000, 3000, _theRandom) { PositionY = -123.12f, VelocityY = 0.86f },
-			};
 			_someShipList = new ShipList {
 				Ships = new List<Ship> {
 					new Ship { PositionX = 47.06f, VelocityX = -2.05f },

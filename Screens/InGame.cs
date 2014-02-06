@@ -97,10 +97,10 @@ namespace Xasteroids.Screens
 			foreach (var asteroid in _gameMain.AsteroidManager.Asteroids)
 			{
 				//TODO: If have scanner upgrades, show colors and black asteroids (black asteroids are not visible on minimap as well until upgraded)
-				if (asteroid is BlackAsteroid)
+				/*if (asteroid is BlackAsteroid)
 				{
 					continue; //Don't show it if no scanner upgrade, mwhahaha!
-				}
+				}*/
 				_dot.Draw(asteroid.PositionX / _gameMain.LevelSize.X * 230, asteroid.PositionY / _gameMain.LevelSize.Y * 230, asteroid.Size / 10f, asteroid.Size / 10f, Color.White); //Later upgrades will add color
 			}
 			foreach (var player in _gameMain.PlayerManager.Players)

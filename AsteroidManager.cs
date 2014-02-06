@@ -69,7 +69,7 @@ namespace Xasteroids
 
 				if (r1 < ast1.Radius + ast2.Radius && r1 < r2) //Collision!
 				{
-					if (!((ast1 is ClumpyAsteroid && ast2 is ClumpyAsteroid) && ast1.Size + ast2.Size <= 5)) //Make sure it's not clumpy asteroids that can clump together
+					if (!((ast1.AsteroidType == AsteroidType.CLUMPY && ast2.AsteroidType == AsteroidType.CLUMPY) && ast1.Size + ast2.Size <= 5)) //Make sure it's not clumpy asteroids that can clump together
 					{
 						//Calculate the impulse or change of momentum, or whatever people call it
 						float rx = dx / r1;
@@ -107,11 +107,11 @@ namespace Xasteroids
 						ast2.ToBeRemoved = true;
 					}
 				}
-				if ((ast1 is RepulserAsteroid || ast2 is RepulserAsteroid) && (r1 < ast1.Size * 64 || r1 < ast2.Size * 64))
+				if ((ast1.AsteroidType == AsteroidType.REPULSER || ast2.AsteroidType == AsteroidType.REPULSER) && (r1 < ast1.Size * 64 || r1 < ast2.Size * 64))
 				{
 					var degree = Math.Atan2(ty2 - ty1, tx2 - tx1);
 					float repulsingForce;
-					if (ast1 is RepulserAsteroid && ast2 is RepulserAsteroid)
+					if (ast1.AsteroidType == AsteroidType.REPULSER && ast2.AsteroidType == AsteroidType.REPULSER)
 					{
 						if (r1 < ast1.Size * 64 && r1 < ast2.Size * 64)
 						{
@@ -129,7 +129,7 @@ namespace Xasteroids
 					}
 					else
 					{
-						if (ast1 is RepulserAsteroid)
+						if (ast1.AsteroidType == AsteroidType.REPULSER)
 						{
 							repulsingForce = ((ast1.Size * 96) - r1);
 						}
@@ -143,11 +143,11 @@ namespace Xasteroids
 					ast1.VelocityX -= (float)(repulsingForce * Math.Cos(degree) * frameDeltaTime * (ast2.Mass / (float)(ast1.Mass + ast2.Mass)));
 					ast1.VelocityY -= (float)(repulsingForce * Math.Sin(degree) * frameDeltaTime * (ast2.Mass / (float)(ast1.Mass + ast2.Mass)));
 				}
-				if ((ast1 is GraviticAsteroid || ast2 is GraviticAsteroid) && (r1 < ast1.Size * 64 || r1 < ast2.Size * 64))
+				if ((ast1.AsteroidType == AsteroidType.GRAVITIC || ast2.AsteroidType == AsteroidType.GRAVITIC) && (r1 < ast1.Size * 64 || r1 < ast2.Size * 64))
 				{
 					var degree = Math.Atan2(ty2 - ty1, tx2 - tx1);
 					float graviticForce;
-					if (ast1 is GraviticAsteroid && ast2 is GraviticAsteroid)
+					if (ast1.AsteroidType == AsteroidType.GRAVITIC && ast2.AsteroidType == AsteroidType.GRAVITIC)
 					{
 						if (r1 < ast1.Size * 64 && r1 < ast2.Size * 64)
 						{
@@ -165,7 +165,7 @@ namespace Xasteroids
 					}
 					else
 					{
-						if (ast1 is RepulserAsteroid)
+						if (ast1.AsteroidType == AsteroidType.REPULSER)
 						{
 							graviticForce = ((ast1.Size * 96) - r1);
 						}
@@ -249,13 +249,13 @@ namespace Xasteroids
 						//Deal damage and activate shield for player
 						player.ShieldAlpha = 1;
 					}
-					if (asteroid is MagneticAsteroid && r1 < asteroid.Size * 64) //Within magnetic range
+					if (asteroid.AsteroidType == AsteroidType.MAGNETIC && r1 < asteroid.Size * 64) //Within magnetic range
 					{
 						var degree = Math.Atan2(ty2 - ty1, tx2 - tx1);
 						asteroid.VelocityX += (float)(((asteroid.Size * 128) - r1) * Math.Cos(degree) * frameDeltaTime);
 						asteroid.VelocityY += (float)(((asteroid.Size * 128) - r1) * Math.Sin(degree) * frameDeltaTime);
 					}
-					if (asteroid is RepulserAsteroid && r1 < asteroid.Size * 64)
+					if (asteroid.AsteroidType == AsteroidType.REPULSER && r1 < asteroid.Size * 64)
 					{
 						var degree = Math.Atan2(ty2 - ty1, tx2 - tx1);
 						float repulsingForce = ((asteroid.Size * 96) - r1);
@@ -264,7 +264,7 @@ namespace Xasteroids
 						asteroid.VelocityX -= (float)(repulsingForce * Math.Cos(degree) * frameDeltaTime * (player.Mass / (float)(asteroid.Mass + player.Mass)));
 						asteroid.VelocityY -= (float)(repulsingForce * Math.Sin(degree) * frameDeltaTime * (player.Mass / (float)(asteroid.Mass + player.Mass)));
 					}
-					if (asteroid is GraviticAsteroid && r1 < asteroid.Size * 64)
+					if (asteroid.AsteroidType == AsteroidType.GRAVITIC && r1 < asteroid.Size * 64)
 					{
 						var degree = Math.Atan2(ty2 - ty1, tx2 - tx1);
 						float graviticForce = ((asteroid.Size * 96) - r1);
@@ -308,50 +308,41 @@ namespace Xasteroids
 							damageDone += asteroid.HP;
 							//Give money to player who shot it
 							int value;
-							if (asteroid is GenericAsteroid)
+							switch (asteroid.AsteroidType)
 							{
-								value = 5;
-							}
-							else if (asteroid is ClumpyAsteroid)
-							{
-								value = 2;
-							}
-							else if (asteroid is MagneticAsteroid)
-							{
-								value = 20;
-							}
-							else if (asteroid is RepulserAsteroid)
-							{
-								value = 10;
-							}
-							else if (asteroid is GraviticAsteroid)
-							{
-								value = 15;
-							}
-							else if (asteroid is DenseAsteroid)
-							{
-								value = 10;
-							}
-							else if (asteroid is ZippyAsteroid)
-							{
-								value = 5;
-							}
-							else if (asteroid is ExplosiveAsteroid)
-							{
-								value = 10;
-							}
-							else if (asteroid is BlackAsteroid)
-							{
-								value = 10;
-							}
-							else if (asteroid is GoldAsteroid)
-							{
-								value = 50;
-							}
-							else
-							{
-								//Only phasing asteroid left
-								value = 25;
+								case AsteroidType.GENERIC:
+									value = 15;
+									break;
+								case AsteroidType.CLUMPY:
+									value = 10;
+									break;
+								case AsteroidType.MAGNETIC:
+									value = 50;
+									break;
+								case AsteroidType.REPULSER:
+									value = 30;
+									break;
+								case AsteroidType.GRAVITIC:
+									value = 40;
+									break;
+								case AsteroidType.DENSE:
+									value = 30;
+									break;
+								case AsteroidType.ZIPPY:
+									value = 15;
+									break;
+								case AsteroidType.EXPLOSIVE:
+									value = 40;
+									break;
+								case AsteroidType.BLACK:
+									value = 30;
+									break;
+								case AsteroidType.GOLD:
+									value = 200;
+									break;
+								default:
+									value = 50;
+									break;
 							}
 							if (PlayerIsOwedMoney != null)
 							{
@@ -389,50 +380,41 @@ namespace Xasteroids
 						{
 							//Give money to player who destroyed it
 							int value;
-							if (asteroid is GenericAsteroid)
+							switch (asteroid.AsteroidType)
 							{
-								value = 15;
-							}
-							else if (asteroid is ClumpyAsteroid)
-							{
-								value = 10;
-							}
-							else if (asteroid is MagneticAsteroid)
-							{
-								value = 50;
-							}
-							else if (asteroid is RepulserAsteroid)
-							{
-								value = 30;
-							}
-							else if (asteroid is GraviticAsteroid)
-							{
-								value = 40;
-							}
-							else if (asteroid is DenseAsteroid)
-							{
-								value = 30;
-							}
-							else if (asteroid is ZippyAsteroid)
-							{
-								value = 15;
-							}
-							else if (asteroid is ExplosiveAsteroid)
-							{
-								value = 40;
-							}
-							else if (asteroid is BlackAsteroid)
-							{
-								value = 30;
-							}
-							else if (asteroid is GoldAsteroid)
-							{
-								value = 200;
-							}
-							else
-							{
-								//Only phasing asteroid left
-								value = 50;
+								case AsteroidType.GENERIC:
+									value = 15;
+									break;
+								case AsteroidType.CLUMPY:
+									value = 10;
+									break;
+								case AsteroidType.MAGNETIC:
+									value = 50;
+									break;
+								case AsteroidType.REPULSER:
+									value = 30;
+									break;
+								case AsteroidType.GRAVITIC:
+									value = 40;
+									break;
+								case AsteroidType.DENSE:
+									value = 30;
+									break;
+								case AsteroidType.ZIPPY:
+									value = 15;
+									break;
+								case AsteroidType.EXPLOSIVE:
+									value = 40;
+									break;
+								case AsteroidType.BLACK:
+									value = 30;
+									break;
+								case AsteroidType.GOLD:
+									value = 200;
+									break;
+								default:
+									value = 50;
+									break;
 							}
 							if (PlayerIsOwedMoney != null)
 							{
@@ -473,65 +455,9 @@ namespace Xasteroids
 			while (asteroidPoints > 0)
 			{
 				var type = types[r.Next(types.Length)];
-				Asteroid newAst;
-				switch (type)
-				{
-					case AsteroidType.GENERIC:
-						newAst = new GenericAsteroid(width, height, r);
-						Asteroids.Add(newAst);
-						asteroidPoints -= newAst.Point;
-						break;
-					case AsteroidType.CLUMPY:
-						newAst = new ClumpyAsteroid(width, height, r);
-						Asteroids.Add(newAst);
-						asteroidPoints -= newAst.Point;
-						break;
-					case AsteroidType.MAGNETIC:
-						newAst = new MagneticAsteroid(width, height, r);
-						Asteroids.Add(newAst);
-						asteroidPoints -= newAst.Point;
-						break;
-					case AsteroidType.EXPLOSIVE:
-						newAst = new ExplosiveAsteroid(width, height, r);
-						Asteroids.Add(newAst);
-						asteroidPoints -= newAst.Point;
-						break;
-					case AsteroidType.BLACK:
-						newAst = new BlackAsteroid(width, height, r);
-						Asteroids.Add(newAst);
-						asteroidPoints -= newAst.Point;
-						break;
-					case AsteroidType.DENSE:
-						newAst = new DenseAsteroid(width, height, r);
-						Asteroids.Add(newAst);
-						asteroidPoints -= newAst.Point;
-						break;
-					case AsteroidType.GRAVITIC:
-						newAst = new GraviticAsteroid(width, height, r);
-						Asteroids.Add(newAst);
-						asteroidPoints -= newAst.Point;
-						break;
-					case AsteroidType.ZIPPY:
-						newAst = new ZippyAsteroid(width, height, r);
-						Asteroids.Add(newAst);
-						asteroidPoints -= newAst.Point;
-						break;
-					case AsteroidType.REPULSER:
-						newAst = new RepulserAsteroid(width, height, r);
-						Asteroids.Add(newAst);
-						asteroidPoints -= newAst.Point;
-						break;
-					case AsteroidType.PHASING:
-						newAst = new PhasingAsteroid(width, height, r);
-						Asteroids.Add(newAst);
-						asteroidPoints -= newAst.Point;
-						break;
-					case AsteroidType.GOLD:
-						newAst = new GoldAsteroid(width, height, r);
-						Asteroids.Add(newAst);
-						asteroidPoints -= newAst.Point;
-						break;
-				}
+				Asteroid newAst = new Asteroid(type, width, height, r);
+				Asteroids.Add(newAst);
+				asteroidPoints -= newAst.Point;
 			}
 		}
 
@@ -723,7 +649,7 @@ namespace Xasteroids
 				//If HP is 0 or less, remove the asteroid and spawn smaller asteroids, unless it's explosive asteroid, in which case it simply emits a shockwave
 				if (asteroid.HP <= 0)
 				{
-					if (asteroid is ExplosiveAsteroid)
+					if (asteroid.AsteroidType == AsteroidType.EXPLOSIVE)
 					{
 						_gameMain.ObjectManager.AddShockwave(asteroid.PositionX, asteroid.PositionY, asteroid.Size, null);
 						_gameMain.ObjectManager.AddExplosion(asteroid.PositionX, asteroid.PositionY, asteroid.VelocityX, asteroid.VelocityY, 4);
@@ -769,57 +695,40 @@ namespace Xasteroids
 				//Continue spawning until points run out
 				float addVel = 0; //for yellow asteroids, they explode fragments FAST
 				int newSize = _gameMain.Random.Next(whichAsteroid.Size - 1) + 1;
-				Asteroid newAsteroid;
-				if (whichAsteroid is GenericAsteroid)
+				Asteroid newAsteroid = new Asteroid(whichAsteroid.AsteroidType, _gameMain.LevelSize.X, _gameMain.LevelSize.Y, _gameMain.Random);
+				switch (whichAsteroid.AsteroidType)
 				{
-					newAsteroid = new GenericAsteroid(_gameMain.LevelSize.X, _gameMain.LevelSize.Y, _gameMain.Random);
-					newAsteroid.HP = 5 * newSize;
-				}
-				else if (whichAsteroid is ClumpyAsteroid)
-				{
-					newAsteroid = new ClumpyAsteroid(_gameMain.LevelSize.X, _gameMain.LevelSize.Y, _gameMain.Random);
-					newAsteroid.HP = 10 * newSize;
-				}
-				else if (whichAsteroid is GraviticAsteroid)
-				{
-					newAsteroid = new GraviticAsteroid(_gameMain.LevelSize.X, _gameMain.LevelSize.Y, _gameMain.Random);
-					newAsteroid.HP = 10 * newSize;
-				}
-				else if (whichAsteroid is RepulserAsteroid)
-				{
-					newAsteroid = new RepulserAsteroid(_gameMain.LevelSize.X, _gameMain.LevelSize.Y, _gameMain.Random);
-					newAsteroid.HP = 10 * newSize;
-				}
-				else if (whichAsteroid is GoldAsteroid)
-				{
-					newAsteroid = new GoldAsteroid(_gameMain.LevelSize.X, _gameMain.LevelSize.Y, _gameMain.Random);
-					newAsteroid.HP = 40 * newSize;
-				}
-				else if (whichAsteroid is MagneticAsteroid)
-				{
-					newAsteroid = new MagneticAsteroid(_gameMain.LevelSize.X, _gameMain.LevelSize.Y, _gameMain.Random);
-					newAsteroid.HP = 10 * newSize;
-				}
-				else if (whichAsteroid is BlackAsteroid)
-				{
-					newAsteroid = new BlackAsteroid(_gameMain.LevelSize.X, _gameMain.LevelSize.Y, _gameMain.Random);
-					newAsteroid.HP = 5 * newSize;
-				}
-				else if (whichAsteroid is ZippyAsteroid)
-				{
-					newAsteroid = new ZippyAsteroid(_gameMain.LevelSize.X, _gameMain.LevelSize.Y, _gameMain.Random);
-					addVel = 200;
-					newAsteroid.HP = 5 * newSize;
-				}
-				else if (whichAsteroid is DenseAsteroid)
-				{
-					newAsteroid = new DenseAsteroid(_gameMain.LevelSize.X, _gameMain.LevelSize.Y, _gameMain.Random);
-					newAsteroid.HP = 50 * newSize;
-				}
-				else //Only phasing left.  Explosive don't split into smaller, they explode, hence their name...
-				{
-					newAsteroid = new PhasingAsteroid(_gameMain.LevelSize.X, _gameMain.LevelSize.Y, _gameMain.Random);
-					newAsteroid.HP = 20 * newSize;
+					case AsteroidType.GENERIC:
+						newAsteroid.HP = 5 * newSize;
+						break;
+					case AsteroidType.CLUMPY:
+						newAsteroid.HP = 10 * newSize;
+						break;
+					case AsteroidType.GRAVITIC:
+						newAsteroid.HP = 10 * newSize;
+						break;
+					case AsteroidType.REPULSER:
+						newAsteroid.HP = 10 * newSize;
+						break;
+					case AsteroidType.GOLD:
+						newAsteroid.HP = 40 * newSize;
+						break;
+					case AsteroidType.MAGNETIC:
+						newAsteroid.HP = 10 * newSize;
+						break;
+					case AsteroidType.BLACK:
+						newAsteroid.HP = 5 * newSize;
+						break;
+					case AsteroidType.ZIPPY:
+						addVel = 200;
+						newAsteroid.HP = 5 * newSize;
+						break;
+					case AsteroidType.DENSE:
+						newAsteroid.HP = 50 * newSize;
+						break;
+					default:
+						newAsteroid.HP = 20 * newSize;
+						break;
 				}
 				newAsteroid.Size = newSize;
 				newAsteroid.Radius = newAsteroid.Size * 16;
@@ -852,8 +761,9 @@ namespace Xasteroids
 		private BBSprite _asteroidSprite;
 
 		//config exlcludes itself (naturally) and AsteroidSprite
-		public const int CONFIG_LENGTH = 19;
+		public const int CONFIG_LENGTH = 18;
 
+        public AsteroidType AsteroidType { get; set; }
 		public bool ToBeRemoved { get; set; }
 		public float PositionX { get; set; }
 		public float PositionY { get; set; }
@@ -870,7 +780,31 @@ namespace Xasteroids
 		public float Phase { get; set; }
 		public bool IsPhasing { get; set; }
 		public int PhaseSpeed { get; set; }
-		public virtual int Point { get; set; }
+		public int Point 
+		{ 
+			get
+			{
+				switch (AsteroidType)
+				{
+					case AsteroidType.GENERIC:
+					case AsteroidType.CLUMPY:
+						return Size;
+					case AsteroidType.BLACK:
+					case AsteroidType.GRAVITIC:
+					case AsteroidType.REPULSER:
+						return (int)(Size * 1.5);
+					case AsteroidType.MAGNETIC:
+					case AsteroidType.EXPLOSIVE:
+					case AsteroidType.DENSE:
+						return Size * 2;
+					case AsteroidType.ZIPPY:
+						return (int)(Size * 2.5);
+					case AsteroidType.GOLD:
+						return Size * 3;
+				}
+				return Size;
+			} 
+		}
 		public BBSprite AsteroidSprite 
 		{ 
 			get
@@ -892,7 +826,7 @@ namespace Xasteroids
 			get
 			{
 				string[] config = new string[CONFIG_LENGTH];
-				config[0] = this.GetType().ToString();
+				config[0] = AsteroidType.ToString();
 				config[1] = ToBeRemoved.ToString();
 				config[2] = PositionX.ToString();
 				config[3] = PositionY.ToString();
@@ -909,7 +843,6 @@ namespace Xasteroids
 				config[14] = Phase.ToString();
 				config[15] = IsPhasing.ToString();
 				config[16] = PhaseSpeed.ToString();
-				config[17] = Point.ToString();
 				string bulletsString;
 				if (ImpactedBullets == null || ImpactedBullets.Count == 0)
 				{
@@ -925,7 +858,7 @@ namespace Xasteroids
 					}
 					bulletsString = "[" + string.Join(",", asStrings) + "]";
 				}
-				config[18] = bulletsString;
+				config[17] = bulletsString;
 		
 				return config;
 			}
@@ -935,10 +868,11 @@ namespace Xasteroids
 				{
 					return;
 				}
-				
-				//Index Zero of Asteroid.Configuration holds the Asteroid's type.
-				//As of 02.06.2014 I don't expect that Asteroid objects will use this data.
-				//It should be the objects that work with Asteroids that use this.
+				try
+				{
+				    AsteroidType = (AsteroidType) Enum.Parse(typeof (AsteroidType), value[0]);
+				}
+				catch {} //Do nothing
 				bool outBool;
 				if(bool.TryParse(value[1], out outBool))
 				{
@@ -1006,13 +940,9 @@ namespace Xasteroids
 				{
 					PhaseSpeed = outInt;
 				}
-				if (int.TryParse(value[17], out outInt))
-				{
-					Point = outInt;
-				}
 
 				ImpactedBullets = new List<Bullet>();
-				string bulletsString = value[18];
+				string bulletsString = value[17];
 				string contents = bulletsString.Substring(1, bulletsString.Length - 2);
 				if (contents.Length != 0)
 				{
@@ -1027,8 +957,9 @@ namespace Xasteroids
 			}
 		}
 
-		public Asteroid(int width, int height, Random r)
+		public Asteroid(AsteroidType asteroidType, int width, int height, Random r)
 		{
+			AsteroidType = asteroidType;
 			ImpactedBullets = new List<Bullet>();
 			ToBeRemoved = false;
 			//Safe zone can't be spawned in, 400x400 in middle of level
@@ -1064,6 +995,134 @@ namespace Xasteroids
 			RotationSpeed = (r.Next(1800) / 10.0f) * (r.Next(2) > 0 ? -1 : 1);
 			Phase = 255;
 			IsPhasing = true;
+
+			//Here begins asteroid-type specific code
+			switch (AsteroidType)
+			{
+				case AsteroidType.GENERIC:
+					{
+						Color = Color.White;
+
+						VelocityX = r.Next(20, 200) * (r.Next(2) > 0 ? -1 : 1);
+						VelocityY = r.Next(20, 200) * (r.Next(2) > 0 ? -1 : 1);
+
+						Mass = Size * 200;
+						HP = Size * 5;
+						break;
+					}
+				case AsteroidType.CLUMPY:
+					{
+						Color = Color.MediumPurple;
+
+						VelocityX = r.Next(80, 260) * (r.Next(2) > 0 ? -1 : 1);
+						VelocityY = r.Next(80, 260) * (r.Next(2) > 0 ? -1 : 1);
+
+						Mass = Size * 300;
+						HP = Size * 10;
+						break;
+					}
+				case AsteroidType.MAGNETIC:
+					{
+						Color = Color.Blue;
+
+						VelocityX = r.Next(80, 240) * (r.Next(2) > 0 ? -1 : 1);
+						VelocityY = r.Next(80, 240) * (r.Next(2) > 0 ? -1 : 1);
+
+						Mass = Size * 160;
+						HP = Size * 10;
+						break;
+					}
+				case AsteroidType.EXPLOSIVE:
+					{
+						Color = Color.OrangeRed;
+
+						VelocityX = r.Next(160, 200) * (r.Next(2) > 0 ? -1 : 1);
+						VelocityY = r.Next(160, 200) * (r.Next(2) > 0 ? -1 : 1);
+
+						Mass = Size * 240;
+						HP = Size * 3;
+						break;
+					}
+				case AsteroidType.BLACK:
+					{
+						Color = Color.Black;
+
+						VelocityX = r.Next(20, 200) * (r.Next(2) > 0 ? -1 : 1);
+						VelocityY = r.Next(20, 200) * (r.Next(2) > 0 ? -1 : 1);
+
+						Mass = Size * 200;
+						HP = Size * 5;
+						break;
+					}
+				case AsteroidType.DENSE:
+					{
+						Color = Color.Gray;
+
+						VelocityX = r.Next(20, 160) * (r.Next(2) > 0 ? -1 : 1);
+						VelocityY = r.Next(20, 160) * (r.Next(2) > 0 ? -1 : 1);
+
+						Mass = Size * 1100;
+						HP = Size * 50;
+						break;
+					}
+				case AsteroidType.GRAVITIC:
+					{
+						Color = Color.Cyan;
+
+						VelocityX = r.Next(200, 400) * (r.Next(2) > 0 ? -1 : 1);
+						VelocityY = r.Next(200, 400) * (r.Next(2) > 0 ? -1 : 1);
+
+						Mass = Size * 300;
+						HP = Size * 10;
+						break;
+					}
+				case AsteroidType.ZIPPY:
+					{
+						Color = Color.GreenYellow;
+
+						VelocityX = r.Next(400, 1000) * (r.Next(2) > 0 ? -1 : 1);
+						VelocityY = r.Next(400, 1000) * (r.Next(2) > 0 ? -1 : 1);
+
+						Mass = Size * 30;
+						HP = Size * 5;
+						break;
+					}
+				case AsteroidType.REPULSER:
+					{
+						Color = Color.HotPink;
+
+						VelocityX = r.Next(200, 400) * (r.Next(2) > 0 ? -1 : 1);
+						VelocityY = r.Next(200, 400) * (r.Next(2) > 0 ? -1 : 1);
+
+						Mass = Size * 260;
+						HP = Size * 10;
+						break;
+					}
+				case AsteroidType.PHASING:
+					{
+						Color = Color.DarkRed;
+
+						VelocityX = r.Next(40, 280) * (r.Next(2) > 0 ? -1 : 1);
+						VelocityY = r.Next(40, 280) * (r.Next(2) > 0 ? -1 : 1);
+
+						Mass = Size * 220;
+						HP = Size * 20;
+
+						PhaseSpeed = r.Next(10, 255);
+						break;
+					}
+				case AsteroidType.GOLD:
+					{
+						Color = Color.Gold;
+
+						VelocityX = r.Next(100, 300) * (r.Next(2) > 0 ? -1 : 1);
+						VelocityY = r.Next(100, 300) * (r.Next(2) > 0 ? -1 : 1);
+
+						Mass = Size * 400;
+						HP = Size * 40;
+						break;
+					}
+			}
 		}
 
 		public Asteroid(string[] configuration)
@@ -1100,298 +1159,29 @@ namespace Xasteroids
 			{
 				PositionY -= height;
 			}
-		}
-	}
 
-	public class GenericAsteroid : Asteroid
-	{
-		public override int Point
-		{
-			get { return Size; }
-		}
-
-		public GenericAsteroid(int width, int height, Random r)
-			: base(width, height, r)
-		{
-			Color = Color.White;
-
-			VelocityX = r.Next(20, 200) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(20, 200) * (r.Next(2) > 0 ? -1 : 1);
-
-			Mass = Size * 200;
-			HP = Size * 5;
-		}
-
-		public GenericAsteroid(string[] config)
-			: base(config)
-		{
-		}
-	}
-	public class ClumpyAsteroid : Asteroid
-	{
-		public override int Point
-		{
-			get { return Size; }
-		}
-
-		public ClumpyAsteroid(int width, int height, Random r)
-			: base(width, height, r)
-		{
-			Color = Color.MediumPurple;
-
-			VelocityX = r.Next(80, 260) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(80, 260) * (r.Next(2) > 0 ? -1 : 1);
-
-			Mass = Size * 300;
-			HP = Size * 10;
-		}
-
-		public ClumpyAsteroid(string[] config)
-			: base(config)
-		{
-		}
-	}
-	public class MagneticAsteroid : Asteroid
-	{
-		public override int Point
-		{
-			get { return Size * 2; }
-		}
-
-		public MagneticAsteroid(int width, int height, Random r)
-			: base(width, height, r)
-		{
-			Color = Color.Blue;
-
-			VelocityX = r.Next(80, 240) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(80, 240) * (r.Next(2) > 0 ? -1 : 1);
-
-			Mass = Size * 160;
-			HP = Size * 10;
-		}
-
-		public MagneticAsteroid(string[] config)
-			: base(config)
-		{
-		}
-	}
-	public class ExplosiveAsteroid : Asteroid
-	{
-		public override int Point
-		{
-			get { return Size * 2; }
-		}
-
-		public ExplosiveAsteroid(int width, int height, Random r)
-			: base(width, height, r)
-		{
-			Color = Color.OrangeRed;
-
-			VelocityX = r.Next(160, 200) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(160, 200) * (r.Next(2) > 0 ? -1 : 1);
-
-			Mass = Size * 240;
-			HP = Size * 3;
-		}
-
-		public ExplosiveAsteroid(string[] config)
-			: base(config)
-		{
-		}
-	}
-	public class BlackAsteroid : Asteroid
-	{
-		public override int Point
-		{
-			get { return (int)(Size * 1.5); }
-		}
-
-		public BlackAsteroid(int width, int height, Random r)
-			: base(width, height, r)
-		{
-			Color = Color.Black;
-
-			VelocityX = r.Next(20, 200) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(20, 200) * (r.Next(2) > 0 ? -1 : 1);
-
-			Mass = Size * 200;
-			HP = Size * 5;
-		}
-
-		public BlackAsteroid(string[] config)
-			: base(config)
-		{
-		}
-	}
-	public class DenseAsteroid : Asteroid
-	{
-		public override int Point
-		{
-			get { return Size * 2; }
-		}
-
-		public DenseAsteroid(int width, int height, Random r)
-			: base(width, height, r)
-		{
-			Color = Color.Gray;
-
-			VelocityX = r.Next(20, 160) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(20, 160) * (r.Next(2) > 0 ? -1 : 1);
-
-			Mass = Size * 1100;
-			HP = Size * 50;
-		}
-
-        public DenseAsteroid(string[] config)
-            : base(config)
-        {
-        }
-	}
-	public class GraviticAsteroid : Asteroid
-	{
-		public override int Point
-		{
-			get { return (int)(Size * 1.5); }
-		}
-
-		public GraviticAsteroid(int width, int height, Random r)
-			: base(width, height, r)
-		{
-			Color = Color.Cyan;
-
-			VelocityX = r.Next(200, 400) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(200, 400) * (r.Next(2) > 0 ? -1 : 1);
-
-			Mass = Size * 300;
-			HP = Size * 10;
-		}
-
-        public GraviticAsteroid(string[] config)
-            : base(config)
-        {
-        }
-	}
-	public class ZippyAsteroid : Asteroid
-	{
-		public override int Point
-		{
-			get { return (int)(Size * 2.5); }
-		}
-
-		public ZippyAsteroid(int width, int height, Random r)
-			: base(width, height, r)
-		{
-			Color = Color.GreenYellow;
-
-			VelocityX = r.Next(400, 1000) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(400, 1000) * (r.Next(2) > 0 ? -1 : 1);
-
-			Mass = Size * 30;
-			HP = Size * 5;
-		}
-
-        public ZippyAsteroid(string[] config)
-            : base(config)
-        {
-        }
-	}
-	public class RepulserAsteroid : Asteroid
-	{
-		public override int Point
-		{
-			get { return (int)(Size * 1.5); }
-		}
-
-		public RepulserAsteroid(int width, int height, Random r)
-			: base(width, height, r)
-		{
-			Color = Color.HotPink;
-
-			VelocityX = r.Next(200, 400) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(200, 400) * (r.Next(2) > 0 ? -1 : 1);
-
-			Mass = Size * 260;
-			HP = Size * 10;
-		}
-
-        public RepulserAsteroid(string[] config)
-            : base(config)
-        {
-        }
-	}
-	public class PhasingAsteroid : Asteroid
-	{
-		public override int Point
-		{
-			get { return Size * 2; }
-		}
-
-		public PhasingAsteroid(int width, int height, Random r)
-			: base(width, height, r)
-		{
-			Color = Color.DarkRed;
-
-			VelocityX = r.Next(40, 280) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(40, 280) * (r.Next(2) > 0 ? -1 : 1);
-
-			Mass = Size * 220;
-			HP = Size * 20;
-
-			PhaseSpeed = r.Next(10, 255);
-		}
-
-        public PhasingAsteroid(string[] config)
-            : base(config)
-        {
-        }
-
-		public override void Update(int width, int height, float frameDeltaTime)
-		{
-			base.Update(width, height, frameDeltaTime);
-
-			if (IsPhasing)
+			if (AsteroidType == AsteroidType.PHASING)
 			{
-				Phase -= PhaseSpeed * frameDeltaTime;
-				if (Phase < 0)
+				if (IsPhasing)
 				{
-					IsPhasing = false;
-					Phase = 0;
+					Phase -= PhaseSpeed * frameDeltaTime;
+					if (Phase < 0)
+					{
+						IsPhasing = false;
+						Phase = 0;
+					}
 				}
-			}
-			else
-			{
-				Phase += PhaseSpeed * frameDeltaTime;
-				if (Phase > 255)
+				else
 				{
-					IsPhasing = true;
-					Phase = 255;
+					Phase += PhaseSpeed * frameDeltaTime;
+					if (Phase > 255)
+					{
+						IsPhasing = true;
+						Phase = 255;
+					}
 				}
 			}
 		}
-	}
-	public class GoldAsteroid : Asteroid
-	{
-		public override int Point
-		{
-			get { return Size * 3; }
-		}
-
-		public GoldAsteroid(int width, int height, Random r)
-			: base(width, height, r)
-		{
-			Color = Color.Gold;
-
-			VelocityX = r.Next(100, 300) * (r.Next(2) > 0 ? -1 : 1);
-			VelocityY = r.Next(100, 300) * (r.Next(2) > 0 ? -1 : 1);
-
-			Mass = Size * 400;
-			HP = Size * 40;
-		}
-
-        public GoldAsteroid(string[] config)
-            : base(config)
-        {
-        }
 	}
 
 	public class AsteroidsList : IConfigurable
@@ -1425,61 +1215,7 @@ namespace Xasteroids
 					{
 						contents = asteroidConfigString.Substring(1, asteroidConfigString.Length - 2);
 						string[] config = ObjectStringConverter.ConfigurationFromMixedString(contents);
-
-                        Asteroid theAsteroid;
-                        if (config[0].Equals(typeof(BlackAsteroid).FullName))
-                        {
-                            theAsteroid = new BlackAsteroid(config);
-                        }
-                        else if (config[0].Equals(typeof(GenericAsteroid).FullName))
-                        {
-                            theAsteroid = new GenericAsteroid(config);
-                        }
-                        else if (config[0].Equals(typeof(ClumpyAsteroid).FullName))
-                        {
-                            theAsteroid = new ClumpyAsteroid(config);
-                        }
-                        else if (config[0].Equals(typeof(MagneticAsteroid).FullName))
-                        {
-                            theAsteroid = new MagneticAsteroid(config);
-                        }
-                        else if (config[0].Equals(typeof(ExplosiveAsteroid).FullName))
-                        {
-                            theAsteroid = new ExplosiveAsteroid(config);
-                        }
-                        else if (config[0].Equals(typeof(BlackAsteroid).FullName))
-                        {
-                            theAsteroid = new BlackAsteroid(config);
-                        }
-                        else if (config[0].Equals(typeof(DenseAsteroid).FullName))
-                        {
-                            theAsteroid = new DenseAsteroid(config);
-                        }
-                        else if (config[0].Equals(typeof(GraviticAsteroid).FullName))
-                        {
-                            theAsteroid = new GraviticAsteroid(config);
-                        }
-                        else if (config[0].Equals(typeof(ZippyAsteroid).FullName))
-                        {
-                            theAsteroid = new ZippyAsteroid(config);
-                        }
-                        else if (config[0].Equals(typeof(RepulserAsteroid).FullName))
-                        {
-                            theAsteroid = new RepulserAsteroid(config);
-                        }
-                        else if (config[0].Equals(typeof(PhasingAsteroid).FullName))
-                        {
-                            theAsteroid = new PhasingAsteroid(config);
-                        }
-                        else if (config[0].Equals(typeof(GoldAsteroid).FullName))
-                        {
-                            theAsteroid = new GoldAsteroid(config);
-                        }
-                        else
-                        {
-                            theAsteroid = new Asteroid(config);
-                        }
-						Asteroids.Add(theAsteroid);
+						Asteroids.Add(new Asteroid(config));
 					}
 				}
 			}

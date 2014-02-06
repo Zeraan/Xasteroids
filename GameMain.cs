@@ -75,7 +75,21 @@ namespace Xasteroids
 				MainPlayer = PlayerManager.Players[MainPlayerID];
 			}
 		} 
-		public Player MainPlayer { get; private set; } 
+		public Player MainPlayer { get; private set; }
+	    public bool AllPlayersDead
+	    {
+	        get
+	        {
+	            foreach (var player in PlayerManager.Players)
+	            {
+	                if (!player.IsDead)
+	                {
+	                    return false;
+	                }
+	            }
+	            return true;
+	        }
+	    }
 
 		public bool IsHost
 		{ 

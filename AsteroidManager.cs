@@ -359,6 +359,12 @@ namespace Xasteroids
 							}
 						}
 						bullet.Damage -= damageDone * (1 - (bullet.PenetratingLevel * 0.10f));
+                        if (bullet.Damage <= 0)
+                        {
+                            //Match the asteroid's speed it hit
+                            bullet.VelocityX = asteroid.VelocityX;
+                            bullet.VelocityY = asteroid.VelocityY;
+                        }
 					}
 				}
 			}
@@ -385,48 +391,48 @@ namespace Xasteroids
 							int value;
 							if (asteroid is GenericAsteroid)
 							{
-								value = 5;
+								value = 15;
 							}
 							else if (asteroid is ClumpyAsteroid)
 							{
-								value = 2;
+								value = 10;
 							}
 							else if (asteroid is MagneticAsteroid)
 							{
-								value = 20;
+								value = 50;
 							}
 							else if (asteroid is RepulserAsteroid)
 							{
-								value = 10;
+								value = 30;
 							}
 							else if (asteroid is GraviticAsteroid)
 							{
-								value = 15;
+								value = 40;
 							}
 							else if (asteroid is DenseAsteroid)
 							{
-								value = 10;
+								value = 30;
 							}
 							else if (asteroid is ZippyAsteroid)
 							{
-								value = 5;
+								value = 15;
 							}
 							else if (asteroid is ExplosiveAsteroid)
 							{
-								value = 10;
+								value = 40;
 							}
 							else if (asteroid is BlackAsteroid)
 							{
-								value = 10;
+								value = 30;
 							}
 							else if (asteroid is GoldAsteroid)
 							{
-								value = 50;
+								value = 200;
 							}
 							else
 							{
 								//Only phasing asteroid left
-								value = 25;
+								value = 50;
 							}
 							if (PlayerIsOwedMoney != null)
 							{
@@ -723,7 +729,7 @@ namespace Xasteroids
 						_gameMain.ObjectManager.AddExplosion(asteroid.PositionX, asteroid.PositionY, asteroid.VelocityX, asteroid.VelocityY, 4);
 						asteroid.ToBeRemoved = true;
 					}
-					else
+					else if (!_gameMain.IsMultiplayer || _gameMain.IsHost)
 					{
 						newAsteroids.AddRange(SpawnAsteroids(asteroid));
 						_gameMain.ObjectManager.AddExplosion(asteroid.PositionX, asteroid.PositionY, asteroid.VelocityX, asteroid.VelocityY, 4);
@@ -846,7 +852,7 @@ namespace Xasteroids
 		private BBSprite _asteroidSprite;
 
 		//config exlcludes itself (naturally) and AsteroidSprite
-		public const int CONFIG_LENGTH = 18;
+		public const int CONFIG_LENGTH = 19;
 
 		public bool ToBeRemoved { get; set; }
 		public float PositionX { get; set; }
@@ -886,23 +892,24 @@ namespace Xasteroids
 			get
 			{
 				string[] config = new string[CONFIG_LENGTH];
-				config[0] = ToBeRemoved.ToString();
-				config[1] = PositionX.ToString();
-				config[2] = PositionY.ToString();
-				config[3] = VelocityX.ToString();
-				config[4] = VelocityY.ToString();
-				config[5] = Angle.ToString();
-				config[6] = RotationSpeed.ToString();
-				config[7] = HP.ToString();
-				config[8] = Color.ToArgb().ToString();
-				config[9] = Radius.ToString();
-				config[10] = Mass.ToString();
-				config[11] = Size.ToString();
-				config[12] = Style.ToString();
-				config[13] = Phase.ToString();
-				config[14] = IsPhasing.ToString();
-				config[15] = PhaseSpeed.ToString();
-				config[16] = Point.ToString();
+				config[0] = this.GetType().ToString();
+				config[1] = ToBeRemoved.ToString();
+				config[2] = PositionX.ToString();
+				config[3] = PositionY.ToString();
+				config[4] = VelocityX.ToString();
+				config[5] = VelocityY.ToString();
+				config[6] = Angle.ToString();
+				config[7] = RotationSpeed.ToString();
+				config[8] = HP.ToString();
+				config[9] = Color.ToArgb().ToString();
+				config[10] = Radius.ToString();
+				config[11] = Mass.ToString();
+				config[12] = Size.ToString();
+				config[13] = Style.ToString();
+				config[14] = Phase.ToString();
+				config[15] = IsPhasing.ToString();
+				config[16] = PhaseSpeed.ToString();
+				config[17] = Point.ToString();
 				string bulletsString;
 				if (ImpactedBullets == null || ImpactedBullets.Count == 0)
 				{
@@ -918,7 +925,7 @@ namespace Xasteroids
 					}
 					bulletsString = "[" + string.Join(",", asStrings) + "]";
 				}
-				config[17] = bulletsString;
+				config[18] = bulletsString;
 		
 				return config;
 			}
@@ -928,81 +935,84 @@ namespace Xasteroids
 				{
 					return;
 				}
-
+				
+				//Index Zero of Asteroid.Configuration holds the Asteroid's type.
+				//As of 02.06.2014 I don't expect that Asteroid objects will use this data.
+				//It should be the objects that work with Asteroids that use this.
 				bool outBool;
-				if(bool.TryParse(value[0], out outBool))
+				if(bool.TryParse(value[1], out outBool))
 				{
 					ToBeRemoved = outBool;
 				}
 				float outFloat;
-				if (float.TryParse(value[1], out outFloat))
+				if (float.TryParse(value[2], out outFloat))
 				{
 					PositionX = outFloat;
 				}
-				if (float.TryParse(value[2], out outFloat))
+				if (float.TryParse(value[3], out outFloat))
 				{
 					PositionY = outFloat;
 				}
-				if (float.TryParse(value[3], out outFloat))
+				if (float.TryParse(value[4], out outFloat))
 				{
 					VelocityX = outFloat;
 				}
-				if (float.TryParse(value[4], out outFloat))
+				if (float.TryParse(value[5], out outFloat))
 				{
 					VelocityY = outFloat;
 				}
-				if (float.TryParse(value[5], out outFloat))
+				if (float.TryParse(value[6], out outFloat))
 				{
 					Angle = outFloat;
 				}
-				if (float.TryParse(value[6], out outFloat))
+				if (float.TryParse(value[7], out outFloat))
 				{
 					RotationSpeed = outFloat;
 				}
-				if (float.TryParse(value[7], out outFloat))
+				if (float.TryParse(value[8], out outFloat))
 				{
 					HP = outFloat;
 				}
 				int outInt;
-				if (int.TryParse(value[8], out outInt))
+				if (int.TryParse(value[9], out outInt))
 				{
 					Color = Color.FromArgb(outInt);
 				}
-				if(int.TryParse(value[9], out outInt))
+				if(int.TryParse(value[10], out outInt))
 				{
 					Radius = outInt;
 				}
-				if (int.TryParse(value[10], out outInt))
+				if (int.TryParse(value[11], out outInt))
 				{
 					Mass = outInt;
 				}
-				if (int.TryParse(value[11], out outInt))
+				if (int.TryParse(value[12], out outInt))
 				{
 					Size = outInt;
 				}
-				if (int.TryParse(value[12], out outInt))
+				if (int.TryParse(value[13], out outInt))
 				{
 					Style = outInt;
 				}
-				if (float.TryParse(value[13], out outFloat))
+				if (float.TryParse(value[14], out outFloat))
 				{
 					Phase = outFloat;
 				}
-				if (bool.TryParse(value[14], out outBool))
+				if (bool.TryParse(value[15], out outBool))
 				{
 					IsPhasing = outBool;
 				}
-				if (int.TryParse(value[15], out outInt))
+				if (int.TryParse(value[16], out outInt))
 				{
 					PhaseSpeed = outInt;
 				}
-				if (int.TryParse(value[16], out outInt))
+				if (int.TryParse(value[17], out outInt))
 				{
 					Point = outInt;
 				}
 
 				ImpactedBullets = new List<Bullet>();
-				string bulletsString = value[17];
+				string bulletsString = value[18];
 				string contents = bulletsString.Substring(1, bulletsString.Length - 2);
 				if (contents.Length != 0)
 				{
@@ -1111,6 +1121,11 @@ namespace Xasteroids
 			Mass = Size * 200;
 			HP = Size * 5;
 		}
+
+		public GenericAsteroid(string[] config)
+			: base(config)
+		{
+		}
 	}
 	public class ClumpyAsteroid : Asteroid
 	{
@@ -1129,6 +1144,11 @@ namespace Xasteroids
 
 			Mass = Size * 300;
 			HP = Size * 10;
+		}
+
+		public ClumpyAsteroid(string[] config)
+			: base(config)
+		{
 		}
 	}
 	public class MagneticAsteroid : Asteroid
@@ -1149,6 +1169,11 @@ namespace Xasteroids
 			Mass = Size * 160;
 			HP = Size * 10;
 		}
+
+		public MagneticAsteroid(string[] config)
+			: base(config)
+		{
+		}
 	}
 	public class ExplosiveAsteroid : Asteroid
 	{
@@ -1167,6 +1192,11 @@ namespace Xasteroids
 
 			Mass = Size * 240;
 			HP = Size * 3;
+		}
+
+		public ExplosiveAsteroid(string[] config)
+			: base(config)
+		{
 		}
 	}
 	public class BlackAsteroid : Asteroid
@@ -1187,6 +1217,11 @@ namespace Xasteroids
 			Mass = Size * 200;
 			HP = Size * 5;
 		}
+
+		public BlackAsteroid(string[] config)
+			: base(config)
+		{
+		}
 	}
 	public class DenseAsteroid : Asteroid
 	{
@@ -1206,6 +1241,11 @@ namespace Xasteroids
 			Mass = Size * 1100;
 			HP = Size * 50;
 		}
+
+        public DenseAsteroid(string[] config)
+            : base(config)
+        {
+        }
 	}
 	public class GraviticAsteroid : Asteroid
 	{
@@ -1225,6 +1265,11 @@ namespace Xasteroids
 			Mass = Size * 300;
 			HP = Size * 10;
 		}
+
+        public GraviticAsteroid(string[] config)
+            : base(config)
+        {
+        }
 	}
 	public class ZippyAsteroid : Asteroid
 	{
@@ -1244,6 +1289,11 @@ namespace Xasteroids
 			Mass = Size * 30;
 			HP = Size * 5;
 		}
+
+        public ZippyAsteroid(string[] config)
+            : base(config)
+        {
+        }
 	}
 	public class RepulserAsteroid : Asteroid
 	{
@@ -1263,6 +1313,11 @@ namespace Xasteroids
 			Mass = Size * 260;
 			HP = Size * 10;
 		}
+
+        public RepulserAsteroid(string[] config)
+            : base(config)
+        {
+        }
 	}
 	public class PhasingAsteroid : Asteroid
 	{
@@ -1284,6 +1339,11 @@ namespace Xasteroids
 
 			PhaseSpeed = r.Next(10, 255);
 		}
+
+        public PhasingAsteroid(string[] config)
+            : base(config)
+        {
+        }
 
 		public override void Update(int width, int height, float frameDeltaTime)
 		{
@@ -1327,6 +1387,11 @@ namespace Xasteroids
 			Mass = Size * 400;
 			HP = Size * 40;
 		}
+
+        public GoldAsteroid(string[] config)
+            : base(config)
+        {
+        }
 	}
 
 	public class AsteroidsList : IConfigurable
@@ -1360,7 +1425,61 @@ namespace Xasteroids
 					{
 						contents = asteroidConfigString.Substring(1, asteroidConfigString.Length - 2);
 						string[] config = ObjectStringConverter.ConfigurationFromMixedString(contents);
-						Asteroids.Add(new Asteroid(config));
+
+                        Asteroid theAsteroid;
+                        if (config[0].Equals(typeof(BlackAsteroid).FullName))
+                        {
+                            theAsteroid = new BlackAsteroid(config);
+                        }
+                        else if (config[0].Equals(typeof(GenericAsteroid).FullName))
+                        {
+                            theAsteroid = new GenericAsteroid(config);
+                        }
+                        else if (config[0].Equals(typeof(ClumpyAsteroid).FullName))
+                        {
+                            theAsteroid = new ClumpyAsteroid(config);
+                        }
+                        else if (config[0].Equals(typeof(MagneticAsteroid).FullName))
+                        {
+                            theAsteroid = new MagneticAsteroid(config);
+                        }
+                        else if (config[0].Equals(typeof(ExplosiveAsteroid).FullName))
+                        {
+                            theAsteroid = new ExplosiveAsteroid(config);
+                        }
+                        else if (config[0].Equals(typeof(BlackAsteroid).FullName))
+                        {
+                            theAsteroid = new BlackAsteroid(config);
+                        }
+                        else if (config[0].Equals(typeof(DenseAsteroid).FullName))
+                        {
+                            theAsteroid = new DenseAsteroid(config);
+                        }
+                        else if (config[0].Equals(typeof(GraviticAsteroid).FullName))
+                        {
+                            theAsteroid = new GraviticAsteroid(config);
+                        }
+                        else if (config[0].Equals(typeof(ZippyAsteroid).FullName))
+                        {
+                            theAsteroid = new ZippyAsteroid(config);
+                        }
+                        else if (config[0].Equals(typeof(RepulserAsteroid).FullName))
+                        {
+                            theAsteroid = new RepulserAsteroid(config);
+                        }
+                        else if (config[0].Equals(typeof(PhasingAsteroid).FullName))
+                        {
+                            theAsteroid = new PhasingAsteroid(config);
+                        }
+                        else if (config[0].Equals(typeof(GoldAsteroid).FullName))
+                        {
+                            theAsteroid = new GoldAsteroid(config);
+                        }
+                        else
+                        {
+                            theAsteroid = new Asteroid(config);
+                        }
+						Asteroids.Add(theAsteroid);
 					}
 				}
 			}

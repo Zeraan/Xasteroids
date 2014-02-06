@@ -63,6 +63,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AsteroidManager.cs" />
+    <Compile Include="AsteroidManagerUnitTests.cs" />
     <Compile Include="BackgroundStars.cs" />
     <Compile Include="BBSprite.cs" />
     <Compile Include="Client.cs" />

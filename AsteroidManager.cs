@@ -391,48 +391,48 @@ namespace Xasteroids
 							int value;
 							if (asteroid is GenericAsteroid)
 							{
-								value = 5;
+								value = 15;
 							}
 							else if (asteroid is ClumpyAsteroid)
 							{
-								value = 2;
+								value = 10;
 							}
 							else if (asteroid is MagneticAsteroid)
 							{
-								value = 20;
+								value = 50;
 							}
 							else if (asteroid is RepulserAsteroid)
 							{
-								value = 10;
+								value = 30;
 							}
 							else if (asteroid is GraviticAsteroid)
 							{
-								value = 15;
+								value = 40;
 							}
 							else if (asteroid is DenseAsteroid)
 							{
-								value = 10;
+								value = 30;
 							}
 							else if (asteroid is ZippyAsteroid)
 							{
-								value = 5;
+								value = 15;
 							}
 							else if (asteroid is ExplosiveAsteroid)
 							{
-								value = 10;
+								value = 40;
 							}
 							else if (asteroid is BlackAsteroid)
 							{
-								value = 10;
+								value = 30;
 							}
 							else if (asteroid is GoldAsteroid)
 							{
-								value = 50;
+								value = 200;
 							}
 							else
 							{
 								//Only phasing asteroid left
-								value = 25;
+								value = 50;
 							}
 							if (PlayerIsOwedMoney != null)
 							{

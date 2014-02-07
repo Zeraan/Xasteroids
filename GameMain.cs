@@ -213,6 +213,7 @@ namespace Xasteroids
 				_client.SendObjectTcp( new Ship {
 					OwnerName = mainPlayer.Name,
 					IsDead = mainPlayer.IsDead,
+					Energy = mainPlayer.Energy,
 					PositionX = mainPlayer.PositionX,
 					PositionY = mainPlayer.PositionY,
 					VelocityX = mainPlayer.VelocityX,
@@ -364,6 +365,7 @@ namespace Xasteroids
 				ships.Add( new Ship {
 					OwnerName = player.Name,
 					IsDead 	  = player.ClientIsDead,
+					Energy    = player.Energy,
 					PositionX = player.PositionX,
 					PositionY = player.PositionY,
 					VelocityX = player.VelocityX,
@@ -451,6 +453,7 @@ namespace Xasteroids
 				Player player = PlayerManager.Players[ownerID];
 				player.ClientIsDead = ship.IsDead;
 				player.IsDead = ship.IsDead;
+				player.Energy = ship.Energy;
 				player.PositionX = ship.PositionX;
 				player.PositionY = ship.PositionY;
 				player.VelocityX = ship.VelocityX;
@@ -491,6 +494,7 @@ namespace Xasteroids
 						var player = PlayerManager.Players[i];
 						var ship = combatData.ShipList.Ships[i];
 						player.IsDead = ship.IsDead;
+						player.Energy = ship.Energy;
 						player.ClientIsDead = ship.IsDead;
 						player.PositionX = ship.PositionX;
 						player.PositionY = ship.PositionY;

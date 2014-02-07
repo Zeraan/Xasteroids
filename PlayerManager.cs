@@ -653,10 +653,11 @@ namespace Xasteroids
 
 	public class Ship : IConfigurable
 	{
-		public const int CONFIG_LENGTH = 7;
+		public const int CONFIG_LENGTH = 8;
 
 		public string OwnerName { get; set; }
 		public bool IsDead { get; set; }
+		public float Energy { get; set; }
 		public float PositionX { get; set; }
 		public float PositionY { get; set; }
 		public float VelocityX { get; set; }
@@ -691,6 +692,7 @@ namespace Xasteroids
 				config[4] = VelocityX.ToString();
 				config[5] = VelocityY.ToString();
 				config[6] = Angle.ToString();
+				config[7] = Energy.ToString();
 				return config;
 			}
 			set
@@ -728,6 +730,10 @@ namespace Xasteroids
 				if (float.TryParse(value[6], out outFloat))
 				{
 					Angle = outFloat;
+				}
+				if (float.TryParse(value[7], out outFloat))
+				{
+					Energy = outFloat;
 				}
 			}
 		}

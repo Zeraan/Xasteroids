@@ -203,7 +203,7 @@ namespace Xasteroids
 
 		private void OnPushData(object sender, EventArgs e)
 		{
-			if (_client != null && _client.IPAddress != null)
+			if (_client != null && _client.IPAddress != null && MainPlayer != null)
 			{
 				Player mainPlayer = MainPlayer;
 				_client.SendObjectTcp( new Ship {

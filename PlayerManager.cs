@@ -266,6 +266,7 @@ namespace Xasteroids
 		public float RechargeRate { get { return RechargeLevel * 5;} }
 		public float ShieldAlpha { get; set; }
 
+		public bool ClientIsDead { get; set; }
 		private bool _isDead;
 		public bool IsDead 
 		{ 

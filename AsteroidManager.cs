@@ -556,6 +556,10 @@ namespace Xasteroids
 					if (player.IsDead)
 					{
 						_gameMain.ObjectManager.AddShockwave(player.PositionX, player.PositionY, player.ShipSize, null);
+						if (player == _gameMain.MainPlayer)
+						{
+							player.ClientIsDead = true;
+						}
 					}
 				}
 			}

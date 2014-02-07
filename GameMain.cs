@@ -82,7 +82,7 @@ namespace Xasteroids
 	        {
 	            foreach (var player in PlayerManager.Players)
 	            {
-	                if (!player.IsDead)
+	                if (!player.ClientIsDead)
 	                {
 	                    return false;
 	                }
@@ -359,7 +359,7 @@ namespace Xasteroids
 			{
 				ships.Add( new Ship {
 					OwnerName = player.Name,
-					IsDead 	  = player.IsDead,
+					IsDead 	  = player.ClientIsDead,
 					PositionX = player.PositionX,
 					PositionY = player.PositionY,
 					VelocityX = player.VelocityX,
@@ -445,6 +445,7 @@ namespace Xasteroids
 				Ship ship = (Ship)theObject;
 				int ownerID = (int)_clientAddressesAndMonikers[senderIPAddress][ID];
 				Player player = PlayerManager.Players[ownerID];
+				player.ClientIsDead = ship.IsDead;
 				player.IsDead = ship.IsDead;
 				player.PositionX = ship.PositionX;
 				player.PositionY = ship.PositionY;
@@ -466,6 +467,7 @@ namespace Xasteroids
 					var theShip = ships[j];
 					thePlayers[j].Name = theShip.OwnerName;
 					thePlayers[j].IsDead = theShip.IsDead;
+					thePlayers[j].ClientIsDead = theShip.IsDead;
 				}
 				return;
 			}
@@ -485,6 +487,7 @@ namespace Xasteroids
 						var player = PlayerManager.Players[i];
 						var ship = combatData.ShipList.Ships[i];
 						player.IsDead = ship.IsDead;
+						player.ClientIsDead = ship.IsDead;
 						player.PositionX = ship.PositionX;
 						player.PositionY = ship.PositionY;
 						player.VelocityX = ship.VelocityX;

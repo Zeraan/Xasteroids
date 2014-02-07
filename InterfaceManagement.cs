@@ -3031,7 +3031,6 @@ namespace Xasteroids
 		private bool _allowScrollbar;
 		private int _x;
 		private int _y;
-        private object _lockObject = new object();
 		#endregion
 
 		private int _maxWidth;
@@ -3093,57 +3092,24 @@ namespace Xasteroids
 
 		public void SetText(string text)
 		{
-            lock (_lockObject)
+            Text = text;
+            if (string.IsNullOrEmpty(text))
             {
-                Text = text;
-                if (string.IsNullOrEmpty(text))
+                text = " "; //Blank so it don't crash with 0 width
+            }
+            _textSprite.Text = text;
+            if (_allowScrollbar)
+            {
+                _textScrollBar.TopIndex = 0;
+                if (_wrapText)
                 {
-                    text = " "; //Blank so it don't crash with 0 width
-                }
-                _textSprite.Text = text;
-                if (_allowScrollbar)
-                {
-                    _textScrollBar.TopIndex = 0;
-                    if (_wrapText)
+                    if (_textSprite.Height > Height)
                     {
-                        if (_textSprite.Height > Height)
-                        {
-                            _scrollbarVisible = true;
-                            _textScrollBar.SetAmountOfItems((int) _textSprite.Height);
-                        }
-                        else
-                        {
-                            if (_textSprite.Width < _maxWidth)
-                            {
-                                Width = (int) _textSprite.Width;
-                            }
-                            else
-                            {
-                                Width = _maxWidth;
-                            }
-                            _scrollbarVisible = false;
-                        }
+                        _scrollbarVisible = true;
+                        _textScrollBar.SetAmountOfItems((int) _textSprite.Height);
                     }
                     else
                     {
-                        if (_textSprite.Width > _maxWidth)
-                        {
-                            _scrollbarVisible = true;
-                            _textScrollBar.SetAmountOfItems((int) _textSprite.Width);
-                            _textScrollBar.MoveTo(_x, (int) (_y + _textSprite.Height));
-                        }
-                        else
-                        {
-                            _scrollbarVisible = false;
-                        }
-                    }
-                }
-                else
-                {
-                    //Expand the size to the actual text sprite's size
-                    if (_wrapText)
-                    {
-                        Height = (int) _textSprite.Height;
                         if (_textSprite.Width < _maxWidth)
                         {
                             Width = (int) _textSprite.Width;
@@ -3152,29 +3118,56 @@ namespace Xasteroids
                         {
                             Width = _maxWidth;
                         }
-                        _target.Height = Height;
+                        _scrollbarVisible = false;
+                    }
+                }
+                else
+                {
+                    if (_textSprite.Width > _maxWidth)
+                    {
+                        _scrollbarVisible = true;
+                        _textScrollBar.SetAmountOfItems((int) _textSprite.Width);
+                        _textScrollBar.MoveTo(_x, (int) (_y + _textSprite.Height));
                     }
                     else
                     {
-                        Width = (int) _textSprite.Width;
-                        _target.Width = Width;
+                        _scrollbarVisible = false;
                     }
                 }
-                RefreshText();
             }
+            else
+            {
+                //Expand the size to the actual text sprite's size
+                if (_wrapText)
+                {
+                    Height = (int) _textSprite.Height;
+                    if (_textSprite.Width < _maxWidth)
+                    {
+                        Width = (int) _textSprite.Width;
+                    }
+                    else
+                    {
+                        Width = _maxWidth;
+                    }
+                    _target.Height = Height;
+                }
+                else
+                {
+                    Width = (int) _textSprite.Width;
+                    _target.Width = Width;
+                }
+            }
+            RefreshText();
 		}
 
 		public void Draw()
 		{
-            lock (_lockObject)
+            if (_allowScrollbar && _scrollbarVisible)
             {
-                if (_allowScrollbar && _scrollbarVisible)
-                {
-                    _textScrollBar.Draw();
-                }
-                //Already rendered when text was set
-                _target.Blit(_x, _y);
+                _textScrollBar.Draw();
             }
+            //Already rendered when text was set
+            _target.Blit(_x, _y);
 		}
 
 		public bool MouseDown(int x, int y)

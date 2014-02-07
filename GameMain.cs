@@ -38,6 +38,7 @@ namespace Xasteroids
 		private Screen _currentScreen;
 		#endregion
 
+		private static object _lockDrawObject = new object();
 		private Xasteroids _parentForm;
 
 		private BackgroundStars _backgroundStars;
@@ -187,7 +188,10 @@ namespace Xasteroids
 			_backgroundStars.Draw();
 
 			_screenInterface.Update(MousePos.X, MousePos.Y, frameDeltaTime);
-			_screenInterface.DrawScreen();
+			lock (_lockDrawObject)
+			{
+				_screenInterface.DrawScreen();
+			}
 
 			if (_currentScreen != Screen.InGame || MainPlayer == null || MainPlayer.IsDead)
 			{
@@ -660,6 +664,11 @@ namespace Xasteroids
 
 		public void ChangeToScreen(Screen whichScreen)
 		{
+			if (_currentScreen == Screen.InGame && whichScreen != Screen.InGame)
+			{
+				//call OnGameOver
+				OnGameOver();
+			}
 			_currentScreen = whichScreen;
 			switch (whichScreen)
 			{

@@ -154,7 +154,6 @@ namespace Xasteroids.Screens
                     }
                     else if (_gameMain.AllPlayersDead)
                     {
-						_gameMain.OnGameOver();
                         foreach (var player in _gameMain.PlayerManager.Players)
                         {
                             if (player.Bank >= 520)

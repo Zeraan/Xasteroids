@@ -793,7 +793,10 @@ namespace Xasteroids
 						MainPlayerID = 0;
 					}
 					NewChatMessage = true; //Just to refresh chat
-					_upgradeAndWaitScreen.RefreshLabels();
+					lock (_lockDrawObject)
+					{
+						_upgradeAndWaitScreen.RefreshLabels();
+					}
 					_screenInterface = _upgradeAndWaitScreen;
 					AssignPlayerIDs();
 					if (IsHost)

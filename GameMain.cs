@@ -269,7 +269,7 @@ namespace Xasteroids
 					themPlayers.Clear();
 				}
 
-				themPlayers.Add(new Player(1, 1, Color.Red) { Name = _mainMenu.PlayerName, Bank = 1000, IsDead = true });
+				themPlayers.Add(new Player(1, 1, Color.Red) { Name = _mainMenu.PlayerName, Bank = 50000, IsDead = true });
 				AddClientsToPlayers();
 				List<Ship> ships = new List<Ship>();
 				foreach (Player p in PlayerManager.Players)
@@ -580,7 +580,7 @@ namespace Xasteroids
 					PlayerManager.AddPlayer(new Player(1, 1, Color.Red));
 				}
 				MainPlayerID = id;
-				MainPlayer.Bank = 1000;
+				MainPlayer.Bank = 50000;
 				MainPlayer.IsDead = true;
 				return;
 			}
@@ -618,7 +618,7 @@ namespace Xasteroids
 			{
 				if (_host.HasConnectionTo(item.Key))
 				{
-					themPlayers.Add(new Player(1, 1, Color.Red) { Name = (string)item.Value[NAME], Bank = 1000, IsDead = true }); 
+					themPlayers.Add(new Player(1, 1, Color.Red) { Name = (string)item.Value[NAME], Bank = 50000, IsDead = true }); 
 				}
 			}
 		}

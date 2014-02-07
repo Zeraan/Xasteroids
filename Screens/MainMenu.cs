@@ -173,7 +173,7 @@ namespace Xasteroids.Screens
 					}
 					_gameMain.MainPlayerID = 0;
 					var player = _gameMain.MainPlayer;
-					player.Bank = 1000;
+					player.Bank = 50000;
 					player.IsDead = true;
 					player.Name = _playerNameTextBox.Text;
 					_gameMain.ResetGame();

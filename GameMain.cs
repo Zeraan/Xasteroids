@@ -1156,7 +1156,7 @@ namespace Xasteroids
 			//Will split the level up into 320x320 sections for performance, 160 is the largest object's size
 			LevelSize = new Point(10 * CELL_SIZE, 10 * CELL_SIZE);
 
-			AsteroidManager.SetUpLevel(asteroidsToInlcude.ToArray(), LevelNumber * 10 * (PlayerManager.Players.Count == 0 ? 1 : PlayerManager.Players.Count), Random);
+			AsteroidManager.SetUpLevel(asteroidsToInlcude.ToArray(), LevelNumber * 10/* * (PlayerManager.Players.Count == 0 ? 1 : PlayerManager.Players.Count)*/, Random);
 		}
 
 		public bool IsKeyDown(KeyboardKeys whichKey)

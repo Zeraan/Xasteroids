@@ -826,7 +826,7 @@ namespace Xasteroids
 			get
 			{
 				string[] config = new string[CONFIG_LENGTH];
-				config[0] = AsteroidType.ToString();
+				config[0] = ((int)AsteroidType).ToString();
 				config[1] = ToBeRemoved.ToString();
 				config[2] = PositionX.ToString();
 				config[3] = PositionY.ToString();
@@ -868,11 +868,11 @@ namespace Xasteroids
 				{
 					return;
 				}
-				try
+				int outInt;
+				if (int.TryParse(value[0], out outInt))
 				{
-				    AsteroidType = (AsteroidType) Enum.Parse(typeof (AsteroidType), value[0]);
+					AsteroidType = (AsteroidType) outInt;
 				}
-				catch {} //Do nothing
 				bool outBool;
 				if(bool.TryParse(value[1], out outBool))
 				{
@@ -907,7 +907,6 @@ namespace Xasteroids
 				{
 					HP = outFloat;
 				}
-				int outInt;
 				if (int.TryParse(value[9], out outInt))
 				{
 					Color = Color.FromArgb(outInt);

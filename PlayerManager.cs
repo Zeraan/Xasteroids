@@ -277,6 +277,7 @@ namespace Xasteroids
 					{
 						_shipSprite = null;
 						_shieldSprite = null;
+						ResetPlayer();
 					}
 				}
 		}
@@ -561,27 +562,7 @@ namespace Xasteroids
 
 			Energy = MaxEnergy;
 
-			RechargeLevel = 1;
-			CapacityLevel = 0;
-
-			AccelerationLevel = 1;
-			RotationLevel = 1;
-			ReverseLevel = 0;
-			BoostingLevel = 0;
-
-			ShreddingLevel = 0;
-			HardnessLevel = 0;
-			InertialLevel = 0;
-			PhasingLevel = 0;
-
-			CooldownLevel = 1;
-			ConsumptionLevel = 0;
-			DamageLevel = 1;
-			NumberOfMounts = 0;
-			VelocityLevel = 1;
-			PenetratingLevel = 0;
-			ShrapnelLevel = 0;
-			NumberOfNukes = 0;
+			ResetPlayer();
 		}
 
 		public Player(string[] configuration)
@@ -617,6 +598,31 @@ namespace Xasteroids
 					CoolDown = 0;
 				}
 			}
+		}
+
+		private void ResetPlayer()
+		{
+			RechargeLevel = 1;
+			CapacityLevel = 0;
+
+			AccelerationLevel = 1;
+			RotationLevel = 1;
+			ReverseLevel = 0;
+			BoostingLevel = 0;
+
+			ShreddingLevel = 0;
+			HardnessLevel = 0;
+			InertialLevel = 0;
+			PhasingLevel = 0;
+
+			CooldownLevel = 1;
+			ConsumptionLevel = 0;
+			DamageLevel = 1;
+			NumberOfMounts = 0;
+			VelocityLevel = 1;
+			PenetratingLevel = 0;
+			ShrapnelLevel = 0;
+			NumberOfNukes = 0;
 		}
 	}
 

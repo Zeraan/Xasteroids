@@ -55,7 +55,7 @@ namespace Xasteroids
 		private BBSprite Cursor;
 		private Host _host;
 		private Client _client;
-		private System.Timers.Timer _2000msPushDataTimer = new System.Timers.Timer { Interval = 2000 };
+		private System.Timers.Timer _1000msPushDataTimer = new System.Timers.Timer { Interval = 1000 };
 		public ShipSelectionWindow ShipSelectionWindow { get; private set; }
 		
 		public object ChatLock = new object();
@@ -404,8 +404,8 @@ namespace Xasteroids
 		{
 			if (_client != null || _host != null)
 			{
-				_2000msPushDataTimer.Stop();
-				_2000msPushDataTimer.Elapsed -= OnPushAsteroids;
+				_1000msPushDataTimer.Stop();
+				_1000msPushDataTimer.Elapsed -= OnPushAsteroids;
 			}
 		}
 
@@ -776,8 +776,8 @@ namespace Xasteroids
 						if (_host != null)
 						{
 							OnPushAsteroids(null, null);
-							_2000msPushDataTimer.Elapsed += OnPushAsteroids;
-							_2000msPushDataTimer.Start();
+							_1000msPushDataTimer.Elapsed += OnPushAsteroids;
+							_1000msPushDataTimer.Start();
 						}
 					}
 					break;

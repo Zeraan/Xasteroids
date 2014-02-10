@@ -59,7 +59,6 @@ namespace Xasteroids
 				if (bullet.Damage <= 0)
 				{
 					bulletsToRemove.Add(bullet);
-					AddExplosion(bullet.PositionX, bullet.PositionY, bullet.VelocityX, bullet.VelocityY, 1);
 					continue;
 				}
 				bullet.PositionX += bullet.VelocityX * frameDeltaTime;
@@ -92,7 +91,6 @@ namespace Xasteroids
 			{
 				if (!bullet.IsShrapnel)
 				{
-					AddExplosion(bullet.PositionX, bullet.PositionY, bullet.VelocityX, bullet.VelocityY, 1);
 					if (bullet.ShrapnelLevel > 0)
 					{
 						for (int i = 0; i < bullet.ShrapnelLevel; i++)

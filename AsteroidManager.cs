@@ -278,7 +278,7 @@ namespace Xasteroids
 
 			public event Action<string, int> PlayerIsOwedMoney;
 
-			public void HandleBullets(Bullet bullet, float frameDeltaTime)
+			public void HandleBullets(Bullet bullet, ObjectManager objectManager, float frameDeltaTime)
 			{
 				if (bullet.Damage <= 0)
 				{
@@ -350,12 +350,7 @@ namespace Xasteroids
 							}
 						}
 						bullet.Damage -= damageDone * (1 - (bullet.PenetratingLevel * 0.10f));
-                        if (bullet.Damage <= 0)
-                        {
-                            //Match the asteroid's speed it hit
-                            bullet.VelocityX = asteroid.VelocityX;
-                            bullet.VelocityY = asteroid.VelocityY;
-                        }
+						objectManager.AddExplosion(bullet.PositionX, bullet.PositionY, asteroid.VelocityX, asteroid.VelocityY, 1);
 					}
 				}
 			}
@@ -594,15 +589,15 @@ namespace Xasteroids
 					{
 						y2 = 0;
 					}
-					_astCells[x1][y1].HandleBullets(bullet, frameDeltaTime);
-					_astCells[x][y1].HandleBullets(bullet, frameDeltaTime);
-					_astCells[x2][y1].HandleBullets(bullet, frameDeltaTime);
-					_astCells[x1][y].HandleBullets(bullet, frameDeltaTime);
-					_astCells[x][y].HandleBullets(bullet, frameDeltaTime);
-					_astCells[x2][y].HandleBullets(bullet, frameDeltaTime);
-					_astCells[x1][y2].HandleBullets(bullet, frameDeltaTime);
-					_astCells[x][y2].HandleBullets(bullet, frameDeltaTime);
-					_astCells[x2][y2].HandleBullets(bullet, frameDeltaTime);
+					_astCells[x1][y1].HandleBullets(bullet, _gameMain.ObjectManager, frameDeltaTime);
+					_astCells[x][y1].HandleBullets(bullet, _gameMain.ObjectManager, frameDeltaTime);
+					_astCells[x2][y1].HandleBullets(bullet, _gameMain.ObjectManager, frameDeltaTime);
+					_astCells[x1][y].HandleBullets(bullet, _gameMain.ObjectManager, frameDeltaTime);
+					_astCells[x][y].HandleBullets(bullet, _gameMain.ObjectManager, frameDeltaTime);
+					_astCells[x2][y].HandleBullets(bullet, _gameMain.ObjectManager, frameDeltaTime);
+					_astCells[x1][y2].HandleBullets(bullet, _gameMain.ObjectManager, frameDeltaTime);
+					_astCells[x][y2].HandleBullets(bullet, _gameMain.ObjectManager, frameDeltaTime);
+					_astCells[x2][y2].HandleBullets(bullet, _gameMain.ObjectManager, frameDeltaTime);
 				}
 			}
 			if (shockwaves != null)

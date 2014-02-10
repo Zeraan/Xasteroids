@@ -27,6 +27,7 @@ namespace Xasteroids
 	public class GameMain
 	{
 		public const int CELL_SIZE = 320;
+		public const int MIN_COST_FOR_SHIP = 1 * 120 + 400;
 
 		#region Screens
 		private ScreenInterface _screenInterface;
@@ -285,6 +286,21 @@ namespace Xasteroids
 				ResetGame();
 				PlayerManager.ResetPlayerPositions();
 			}
+
+			if (IsHost)
+			{
+				if (PlayerManager.Players.Count == 0)
+				{
+					PlayerManager.Players.Add(new Player(1, 1, Color.Red));
+				}
+				else if (PlayerManager.Players[0] == null)
+				{
+					PlayerManager.Players[0] = new Player(1, 1, Color.Red);
+				}
+				MainPlayerID = 0;
+				AssignPlayerIDs();
+			}
+			NewChatMessage = true; //Just to refresh chat
 		}
 
 		private void OnShipSelected(object shipData)
@@ -778,25 +794,11 @@ namespace Xasteroids
 							ExitGame();
 						}
 					}
-					if (IsHost)
-					{
-						if (PlayerManager.Players.Count == 0)
-						{
-							PlayerManager.Players.Add(new Player(1, 1, Color.Red));
-						}
-						else if (PlayerManager.Players[0] == null)
-						{
-							PlayerManager.Players[0] = new Player(1, 1, Color.Red);
-						}
-						MainPlayerID = 0;
-					}
-					NewChatMessage = true; //Just to refresh chat
 					lock (_lockDrawObject)
 					{
 						_upgradeAndWaitScreen.RefreshLabels();
 					}
 					_screenInterface = _upgradeAndWaitScreen;
-					AssignPlayerIDs();
 					if (IsHost)
 					{
 						if (ShoppingPlayers == null)
@@ -805,7 +807,7 @@ namespace Xasteroids
 						}
 						foreach (var item in _clientAddressesAndMonikers)
 						{
-							if (item.Value[ID] != null)
+							if (item.Value[ID] != null && PlayerManager.Players[ID].Bank >= MIN_COST_FOR_SHIP)
 							{
 								ShoppingPlayers.Add(item.Key, item.Value);
 							}
@@ -814,7 +816,15 @@ namespace Xasteroids
 						{
 							_upgradeAndWaitScreen.DisableTheReadyButton();
 						}
+						else
+						{
+							_upgradeAndWaitScreen.EnableTheReadyButton();
+						}
 						_host.SendObjectTCP(new NetworkMessage { Content = "Change to " + Screen.Upgrade.ToString() + " Screen." });
+					}
+					else
+					{
+						_upgradeAndWaitScreen.EnableTheReadyButton();
 					}
 					break;
 				}

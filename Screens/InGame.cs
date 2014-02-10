@@ -235,6 +235,51 @@ namespace Xasteroids.Screens
 					}
 				}
 			}
+			else
+			{
+				var moveSpeed = _gameMain.IsKeyDown(KeyboardKeys.ShiftKey) ? 1000 : 300;
+				//Can move around the screen still
+				if (_gameMain.IsKeyDown(KeyboardKeys.Left))
+				{
+					mainPlayer.PositionX -= moveSpeed * frameDeltaTime;
+					if (mainPlayer.PositionX < 0)
+					{
+						mainPlayer.PositionX += _gameMain.LevelSize.X;
+					}
+					_gameMain.MoveStars(moveSpeed * frameDeltaTime, 0);
+				}
+				else if (_gameMain.IsKeyDown(KeyboardKeys.Right))
+				{
+					mainPlayer.PositionX += moveSpeed * frameDeltaTime;
+					if (mainPlayer.PositionX >= _gameMain.LevelSize.X)
+					{
+						mainPlayer.PositionX -= _gameMain.LevelSize.X;
+					}
+					_gameMain.MoveStars(-moveSpeed * frameDeltaTime, 0);
+				}
+				if (_gameMain.IsKeyDown(KeyboardKeys.Up))
+				{
+					mainPlayer.PositionY -= moveSpeed * frameDeltaTime;
+					if (mainPlayer.PositionY < 0)
+					{
+						mainPlayer.PositionY += _gameMain.LevelSize.Y;
+					}
+					_gameMain.MoveStars(0, moveSpeed * frameDeltaTime);
+				}
+				if (_gameMain.IsKeyDown(KeyboardKeys.Down))
+				{
+					mainPlayer.PositionY += moveSpeed * frameDeltaTime;
+					if (mainPlayer.PositionY >= _gameMain.LevelSize.Y)
+					{
+						mainPlayer.PositionY -= _gameMain.LevelSize.Y;
+					}
+					_gameMain.MoveStars(0, -moveSpeed * frameDeltaTime);
+				}
+			}
+			if (_gameMain.IsMultiplayer)
+			{
+				_gameMain.PushData();
+			}
 		}
 
 		public void MouseDown(int x, int y)

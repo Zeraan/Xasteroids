@@ -54,7 +54,6 @@ namespace Xasteroids
 		private BBSprite Cursor;
 		private Host _host;
 		private Client _client;
-		private System.Timers.Timer _200msPushDataTimer = new System.Timers.Timer { Interval = 100 };
 		private System.Timers.Timer _2000msPushDataTimer = new System.Timers.Timer { Interval = 2000 };
 		public ShipSelectionWindow ShipSelectionWindow { get; private set; }
 		
@@ -205,7 +204,7 @@ namespace Xasteroids
 			_host.SendObjectTCP( new AsteroidsList { Asteroids = AsteroidManager.Asteroids } );
 		}
 
-		private void OnPushData(object sender, EventArgs e)
+		public void PushData()
 		{
 			if (_client != null && _client.IPAddress != null && MainPlayer != null)
 			{
@@ -389,9 +388,6 @@ namespace Xasteroids
 		{
 			if (_client != null || _host != null)
 			{
-				_200msPushDataTimer.Stop();
-				_200msPushDataTimer.Elapsed -= OnPushData;
-
 				_2000msPushDataTimer.Stop();
 				_2000msPushDataTimer.Elapsed -= OnPushAsteroids;
 			}
@@ -761,8 +757,6 @@ namespace Xasteroids
 					_screenInterface = _inGame;
 					if (_host != null || _client != null)
 					{
-						_200msPushDataTimer.Elapsed += OnPushData;
-						_200msPushDataTimer.Start();
 						if (_host != null)
 						{
 							OnPushAsteroids(null, null);
